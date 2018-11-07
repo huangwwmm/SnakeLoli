@@ -4,28 +4,24 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-[RequireComponent(typeof(EventSystem))]
-public class snEventSystem : MonoBehaviour
+public class snEventSystem : EventSystem
 {
+	[Space(10)]
 	public BaseInput InputOverride;
-	private EventSystem m_EventSystem;
 
-	protected void Awake()
+	protected override void Awake()
 	{
-		m_EventSystem = GetComponent<EventSystem>();
+		base.Awake();
+
 		if (InputOverride != null)
 		{
 			StartCoroutine(OverrideEventSystemInputModule_Co());
 		}
 	}
 
-	protected void OnDestroy()
+	protected override void OnDestroy()
 	{
-		m_EventSystem = null;
-	}
-
-	protected void Update()
-	{
+		base.OnDestroy();
 	}
 
 	/// <summary>
@@ -37,11 +33,11 @@ public class snEventSystem : MonoBehaviour
 		Type baseInputModuleType = typeof(BaseInputModule);
 		FieldInfo inputOverrideFieldInfo = baseInputModuleType.GetField("m_InputOverride", BindingFlags.NonPublic | BindingFlags.Instance);
 		// TODO Assert inputOverrideFieldInfo != null
-		while (m_EventSystem.currentInputModule == null)
+		while (currentInputModule == null)
 		{
 			// TODO add infinite loop protection
 			yield return null;
 		}
-		inputOverrideFieldInfo.SetValue(m_EventSystem.currentInputModule, InputOverride);
+		inputOverrideFieldInfo.SetValue(currentInputModule, InputOverride);
 	}
 }

@@ -4,7 +4,7 @@ using UnityEngine.UI;
 public class snJoystickCursor : MonoBehaviour
 {
 	public Canvas MyCanvas;
-	public GameObject AnimationRoot;
+	public GameObject Cursor;
 
 	public Animator CursorAnimator;
 	public string CursorAnimatorClickParmeterName;
@@ -30,10 +30,16 @@ public class snJoystickCursor : MonoBehaviour
 	/// only valid when cursor display
 	/// </summary>
 	private Vector2 m_CursorPosition_ScreenSpace;
+	private PressState m_PressState = PressState.Notset;
 
 	public bool IsDisplay()
 	{
-		return gameObject.activeInHierarchy && m_Display;
+		return m_Display;
+	}
+
+	public PressState GetPressState()
+	{
+		return m_PressState;
 	}
 
 	public Vector2 GetCusrorPosition_ScreenSpace()
@@ -67,11 +73,12 @@ public class snJoystickCursor : MonoBehaviour
 			{
 				SetDisplay(true);
 			}
-			Vector2 position_CanvasSpace = transform.localPosition; // origin in canvas center 
+
+			Vector2 position_CanvasSpace = Cursor.transform.localPosition; // origin in canvas center 
 			position_CanvasSpace += axis;
 			position_CanvasSpace.x = Mathf.Clamp(position_CanvasSpace.x, -m_CanvasHalfSize.x, m_CanvasHalfSize.x);
 			position_CanvasSpace.y = Mathf.Clamp(position_CanvasSpace.y, -m_CanvasHalfSize.y, m_CanvasHalfSize.y);
-			transform.localPosition = position_CanvasSpace;
+			Cursor.transform.localPosition = position_CanvasSpace;
 
 			m_CursorPosition_ScreenSpace = (position_CanvasSpace + m_CanvasHalfSize) // change origin to canvas leftdown
 				* m_CanvasToScreenScale;
@@ -86,22 +93,39 @@ public class snJoystickCursor : MonoBehaviour
 			{
 				SetDisplay(false);
 			}
-			else if (Input.GetButton(SubmitButtonName)) // submit only vaild when display
+		}
+
+		// play click animation
+		if (m_Display)
+		{
+			if (Input.GetButtonUp(SubmitButtonName))
 			{
 				hasInput = true;
+				m_PressState = PressState.Up;
+				CursorAnimator.SetBool(CursorAnimatorClickParmeterName, true);
 			}
+			else if (Input.GetButton(SubmitButtonName))
+			{
+				hasInput = true;
+				m_PressState = m_PressState == PressState.Notset
+					? PressState.Down
+					: PressState.Hold;
+			}
+			else
+			{
+				m_PressState = PressState.Notset;
+			}
+
+			CursorAnimator.SetBool(CursorAnimatorHoverParmeterName, snInput.GetInstance().EventSystem.IsPointerOverGameObject());
+		}
+		else
+		{
+			// handle on SetDisplay()
 		}
 
 		if (hasInput)
 		{
 			m_LastHasInputTime = snSystem.GetInstance().GetRealtimeSinceStartup();
-		}
-
-		// play click animation
-		if (m_Display
-			&& Input.GetButtonUp(SubmitButtonName))
-		{
-			CursorAnimator.SetBool(CursorAnimatorClickParmeterName, true);
 		}
 	}
 
@@ -121,13 +145,21 @@ public class snJoystickCursor : MonoBehaviour
 	private void SetDisplay(bool display)
 	{
 		m_Display = display;
-		AnimationRoot.SetActive(display);
+		Cursor.SetActive(display);
 
 		// stop click animation when hide cursor
 		if (!display)
 		{
 			CursorAnimator.SetBool(CursorAnimatorClickParmeterName, false);
+			m_PressState = PressState.Notset;
 		}
 	}
 
+	public enum PressState : byte
+	{
+		Notset,
+		Down,
+		Hold,
+		Up,
+	}
 }
