@@ -1,14 +1,14 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class hwmSystemInitializer : MonoBehaviour
+/// <summary>
+/// add <see cref="snSystem"/> and system required prefab
+/// </summary>
+public class snSystemInitializer : MonoBehaviour
 {
 	private static bool ms_AlreadyInitialized = false;
 
 	public Object[] SystemPrefabs;
-
-	private bool m_Initialized = false;
 
 	protected void Awake()
 	{
@@ -25,26 +25,22 @@ public class hwmSystemInitializer : MonoBehaviour
 
 	private IEnumerator Initialize_Co()
 	{
+		gameObject.AddComponent<snSystem>();
+		yield return null;
+
 		for (int iPrefab = 0; iPrefab < SystemPrefabs.Length; iPrefab++)
 		{
 			Object iterPrefab = SystemPrefabs[iPrefab];
 			GameObject obj = Instantiate(iterPrefab) as GameObject;
-			obj.transform.parent = transform;
+			obj.transform.SetParent(transform, false);
 			yield return null;
 		}
 
-		m_Initialized = true;
 		ms_AlreadyInitialized = true;
+		DestroyImmediate(this);
 	}
 
 	protected void OnDestroy()
 	{
-		if (m_Initialized)
-		{
-		}
-		else
-		{
-			// dont need do anything
-		}
 	}
 }

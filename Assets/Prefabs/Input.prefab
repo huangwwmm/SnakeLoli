@@ -21,7 +21,7 @@ GameObject:
   - component: {fileID: 224538857007447910}
   - component: {fileID: 222482780322434288}
   - component: {fileID: 114544578811326380}
-  m_Layer: 31
+  m_Layer: 5
   m_Name: Ring2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -36,7 +36,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4935291046643686}
-  m_Layer: 31
+  m_Layer: 5
   m_Name: AnimationRoot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -71,7 +71,7 @@ GameObject:
   - component: {fileID: 224182673609608160}
   - component: {fileID: 222411827957424254}
   - component: {fileID: 114891456468260554}
-  m_Layer: 31
+  m_Layer: 5
   m_Name: Ring5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -88,7 +88,7 @@ GameObject:
   - component: {fileID: 224083829660088016}
   - component: {fileID: 222431508955911820}
   - component: {fileID: 114644587525357456}
-  m_Layer: 31
+  m_Layer: 5
   m_Name: Ring4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -105,7 +105,7 @@ GameObject:
   - component: {fileID: 224173181784434312}
   - component: {fileID: 222796618016120456}
   - component: {fileID: 114815993842870634}
-  m_Layer: 31
+  m_Layer: 5
   m_Name: Ring3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -174,7 +174,7 @@ GameObject:
   - component: {fileID: 224826246224750586}
   - component: {fileID: 222213673002462902}
   - component: {fileID: 114892018213047676}
-  m_Layer: 31
+  m_Layer: 5
   m_Name: Ring1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -218,7 +218,7 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1717198655298722}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -285,7 +285,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   InputOverride: {fileID: 114731807809023944}
-  b: 0
 --- !u!114 &114391847426440990
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -379,7 +378,9 @@ MonoBehaviour:
   CursorAnimatorHoverParmeterName: Hover
   XInputAxesName: GP_LAxis_X
   YInputAxesName: GP_LAxis_Y
-  CursorMoveSpeed: 10
+  CursorMoveSpeed: 5
+  AutoHideCursorTime: 1
+  SubmitButtonName: Submit
 --- !u!114 &114731807809023944
 MonoBehaviour:
   m_ObjectHideFlags: 1
