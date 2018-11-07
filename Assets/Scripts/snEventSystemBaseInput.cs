@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class hwmEventSystemBaseInput : BaseInput
+public class snEventSystemBaseInput : BaseInput
 {
 	public override Vector2 mousePosition
 	{

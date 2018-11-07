@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class hwmJoystickCursor : MonoBehaviour
+public class snJoystickCursor : MonoBehaviour
 {
 	public Canvas MyCanvas;
 	public GameObject AnimationRoot;
@@ -112,8 +112,6 @@ public class hwmJoystickCursor : MonoBehaviour
 
 	private void CalculateMaxCursorPosition()
 	{
-		CanvasScaler canvasScaler = MyCanvas.GetComponent<CanvasScaler>();
-
 		m_CanvasHalfSize.x = MyCanvas.pixelRect.width / MyCanvas.scaleFactor;
 		m_CanvasToScreenScale = Screen.width / m_CanvasHalfSize.x;
 		m_CanvasHalfSize.x *= 0.5f;

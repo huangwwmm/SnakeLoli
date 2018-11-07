@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 
 [RequireComponent(typeof(EventSystem))]
-public class hwmEventSystem : MonoBehaviour
+public class snEventSystem : MonoBehaviour
 {
 	public BaseInput InputOverride;
 	private EventSystem m_EventSystem;

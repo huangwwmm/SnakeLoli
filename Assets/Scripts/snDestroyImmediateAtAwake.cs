@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class hwmDestroyImmediateAtAwake : MonoBehaviour
+public class snDestroyImmediateAtAwake : MonoBehaviour
 {
 	protected void Awake()
 	{

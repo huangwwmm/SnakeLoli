@@ -7,7 +7,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System;
 using System.Linq;
 
-public class hwmAssetRelationsInProjectWindow : EditorWindow
+public class snAssetRelationsInProjectWindow : EditorWindow
 {
 	/// <summary>
 	/// 保存在 ProjectRoot/RELATIONS_RECORD_FILE_PATH
@@ -43,10 +43,10 @@ public class hwmAssetRelationsInProjectWindow : EditorWindow
 	private Vector2 m_DependencieScrollPosition = Vector2.zero;
 	private string m_RecordFilePath;
 
-	[MenuItem("Custom/HWM/Asset Relations In Project")]
+	[MenuItem("Custom/Utility/Asset Relations In Project")]
 	public static void ShowWindow()
 	{
-		hwmAssetRelationsInProjectWindow window = GetWindow(typeof(hwmAssetRelationsInProjectWindow)) as hwmAssetRelationsInProjectWindow;
+		snAssetRelationsInProjectWindow window = GetWindow(typeof(snAssetRelationsInProjectWindow)) as snAssetRelationsInProjectWindow;
 		window.titleContent = new GUIContent("Relations");
 	}
 
