@@ -12,6 +12,7 @@ public class snSystem : MonoBehaviour
 	private snINIParser m_Config;
 	private snInput m_Input;
 	private snSceneFSM m_SceneFSM;
+	private snLocalization m_Localization;
 	private float m_RealtimeSinceStartup;
 
 	public static snSystem GetInstance()
@@ -53,13 +54,17 @@ public class snSystem : MonoBehaviour
 	{
 		if (ms_Instance == this) // avoid multiple snSystem
 		{
-			m_Input = null;
-
 			m_Config.Destroy();
 			m_Config = null;
 
 			m_LogRecord.Destroy();
 			m_LogRecord = null;
+
+			m_Input = null;
+			m_SceneFSM = null;
+
+			m_Localization.Destroy();
+			m_Localization = null;
 
 			ms_Instance = null;
 		}
@@ -109,6 +114,9 @@ public class snSystem : MonoBehaviour
 		m_SceneFSM = InstantiatePrefabAndSetParentThisTransform<snSceneFSM>(SystemInitializer.SceneFSMPrefab);
 		yield return StartCoroutine(m_SceneFSM.ChangeState_Co(m_SceneFSM.GetLobbyState()));
 		yield return null;
+
+		m_Localization = new snLocalization();
+		m_Localization.Initialize(SystemInitializer.Localization);
 	}
 
 	private T InstantiatePrefabAndSetParentThisTransform<T>(GameObject prefab)
@@ -125,4 +133,5 @@ public class snSystemInitializer
 	public TextAsset Config;
 	public GameObject InputPrefab;
 	public GameObject SceneFSMPrefab;
+	public TextAsset Localization;
 }

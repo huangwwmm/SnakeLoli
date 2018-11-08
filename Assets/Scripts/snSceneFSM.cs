@@ -19,4 +19,12 @@
 		m_LobbyState = FindState("Lobby") as snSceneFSMState_Lobby;
 		m_GameState = FindState("Game") as snSceneFSMState_Game;
 	}
+
+	protected override void OnDestroy()
+	{
+		m_GameState = null;
+		m_LobbyState = null;
+
+		base.OnDestroy();
+	}
 }

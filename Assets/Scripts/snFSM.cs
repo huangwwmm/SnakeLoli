@@ -82,6 +82,14 @@ public class snFSM : MonoBehaviour
 		}
 	}
 
+	protected virtual void OnDestroy()
+	{
+		m_States = null;
+		m_CurrentState = null;
+		m_ChangeFromState = null;
+		m_ChangeToState = null;
+	}
+
 	private void ChangeStart(snFSMState newState)
 	{
 		snDebug.Assert(!m_IsChanging, "!m_IsChanging");
