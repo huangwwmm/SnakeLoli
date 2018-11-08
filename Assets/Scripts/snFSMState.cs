@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class snFSMState : MonoBehaviour
 {
+	public string StateName;
+
 	public virtual void Initialize(snFSM owner)
 	{
 	}

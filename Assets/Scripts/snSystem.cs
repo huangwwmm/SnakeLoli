@@ -11,6 +11,7 @@ public class snSystem : MonoBehaviour
 	private snLogRecord m_LogRecord;
 	private snINIParser m_Config;
 	private snInput m_Input;
+	private snSceneFSM m_SceneFSM;
 	private float m_RealtimeSinceStartup;
 
 	public static snSystem GetInstance()
@@ -101,10 +102,20 @@ public class snSystem : MonoBehaviour
 		yield return null;
 
 		// initialize input
-		GameObject inputObject = Instantiate(SystemInitializer.InputPrefab) as GameObject;
-		inputObject.transform.SetParent(transform, false);
-		m_Input = inputObject.GetComponent<snInput>();
+		m_Input = InstantiatePrefabAndSetParentThisTransform<snInput>(SystemInitializer.InputPrefab);
 		yield return null;
+
+		// initialize scene fsm
+		m_SceneFSM = InstantiatePrefabAndSetParentThisTransform<snSceneFSM>(SystemInitializer.SceneFSMPrefab);
+		yield return StartCoroutine(m_SceneFSM.ChangeState_Co(m_SceneFSM.GetLobbyState()));
+		yield return null;
+	}
+
+	private T InstantiatePrefabAndSetParentThisTransform<T>(GameObject prefab)
+	{
+		GameObject obj = Instantiate(prefab) as GameObject;
+		obj.transform.SetParent(transform, false);
+		return obj.GetComponent<T>();
 	}
 }
 
@@ -113,4 +124,5 @@ public class snSystemInitializer
 {
 	public TextAsset Config;
 	public GameObject InputPrefab;
+	public GameObject SceneFSMPrefab;
 }

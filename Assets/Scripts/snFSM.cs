@@ -15,7 +15,7 @@ public class snFSM : MonoBehaviour
 		for (int iState = 0; iState < m_States.Length; iState++)
 		{
 			snFSMState iterState = m_States[iState];
-			if (iterState.name == name)
+			if (iterState.StateName == name)
 			{
 				return iterState;
 			}
@@ -23,24 +23,7 @@ public class snFSM : MonoBehaviour
 		return null;
 	}
 
-	public bool IsChanging()
-	{
-		return m_IsChanging;
-	}
-
-	protected void Awake()
-	{
-		m_States = GetComponentsInChildren<snFSMState>(true);
-		for (int iState = 0; iState < m_States.Length; iState++)
-		{
-			snFSMState iterState = m_States[iState];
-			snDebug.Assert(iterState.SupportInstantlyChange() || iterState.SupportCoroutineChange()
-				, string.Format("State ({0}) not support change", iterState.name));
-			iterState.Initialize(this);
-		}
-	}
-
-	private void ChangeState_Instantly(snFSMState newState)
+	public void ChangeState_Instantly(snFSMState newState)
 	{
 		ChangeStart(newState);
 
@@ -61,7 +44,7 @@ public class snFSM : MonoBehaviour
 		ChangeFinished();
 	}
 
-	private IEnumerator ChangeState_Co(snFSMState newState)
+	public IEnumerator ChangeState_Co(snFSMState newState)
 	{
 		ChangeStart(newState);
 
@@ -75,11 +58,28 @@ public class snFSM : MonoBehaviour
 
 		if (m_ChangeToState != null)
 		{
-			snDebug.Assert(m_ChangeFromState.SupportCoroutineChange(), "m_ChangeToState not support coroutine change");
+			snDebug.Assert(m_ChangeToState.SupportCoroutineChange(), "m_ChangeToState not support coroutine change");
 			yield return StartCoroutine(m_ChangeToState.Activate_Co());
 		}
-		 
+
 		ChangeFinished();
+	}
+
+	public bool IsChanging()
+	{
+		return m_IsChanging;
+	}
+
+	protected virtual void Awake()
+	{
+		m_States = GetComponentsInChildren<snFSMState>(true);
+		for (int iState = 0; iState < m_States.Length; iState++)
+		{
+			snFSMState iterState = m_States[iState];
+			snDebug.Assert(iterState.SupportInstantlyChange() || iterState.SupportCoroutineChange()
+				, string.Format("State ({0}) not support change", iterState.StateName));
+			iterState.Initialize(this);
+		}
 	}
 
 	private void ChangeStart(snFSMState newState)
@@ -87,8 +87,8 @@ public class snFSM : MonoBehaviour
 		snDebug.Assert(!m_IsChanging, "!m_IsChanging");
 
 		Debug.Log(string.Format("Change state from ({0}) to ({1}) start"
-			, m_CurrentState == null ? "NULL" : m_CurrentState.name
-			, newState == null ? "NULL" : newState.name));
+			, m_CurrentState == null ? "NULL" : m_CurrentState.StateName
+			, newState == null ? "NULL" : newState.StateName));
 
 		m_IsChanging = true;
 		m_ChangeFromState = m_CurrentState;
@@ -99,9 +99,9 @@ public class snFSM : MonoBehaviour
 	{
 		snDebug.Assert(m_IsChanging, "m_IsChanging");
 
-		Debug.Log(string.Format("Change state from '{0}' to '{1}' finished"
-			, m_ChangeFromState == null ? "NULL" : m_ChangeFromState.name
-			, m_ChangeToState == null ? "NULL" : m_ChangeToState.name));
+		Debug.Log(string.Format("Change state from ({0}) to ({1}) finished"
+			, m_ChangeFromState == null ? "NULL" : m_ChangeFromState.StateName
+			, m_ChangeToState == null ? "NULL" : m_ChangeToState.StateName));
 
 		m_CurrentState = m_ChangeToState;
 

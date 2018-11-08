@@ -55,3 +55,5 @@ MonoBehaviour:
     Config: {fileID: 4900000, guid: 01ee0bc6c796dbe4c8ebebb337b07434, type: 3}
     InputPrefab: {fileID: 1717198655298722, guid: f40b5a64c7a90984092d7144c8885f40,
       type: 2}
+    SceneFSMPrefab: {fileID: 1150128558821594, guid: ddcc261d50d47bd4499b129282daf249,
+      type: 2}
