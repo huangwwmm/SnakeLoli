@@ -48,10 +48,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1881416406117754}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f870b5ccfc905e444bc2e6219116db32, type: 3}
+  m_Script: {fileID: 11500000, guid: b8ec0f82e763dc54598eb658af59f0a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   SystemPrefabs:
-  - {fileID: 1069844352694248, guid: 4cc637bb712685e42af63ce931bc0690, type: 2}
   - {fileID: 1717198655298722, guid: f40b5a64c7a90984092d7144c8885f40, type: 2}
-  LobbyUI: {fileID: 1154233847445190, guid: 7d1349f3b4ec8944d924ae956749c2f0, type: 2}
+  - {fileID: 1421023748411174, guid: 7d1349f3b4ec8944d924ae956749c2f0, type: 2}
