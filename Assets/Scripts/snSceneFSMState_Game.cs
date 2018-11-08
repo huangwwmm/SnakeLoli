@@ -1,4 +1,4 @@
-﻿public class snSceneFSMState_Game : snFSMState
+﻿public class snSceneFSMState_Game : snSceneFSMState
 {
 	public override bool SupportCoroutineChange()
 	{
