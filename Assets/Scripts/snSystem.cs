@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class snSystem : MonoBehaviour
@@ -8,8 +9,8 @@ public class snSystem : MonoBehaviour
 	public Object[] SystemPrefabs;
 
 	private snLogRecord m_LogRecord;
+	private snINIParser m_Config;
 	private float m_RealtimeSinceStartup;
-
 
 	public static snSystem GetInstance()
 	{
@@ -45,6 +46,9 @@ public class snSystem : MonoBehaviour
 	{
 		if (ms_Instance == this) // avoid multiple snSystem
 		{
+			m_Config.Destroy();
+			m_Config = null;
+
 			m_LogRecord.Destroy();
 			m_LogRecord = null;
 
@@ -61,6 +65,7 @@ public class snSystem : MonoBehaviour
 
 	private IEnumerator Initialize_Co()
 	{
+		// initialize log record
 		m_LogRecord = new snLogRecord();
 #if UNITY_EDITOR
 		m_LogRecord.Initialize(byte.MaxValue, true);
@@ -75,7 +80,22 @@ public class snSystem : MonoBehaviour
 #endif
 		yield return null;
 
-		// initizlize system prefab
+		// initialize config
+		string[] configLines;
+#if UNITY_EDITOR
+		configLines = System.IO.File.ReadAllLines(Application.dataPath + "/Config/Debug.ini", System.Text.Encoding.UTF8);
+#endif
+		m_Config = new snINIParser();
+		m_Config.Initialize(configLines);
+		System.Text.StringBuilder configLogString = new System.Text.StringBuilder(512);
+		configLogString.AppendLine("Loaded Config");
+		foreach (KeyValuePair<string, string> kv in m_Config.GetConfig())
+		{
+			configLogString.AppendLine(string.Format("{0}={1}", kv.Key, kv.Value));
+		}
+		Debug.Log(configLogString.ToString());
+
+		// initialize system prefab
 		for (int iPrefab = 0; iPrefab < SystemPrefabs.Length; iPrefab++)
 		{
 			Object iterPrefab = SystemPrefabs[iPrefab];

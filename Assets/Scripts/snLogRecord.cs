@@ -54,7 +54,6 @@ public class snLogRecord
 
 		FlushStreamWriter();
 		m_StreamWriter.Close();
-		m_FileStream.Flush();
 		m_FileStream.Close();
 	}
 
@@ -88,9 +87,11 @@ public class snLogRecord
 	{
 		if ((m_RecordLogTypeFlags & (1 << (byte)type)) > 0)
 		{
-			m_StreamWriter.WriteLine(string.Format("{0}|{1}|{2}", DateTime.Now.ToString("G"), type, condition));
+			m_StreamWriter.WriteLine(string.Format("{0}|{1}", DateTime.Now.ToString("G"), type));
+			m_StreamWriter.WriteLine(condition);
 			if (m_RecordStackTrace)
 			{
+				m_StreamWriter.WriteLine("ST:");
 				m_StreamWriter.WriteLine(stackTrace);
 			}
 		}
