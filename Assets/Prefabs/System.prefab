@@ -21,7 +21,7 @@ GameObject:
   - component: {fileID: 4146897559825468}
   - component: {fileID: 114159332402526884}
   m_Layer: 0
-  m_Name: SystemInitializer
+  m_Name: System
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
