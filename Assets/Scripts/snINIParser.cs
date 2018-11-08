@@ -5,13 +5,14 @@ public class snINIParser
 {
 	private Dictionary<string, string> m_Config;
 
-	public void Initialize(string[] lines, char commentSymbol = ';')
+	public void Initialize(string configText, char commentSymbol = ';')
 	{
 		m_Config = new Dictionary<string, string>();
 
+		string[] lines = configText.Split('\n');
 		for (int iLine = 0; iLine < lines.Length; iLine++)
 		{
-			string iterLine = lines[iLine];
+			string iterLine = lines[iLine].Trim();
 			// ignore empty line
 			if (string.IsNullOrEmpty(iterLine))
 			{

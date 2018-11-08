@@ -9,17 +9,17 @@ Prefab:
     m_Modifications: []
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
-  m_RootGameObject: {fileID: 1881416406117754}
+  m_RootGameObject: {fileID: 1287820109053828}
   m_IsPrefabParent: 1
---- !u!1 &1881416406117754
+--- !u!1 &1287820109053828
 GameObject:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   serializedVersion: 5
   m_Component:
-  - component: {fileID: 4146897559825468}
-  - component: {fileID: 114159332402526884}
+  - component: {fileID: 4193860582240842}
+  - component: {fileID: 114995038713341984}
   m_Layer: 0
   m_Name: System
   m_TagString: Untagged
@@ -27,12 +27,12 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &4146897559825468
+--- !u!4 &4193860582240842
 Transform:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1881416406117754}
+  m_GameObject: {fileID: 1287820109053828}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 282.5, y: -249.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -40,17 +40,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &114159332402526884
+--- !u!114 &114995038713341984
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1881416406117754}
+  m_GameObject: {fileID: 1287820109053828}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b8ec0f82e763dc54598eb658af59f0a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SystemPrefabs:
-  - {fileID: 1717198655298722, guid: f40b5a64c7a90984092d7144c8885f40, type: 2}
-  - {fileID: 1421023748411174, guid: 7d1349f3b4ec8944d924ae956749c2f0, type: 2}
+  SystemInitializer:
+    Config: {fileID: 4900000, guid: 01ee0bc6c796dbe4c8ebebb337b07434, type: 3}
+    InputPrefab: {fileID: 1717198655298722, guid: f40b5a64c7a90984092d7144c8885f40,
+      type: 2}

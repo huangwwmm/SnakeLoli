@@ -6,15 +6,21 @@ public class snSystem : MonoBehaviour
 {
 	private static snSystem ms_Instance;
 
-	public Object[] SystemPrefabs;
+	public snSystemInitializer SystemInitializer;
 
 	private snLogRecord m_LogRecord;
 	private snINIParser m_Config;
+	private snInput m_Input;
 	private float m_RealtimeSinceStartup;
 
 	public static snSystem GetInstance()
 	{
 		return ms_Instance;
+	}
+
+	public snInput GetInput()
+	{
+		return m_Input;
 	}
 
 	public snLogRecord GetLogRecord()
@@ -46,6 +52,8 @@ public class snSystem : MonoBehaviour
 	{
 		if (ms_Instance == this) // avoid multiple snSystem
 		{
+			m_Input = null;
+
 			m_Config.Destroy();
 			m_Config = null;
 
@@ -81,12 +89,8 @@ public class snSystem : MonoBehaviour
 		yield return null;
 
 		// initialize config
-		string[] configLines;
-#if UNITY_EDITOR
-		configLines = System.IO.File.ReadAllLines(Application.dataPath + "/Config/Debug.ini", System.Text.Encoding.UTF8);
-#endif
 		m_Config = new snINIParser();
-		m_Config.Initialize(configLines);
+		m_Config.Initialize(SystemInitializer.Config.text);
 		System.Text.StringBuilder configLogString = new System.Text.StringBuilder(512);
 		configLogString.AppendLine("Loaded Config");
 		foreach (KeyValuePair<string, string> kv in m_Config.GetConfig())
@@ -94,14 +98,19 @@ public class snSystem : MonoBehaviour
 			configLogString.AppendLine(string.Format("{0}={1}", kv.Key, kv.Value));
 		}
 		Debug.Log(configLogString.ToString());
+		yield return null;
 
-		// initialize system prefab
-		for (int iPrefab = 0; iPrefab < SystemPrefabs.Length; iPrefab++)
-		{
-			Object iterPrefab = SystemPrefabs[iPrefab];
-			GameObject obj = Instantiate(iterPrefab) as GameObject;
-			obj.transform.SetParent(transform, false);
-			yield return null;
-		}
+		// initialize input
+		GameObject inputObject = Instantiate(SystemInitializer.InputPrefab) as GameObject;
+		inputObject.transform.SetParent(transform, false);
+		m_Input = inputObject.GetComponent<snInput>();
+		yield return null;
 	}
+}
+
+[System.Serializable]
+public class snSystemInitializer
+{
+	public TextAsset Config;
+	public GameObject InputPrefab;
 }

@@ -116,7 +116,7 @@ public class snJoystickCursor : MonoBehaviour
 				m_PressState = PressState.Notset;
 			}
 
-			CursorAnimator.SetBool(CursorAnimatorHoverParmeterName, snInput.GetInstance().EventSystem.IsPointerOverGameObject());
+			CursorAnimator.SetBool(CursorAnimatorHoverParmeterName, snSystem.GetInstance().GetInput().EventSystem.IsPointerOverGameObject());
 		}
 		else
 		{
