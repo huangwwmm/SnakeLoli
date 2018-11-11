@@ -47,6 +47,11 @@ public class snSystem : MonoBehaviour
 	{
 		return m_AssetLoader;
 	}
+
+	public snLocalization GetLocalization()
+	{
+		return m_Localization;
+	}
 	#endregion // Get function
 
 	protected void Awake()

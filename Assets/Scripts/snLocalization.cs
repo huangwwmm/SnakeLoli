@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class snLocalization
 {
+	/// <summary>
+	/// {0} => Localization key
+	/// </summary>
+	private const string LOCALIZATION_PLACEHOLDER = "${0}$";
+
 	private Dictionary<string, string> m_Localization;
 	private TextAsset m_CSVAsset;
 	private snConstants.SupportLanguage m_Language;
@@ -28,6 +33,16 @@ public class snLocalization
 	{
 		m_Localization.Clear();
 		ParseLocalization();
+	}
+
+	public string GetLocalizationText(string key)
+	{
+		string text;
+		if (!TryGetText(key, out text))
+		{
+			text = string.Format(LOCALIZATION_PLACEHOLDER, key);
+		}
+		return text;
 	}
 
 	public bool TryGetText(string key, out string text)
