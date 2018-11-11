@@ -5,15 +5,15 @@
 /// </summary>
 public class hwmAssetLoader
 {
-	public GameObject LoadPrefab(AssetType assetType, string prefabName, bool ignoreLog = false)
+	public Object LoadPrefab(AssetType assetType, string assetName, bool ignoreLog = false)
 	{
-		string prefabPath = string.Format("Prefabs/{0}/{1}", assetType, prefabName);
-		GameObject gameObject = Resources.Load(prefabPath) as GameObject;
-		if (gameObject == null && !ignoreLog)
+		string assetPath = string.Format("{0}/{1}", assetType, assetName);
+		Object obj = Resources.Load(assetPath);
+		if (obj == null && !ignoreLog)
 		{
-			Debug.LogError(string.Format("Load prefab AssetType:({0}) Name:({1}) Path:({2}) failed", assetType, prefabName, prefabPath));
+			Debug.LogError(string.Format("Load AssetType:({0}) Name:({1}) Path:({2}) failed", assetType, assetName, assetPath));
 		}
-		return gameObject;
+		return obj;
 	}
 
 	/// <summary>
@@ -21,6 +21,7 @@ public class hwmAssetLoader
 	/// </summary>
 	public enum AssetType
 	{
-		UIRoot
+		UIRoot,
+		Level,
 	}
 }

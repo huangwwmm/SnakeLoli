@@ -49,7 +49,7 @@ public class hwmJoystickCursor : MonoBehaviour
 
 	protected void Awake()
 	{
-		MyCanvas.sortingOrder = (int)slConstants.CanvasSortOrder.JoystickCursor;
+		MyCanvas.sortingOrder = hwmConstants.CANVAS_SORTORDER_JOYSTICKCURSOR;
 
 		CalculateMaxCursorPosition();
 		SetDisplay(false);
@@ -83,12 +83,12 @@ public class hwmJoystickCursor : MonoBehaviour
 			m_CursorPosition_ScreenSpace = (position_CanvasSpace + m_CanvasHalfSize) // change origin to canvas leftdown
 				* m_CanvasToScreenScale;
 
-			m_LastHasInputTime = slSystem.GetInstance().GetRealtimeSinceStartup();
+			m_LastHasInputTime = hwmSystem.GetInstance().GetRealtimeSinceStartup();
 		}
 		// hide when no input for a long time
 		else if (m_Display)
 		{
-			float currentTime = slSystem.GetInstance().GetRealtimeSinceStartup();
+			float currentTime = hwmSystem.GetInstance().GetRealtimeSinceStartup();
 			if (currentTime - m_LastHasInputTime >= AutoHideCursorTime)
 			{
 				SetDisplay(false);
@@ -116,7 +116,7 @@ public class hwmJoystickCursor : MonoBehaviour
 				m_PressState = PressState.Notset;
 			}
 
-			CursorAnimator.SetBool(CursorAnimatorHoverParmeterName, slSystem.GetInstance().GetInput().EventSystem.IsPointerOverGameObject());
+			CursorAnimator.SetBool(CursorAnimatorHoverParmeterName, hwmSystem.GetInstance().GetInput().EventSystem.IsPointerOverGameObject());
 		}
 		else
 		{
@@ -125,7 +125,7 @@ public class hwmJoystickCursor : MonoBehaviour
 
 		if (hasInput)
 		{
-			m_LastHasInputTime = slSystem.GetInstance().GetRealtimeSinceStartup();
+			m_LastHasInputTime = hwmSystem.GetInstance().GetRealtimeSinceStartup();
 		}
 	}
 

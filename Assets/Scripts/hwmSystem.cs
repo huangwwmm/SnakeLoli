@@ -2,23 +2,23 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class slSystem : MonoBehaviour
+public class hwmSystem : MonoBehaviour
 {
-	private static slSystem ms_Instance;
+	private static hwmSystem ms_Instance;
 
-	public slSystemInitializer SystemInitializer;
+	public hwmSystemInitializer SystemInitializer;
 
 	private hwmLogRecord m_LogRecord;
 	private hwmINIParser m_Config;
 	private hwmInput m_Input;
-	private slSceneFSM m_SceneFSM;
+	private hwmSceneFSM m_SceneFSM;
 	private hwmLocalization m_Localization;
 	private hwmUISystem m_UISystem;
 	private hwmAssetLoader m_AssetLoader;
 	private float m_RealtimeSinceStartup;
 
 	#region Get function
-	public static slSystem GetInstance()
+	public static hwmSystem GetInstance()
 	{
 		return ms_Instance;
 	}
@@ -56,7 +56,7 @@ public class slSystem : MonoBehaviour
 
 	protected void Awake()
 	{
-		if (ms_Instance == null) // avoid multiple snSystem
+		if (ms_Instance == null) // avoid multiple System
 		{
 			ms_Instance = this;
 			DontDestroyOnLoad(this);
@@ -71,7 +71,7 @@ public class slSystem : MonoBehaviour
 
 	protected void OnDestroy()
 	{
-		if (ms_Instance == this) // avoid multiple snSystem
+		if (ms_Instance == this) // avoid multiple System
 		{
 			m_SceneFSM = null;
 
@@ -143,9 +143,8 @@ public class slSystem : MonoBehaviour
 		m_UISystem.Initialize();
 		yield return null;
 
-		m_SceneFSM = InstantiatePrefabAndSetParentThisTransform<slSceneFSM>(SystemInitializer.SceneFSMPrefab);
-		yield return StartCoroutine(m_SceneFSM.ChangeState_Co(m_SceneFSM.GetLobbyState()));
-		yield return null;
+		m_SceneFSM = InstantiatePrefabAndSetParentThisTransform<hwmSceneFSM>(SystemInitializer.SceneFSMPrefab);
+		yield return StartCoroutine(m_SceneFSM.EnterStartupScene());
 	}
 
 	private T InstantiatePrefabAndSetParentThisTransform<T>(GameObject prefab)
@@ -157,7 +156,7 @@ public class slSystem : MonoBehaviour
 }
 
 [System.Serializable]
-public class slSystemInitializer
+public class hwmSystemInitializer
 {
 	public TextAsset Config;
 	public GameObject InputPrefab;

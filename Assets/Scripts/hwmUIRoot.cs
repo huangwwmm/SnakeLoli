@@ -1,21 +1,58 @@
 ﻿using UnityEngine;
 
-public abstract class hwmUIRoot : MonoBehaviour
+public class hwmUIRoot : MonoBehaviour
 {
-	/// <summary>
-	/// {0} => Localization key
-	/// </summary>
-	private const string LOCALIZATION_PLACEHOLDER = "${0}$";
+	private bool m_Display = false;
 
-	public abstract void OnUIRootInitialize();
+	public bool IsDisplay()
+	{
+		return m_Display;
+	}
 
-	public abstract void OnUIRootDestroy();
+	public void OnUIRootInitialize()
+	{
+		HandleUIRootInitialize();
+		HandleUIRootLocalize();
 
-	public abstract void OnUIRootDisplay();
+		OnUIRootDisplay();
+	}
 
-	public abstract void OnUIRootHide();
+	public void OnUIRootDestroy()
+	{
+		OnUIRootHide();
 
-	public virtual void OnLanguageChanged()
+		HandleUIRootDestroy();
+	}
+
+	public void OnUIRootDisplay()
+	{
+		m_Display = true;
+		HandleUIRootDisplay();
+	}
+
+	public void OnUIRootHide()
+	{
+		HandleUIRootHide();
+		m_Display = false;
+	}
+
+	protected virtual void HandleUIRootInitialize()
+	{
+	}
+
+	protected virtual void HandleUIRootDestroy()
+	{
+	}
+
+	protected virtual void HandleUIRootDisplay()
+	{
+	}
+
+	protected virtual void HandleUIRootHide()
+	{
+	}
+
+	protected virtual void HandleUIRootLocalize()
 	{
 	}
 }

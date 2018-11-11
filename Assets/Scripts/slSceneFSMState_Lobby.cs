@@ -19,7 +19,7 @@ public class slSceneFSMState_Lobby : slSceneFSMState
 
 		if (m_LobbyUIRoot == null)
 		{
-			m_LobbyUIRoot = slSystem.GetInstance().GetUISystem().InstantiateUIRoot<slLobbyUIRoot>("Lobby");
+			m_LobbyUIRoot = hwmSystem.GetInstance().GetUISystem().InstantiateUIRoot<slLobbyUIRoot>("Lobby");
 		}
 		else
 		{

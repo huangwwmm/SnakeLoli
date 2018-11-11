@@ -7,8 +7,8 @@ public class hwmEventSystemBaseInput : BaseInput
 	{
 		get
 		{
-			return slSystem.GetInstance().GetInput().JoystickCursor.IsDisplay()
-				? slSystem.GetInstance().GetInput().JoystickCursor.GetCusrorPosition_ScreenSpace()
+			return hwmSystem.GetInstance().GetInput().JoystickCursor.IsDisplay()
+				? hwmSystem.GetInstance().GetInput().JoystickCursor.GetCusrorPosition_ScreenSpace()
 				: (Vector2)Input.mousePosition;
 		}
 	}
@@ -17,7 +17,7 @@ public class hwmEventSystemBaseInput : BaseInput
 	{
 		get
 		{
-			return slSystem.GetInstance().GetInput().JoystickCursor.IsDisplay()
+			return hwmSystem.GetInstance().GetInput().JoystickCursor.IsDisplay()
 				? Vector2.zero
 				: Input.mouseScrollDelta;
 		}
@@ -34,28 +34,28 @@ public class hwmEventSystemBaseInput : BaseInput
 
 	public override bool GetMouseButton(int button)
 	{
-		return slSystem.GetInstance().GetInput().JoystickCursor.IsDisplay()
+		return hwmSystem.GetInstance().GetInput().JoystickCursor.IsDisplay()
 			? button == 0 // joystickCursor only support button0
-				? slSystem.GetInstance().GetInput().JoystickCursor.GetPressState() == hwmJoystickCursor.PressState.Hold
-					|| slSystem.GetInstance().GetInput().JoystickCursor.GetPressState() == hwmJoystickCursor.PressState.Hold
+				? hwmSystem.GetInstance().GetInput().JoystickCursor.GetPressState() == hwmJoystickCursor.PressState.Hold
+					|| hwmSystem.GetInstance().GetInput().JoystickCursor.GetPressState() == hwmJoystickCursor.PressState.Hold
 				: false
 			: Input.GetMouseButton(button);
 	}
 
 	public override bool GetMouseButtonDown(int button)
 	{
-		return slSystem.GetInstance().GetInput().JoystickCursor.IsDisplay()
+		return hwmSystem.GetInstance().GetInput().JoystickCursor.IsDisplay()
 			? button == 0 // joystickCursor only support button0
-				? slSystem.GetInstance().GetInput().JoystickCursor.GetPressState() == hwmJoystickCursor.PressState.Down
+				? hwmSystem.GetInstance().GetInput().JoystickCursor.GetPressState() == hwmJoystickCursor.PressState.Down
 				: false
 			: Input.GetMouseButtonDown(button);
 	}
 
 	public override bool GetMouseButtonUp(int button)
 	{
-		return slSystem.GetInstance().GetInput().JoystickCursor.IsDisplay()
+		return hwmSystem.GetInstance().GetInput().JoystickCursor.IsDisplay()
 			? button == 0 // joystickCursor only support button0
-				? slSystem.GetInstance().GetInput().JoystickCursor.GetPressState() == hwmJoystickCursor.PressState.Up
+				? hwmSystem.GetInstance().GetInput().JoystickCursor.GetPressState() == hwmJoystickCursor.PressState.Up
 				: false
 			: Input.GetMouseButtonUp(button);
 	}

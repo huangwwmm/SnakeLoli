@@ -11,7 +11,7 @@ public class hwmLocalization
 
 	private Dictionary<string, string> m_Localization;
 	private TextAsset m_CSVAsset;
-	private slConstants.SupportLanguage m_Language;
+	private hwmConstants.SupportLanguage m_Language;
 
 	public void Initialize(TextAsset csvAsset)
 	{
@@ -108,13 +108,13 @@ public class hwmLocalization
 	///		Cache in PlayerPrebs
 	///		System Language
 	/// </summary>
-	private slConstants.SupportLanguage GetLanguage()
+	private hwmConstants.SupportLanguage GetLanguage()
 	{
 
-		if (PlayerPrefs.HasKey(slConstants.PREFSKEY_LANGUAGE))
+		if (PlayerPrefs.HasKey(hwmConstants.PREFSKEY_LANGUAGE))
 		{
-			string languageInPrefs = PlayerPrefs.GetString(slConstants.PREFSKEY_LANGUAGE);
-			slConstants.SupportLanguage language;
+			string languageInPrefs = PlayerPrefs.GetString(hwmConstants.PREFSKEY_LANGUAGE);
+			hwmConstants.SupportLanguage language;
 			if (IsSupportLanguage(languageInPrefs, out language))
 			{
 				Debug.Log(string.Format("language cache ({0}) detected", languageInPrefs));
@@ -127,7 +127,7 @@ public class hwmLocalization
 			|| Application.platform == RuntimePlatform.WindowsEditor)
 		{
 			string sysLanguage = Application.systemLanguage.ToString();
-			slConstants.SupportLanguage language;
+			hwmConstants.SupportLanguage language;
 			if (IsSupportLanguage(sysLanguage, out language))
 			{
 				Debug.Log(string.Format("system language ({0}) detected", sysLanguage));
@@ -139,17 +139,17 @@ public class hwmLocalization
 			|| Application.systemLanguage == SystemLanguage.ChineseSimplified
 			|| Application.systemLanguage == SystemLanguage.ChineseTraditional)
 		{
-			return slConstants.SupportLanguage.Chinese;
+			return hwmConstants.SupportLanguage.Chinese;
 		}
 
-		return slConstants.DEFAULT_LANGUAGE;
+		return hwmConstants.DEFAULT_LANGUAGE;
 	}
 
-	private bool IsSupportLanguage(string sLanguage, out slConstants.SupportLanguage language)
+	private bool IsSupportLanguage(string sLanguage, out hwmConstants.SupportLanguage language)
 	{
 		try
 		{
-			language = (slConstants.SupportLanguage)Enum.ToObject(typeof(slConstants.SupportLanguage), sLanguage);
+			language = (hwmConstants.SupportLanguage)Enum.ToObject(typeof(hwmConstants.SupportLanguage), sLanguage);
 			return true;
 		}
 		catch (Exception)

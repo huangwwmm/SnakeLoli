@@ -19,7 +19,7 @@ public class hwmDebug
 #endif
 			Debug.LogAssertion(message, context);
 			Debug.Break();
-			slSystem.GetInstance().GetLogRecord().FlushStreamWriter();
+			hwmSystem.GetInstance().GetLogRecord().FlushStreamWriter();
 		}
 		return valid;
 	}
