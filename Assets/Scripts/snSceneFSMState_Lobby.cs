@@ -1,10 +1,9 @@
 ﻿using System.Collections;
-using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class snSceneFSMState_Lobby : snSceneFSMState
 {
-	public GameObject LobbyUIPrefab;
+	private snLobbyUIRoot m_LobbyUIRoot;
 
 	public override bool SupportCoroutineChange()
 	{
@@ -17,10 +16,20 @@ public class snSceneFSMState_Lobby : snSceneFSMState
 		{
 			yield return StartCoroutine(LoadScene_Co(snConstants.SCENE_NAME_LOBBY));
 		}
+
+		if (m_LobbyUIRoot == null)
+		{
+			m_LobbyUIRoot = snSystem.GetInstance().GetUISystem().InstantiateUIRoot<snLobbyUIRoot>("Lobby");
+		}
+		else
+		{
+			m_LobbyUIRoot.OnUIRootDisplay();
+		}
 	}
 
 	public override IEnumerator Deactivate_Co()
 	{
+		m_LobbyUIRoot.OnUIRootHide();
 		yield return null;
 	}
 }

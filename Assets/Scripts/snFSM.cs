@@ -29,7 +29,7 @@ public class snFSM : MonoBehaviour
 
 		if (m_ChangeFromState != null)
 		{
-			snDebug.Assert(m_ChangeFromState.SupportInstantlyChange(), "ChangeFromState not support instantly change");
+			snDebug.Assert(m_ChangeFromState.SupportInstantlyChange(), "ChangeFromState not support instantly change", gameObject);
 			m_ChangeFromState.Deactivate_Instantly();
 		}
 
@@ -37,7 +37,7 @@ public class snFSM : MonoBehaviour
 
 		if (m_ChangeToState != null)
 		{
-			snDebug.Assert(m_ChangeFromState.SupportInstantlyChange(), "m_ChangeToState not support instantly change");
+			snDebug.Assert(m_ChangeFromState.SupportInstantlyChange(), "m_ChangeToState not support instantly change", gameObject);
 			m_ChangeToState.Activate_Instantly();
 		}
 
@@ -50,7 +50,7 @@ public class snFSM : MonoBehaviour
 
 		if (m_ChangeFromState != null)
 		{
-			snDebug.Assert(m_ChangeFromState.SupportCoroutineChange(), "ChangeFromState not support coroutine change");
+			snDebug.Assert(m_ChangeFromState.SupportCoroutineChange(), "ChangeFromState not support coroutine change", gameObject);
 			yield return StartCoroutine(m_ChangeFromState.Deactivate_Co());
 		}
 
@@ -58,7 +58,7 @@ public class snFSM : MonoBehaviour
 
 		if (m_ChangeToState != null)
 		{
-			snDebug.Assert(m_ChangeToState.SupportCoroutineChange(), "m_ChangeToState not support coroutine change");
+			snDebug.Assert(m_ChangeToState.SupportCoroutineChange(), "m_ChangeToState not support coroutine change", gameObject);
 			yield return StartCoroutine(m_ChangeToState.Activate_Co());
 		}
 
@@ -77,7 +77,8 @@ public class snFSM : MonoBehaviour
 		{
 			snFSMState iterState = m_States[iState];
 			snDebug.Assert(iterState.SupportInstantlyChange() || iterState.SupportCoroutineChange()
-				, string.Format("State ({0}) not support change", iterState.StateName));
+				, string.Format("State ({0}) not support change", iterState.StateName)
+				, gameObject);
 			iterState.Initialize(this);
 		}
 	}
@@ -92,7 +93,7 @@ public class snFSM : MonoBehaviour
 
 	private void ChangeStart(snFSMState newState)
 	{
-		snDebug.Assert(!m_IsChanging, "!m_IsChanging");
+		snDebug.Assert(!m_IsChanging, "!m_IsChanging", gameObject);
 
 		Debug.Log(string.Format("Change state from ({0}) to ({1}) start"
 			, m_CurrentState == null ? "NULL" : m_CurrentState.StateName
@@ -105,7 +106,7 @@ public class snFSM : MonoBehaviour
 
 	private void ChangeFinished()
 	{
-		snDebug.Assert(m_IsChanging, "m_IsChanging");
+		snDebug.Assert(m_IsChanging, "m_IsChanging", gameObject);
 
 		Debug.Log(string.Format("Change state from ({0}) to ({1}) finished"
 			, m_ChangeFromState == null ? "NULL" : m_ChangeFromState.StateName

@@ -21,6 +21,11 @@ public class snConstants
 		Chinese,
 	}
 
+	public enum GameMode
+	{
+		Free,
+	}
+
 	public const SupportLanguage DEFAULT_LANGUAGE = SupportLanguage.English;
 
 	public const string PREFSKEY_LANGUAGE = "Language";

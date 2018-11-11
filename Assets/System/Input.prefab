@@ -259,7 +259,7 @@ MonoBehaviour:
   XInputAxesName: GP_LAxis_X
   YInputAxesName: GP_LAxis_Y
   CursorMoveSpeed: 5
-  AutoHideCursorTime: 99
+  AutoHideCursorTime: 1
   SubmitButtonName: Submit
 --- !u!114 &114155711355192370
 MonoBehaviour:
