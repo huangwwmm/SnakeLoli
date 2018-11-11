@@ -7,7 +7,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System;
 using System.Linq;
 
-public class snAssetRelationsInProjectWindow : EditorWindow
+public class hwmAssetRelationsInProjectWindow : EditorWindow
 {
 	/// <summary>
 	/// 保存在 ProjectRoot/RELATIONS_RECORD_FILE_PATH
@@ -46,13 +46,13 @@ public class snAssetRelationsInProjectWindow : EditorWindow
 	[MenuItem("Custom/Utility/Asset Relations In Project")]
 	public static void ShowWindow()
 	{
-		snAssetRelationsInProjectWindow window = GetWindow(typeof(snAssetRelationsInProjectWindow)) as snAssetRelationsInProjectWindow;
+		hwmAssetRelationsInProjectWindow window = GetWindow(typeof(hwmAssetRelationsInProjectWindow)) as hwmAssetRelationsInProjectWindow;
 		window.titleContent = new GUIContent("Relations");
 	}
 
 	protected void OnEnable()
 	{
-		m_RecordFilePath = string.Format("{0}/{1}", Directory.GetCurrentDirectory(), RELATIONS_RECORD_FILE_PATH);
+		m_RecordFilePath = string.Format("{0}/../Temp/{1}", Application.dataPath, RELATIONS_RECORD_FILE_PATH);
 		LoadAllRelationFromFile(false); // Q：为什么这里不输出LOG A：修改代码后返回UnityEditor都会触发这里，弹Log的Dialog太烦了
 	}
 
