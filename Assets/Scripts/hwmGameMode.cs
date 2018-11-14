@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class slGameMode : MonoBehaviour 
+public class hwmGameMode : MonoBehaviour 
 {
 	public void StartPlay()
 	{

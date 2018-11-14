@@ -15,9 +15,11 @@ public class hwmSystem : MonoBehaviour
 	private hwmLocalization m_Localization;
 	private hwmUISystem m_UISystem;
 	private hwmAssetLoader m_AssetLoader;
+	private hwmWorld m_World;
+	private hwmLevel m_WaitingToPlayLevel;
 	private float m_RealtimeSinceStartup;
 
-	#region Get function
+	#region get/set function
 	public static hwmSystem GetInstance()
 	{
 		return ms_Instance;
@@ -52,7 +54,22 @@ public class hwmSystem : MonoBehaviour
 	{
 		return m_Localization;
 	}
-	#endregion // Get function
+
+	public hwmWorld GetWorld()
+	{
+		return m_World;
+	}
+
+	public hwmLevel GetWaitingToPlayLevel()
+	{
+		return m_WaitingToPlayLevel;
+	}
+
+	public void SetWaitingToPlayLevel(hwmLevel level)
+	{
+		m_WaitingToPlayLevel = level;
+	}
+	#endregion // get/set function
 
 	protected void Awake()
 	{
@@ -75,6 +92,8 @@ public class hwmSystem : MonoBehaviour
 		{
 			m_SceneFSM = null;
 
+			m_World = null;
+
 			m_UISystem.Destroy();
 			m_UISystem = null;
 
@@ -82,7 +101,7 @@ public class hwmSystem : MonoBehaviour
 			m_Localization = null;
 
 			m_AssetLoader = null;
-			
+
 			m_Input = null;
 
 			m_Config.Destroy();
@@ -142,6 +161,8 @@ public class hwmSystem : MonoBehaviour
 		m_UISystem = new hwmUISystem();
 		m_UISystem.Initialize();
 		yield return null;
+
+		m_World = new hwmWorld();
 
 		m_SceneFSM = InstantiatePrefabAndSetParentThisTransform<hwmSceneFSM>(SystemInitializer.SceneFSMPrefab);
 		yield return StartCoroutine(m_SceneFSM.EnterStartupScene());

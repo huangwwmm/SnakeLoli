@@ -23,7 +23,7 @@ public class hwmUISystem
 	public T InstantiateUIRoot<T>(string uiRootName) where T : hwmUIRoot
 	{
 		hwmDebug.Assert(!m_UIRoots.ContainsKey(uiRootName), "!m_UIRoots.ContainsKey(uiRootName)");
-		GameObject uiRootGameObject = Object.Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadPrefab(hwmAssetLoader.AssetType.UIRoot, uiRootName)) as GameObject;
+		GameObject uiRootGameObject = Object.Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.UIRoot, uiRootName)) as GameObject;
 		hwmUIRoot uiRoot = uiRootGameObject.GetComponent<hwmUIRoot>();
 		hwmDebug.Assert(uiRoot != null, "uiRoot != null");
 		m_UIRoots.Add(uiRootName, uiRoot);

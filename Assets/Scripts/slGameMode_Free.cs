@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
 
-public class slGameMode_Free : slGameMode 
+public class slGameMode_Free : hwmGameMode 
 {
 }

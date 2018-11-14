@@ -5,7 +5,7 @@
 /// </summary>
 public class hwmAssetLoader
 {
-	public Object LoadPrefab(AssetType assetType, string assetName, bool ignoreLog = false)
+	public Object LoadAsset(AssetType assetType, string assetName, bool ignoreLog = false)
 	{
 		string assetPath = string.Format("{0}/{1}", assetType, assetName);
 		Object obj = Resources.Load(assetPath);

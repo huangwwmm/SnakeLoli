@@ -15,12 +15,14 @@ public class slSceneFSMState_Game : slSceneFSMState
 			yield return StartCoroutine(LoadScene_Co(slConstants.SCENE_NAME_GAME));
 		}
 
-		hwmSystem.GetInstance().GetUISystem().InstantiateUIRoot<hwmGameUIRoot>("Game");
+		yield return StartCoroutine(hwmSystem.GetInstance().GetWorld().BeginPlay());
+		// UNDONE move to player.cs
+		//hwmSystem.GetInstance().GetUISystem().InstantiateUIRoot<hwmGameUIRoot>("Game");
 	}
 
 	public override IEnumerator Deactivate_Co()
 	{
-		hwmSystem.GetInstance().GetUISystem().DestroyUIRoot("Game");
-		yield return null;
+		//hwmSystem.GetInstance().GetUISystem().DestroyUIRoot("Game");
+		yield return StartCoroutine(hwmSystem.GetInstance().GetWorld().EndPlay());
 	}
 }

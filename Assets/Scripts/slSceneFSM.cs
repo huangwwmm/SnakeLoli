@@ -8,6 +8,12 @@ public class slSceneFSM : hwmSceneFSM
 		string startupScene;
 #if UNITY_EDITOR
 		startupScene = SceneManager.GetActiveScene().name;
+
+		if (startupScene == slConstants.SCENE_NAME_GAME)
+		{
+			hwmSystem.GetInstance().SetWaitingToPlayLevel(
+				hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Level, slConstants.DEFAULT_LEVEL_NAME) as hwmLevel);
+		}
 #else
 		startupScene = slConstants.SCENE_NAME_LOBBY;
 #endif
