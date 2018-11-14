@@ -33,7 +33,7 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 			// Following trick can reduce the range check by one
 			if ((uint)index >= (uint)m_Size)
 			{
-				throw new ArgumentOutOfRangeException("index");
+				throw new ArgumentOutOfRangeException("index", string.Format("index:{0} m_Size:{1}", index, m_Size));
 			}
 			return m_Items[index];
 		}
@@ -173,6 +173,7 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 		{
 			if (!m_ItemValids[iItem])
 			{
+				m_Size = Math.Max(m_Size, iItem + 1);
 				m_Items[iItem] = item;
 				m_ItemValids[iItem] = true;
 				m_ValidItemCount++;
@@ -276,7 +277,7 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 	public void Shrink(int reserve = 0)
 	{
 		T[] newItems = new T[m_ValidItemCount + reserve];
-		bool[] itemVailds = GenerateItemValids(m_ValidItemCount + reserve);
+		bool[] newItemVailds = GenerateItemValids(m_ValidItemCount + reserve);
 
 		int index = 0;
 		for (int iItem = 0; iItem < m_Items.Length; iItem++)
@@ -287,11 +288,16 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 				{
 					throw new ArgumentOutOfRangeException("m_ValidItemCount");
 				}
-				newItems[index] = m_Items[index];
-				itemVailds[index] = true;
+				newItems[index] = m_Items[iItem];
+				newItemVailds[index] = true;
 				index++;
 			}
 		}
+
+		m_Size = m_ValidItemCount;
+		m_Items = newItems;
+		m_ItemValids = newItemVailds;
+		m_Version++;
 	}
 
 	public void Insert(int index, T item)
