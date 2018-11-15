@@ -55,6 +55,8 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 
 	public int Count { get { return m_Size; } }
 
+	public int ValidItemCount { get { return ValidItemCount; } }
+
 	/// <summary>
 	/// Gets and sets the capacity of this list.  The capacity is the size of the internal array used to hold items.  When set, the internal array of the list is reallocated to the given capacity.
 	/// </summary>
@@ -311,6 +313,26 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 	public Enumerator GetEnumerator()
 	{
 		return new Enumerator(this);
+	}
+
+	public T[] ToArray()
+	{
+		T[] array = new T[m_ValidItemCount];
+
+		int index = 0;
+		for (int iItem = 0; iItem < m_Items.Length; iItem++)
+		{
+			if (m_ItemValids[iItem])
+			{
+				if (index >= m_ValidItemCount)
+				{
+					throw new ArgumentOutOfRangeException("m_ValidItemCount");
+				}
+				array[index] = m_Items[iItem];
+				index++;
+			}
+		}
+		return array;
 	}
 
 	/// <summary>
