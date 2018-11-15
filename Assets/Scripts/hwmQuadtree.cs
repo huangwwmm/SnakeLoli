@@ -107,11 +107,6 @@ public class hwmQuadtree
 			m_Parent = null;
 		}
 
-		public hwmQuadtree GetOwner()
-		{
-			return m_Owner;
-		}
-
 		public bool UpdateElement(Element element)
 		{
 			if (m_LooseBounds.Contains(element.Bounds))
@@ -288,9 +283,14 @@ public class hwmQuadtree
 		/// </summary>
 		internal Node _Owner;
 
+		public Element(hwmQuadtree quadtree)
+		{
+			Quadtree = quadtree;
+		}
+
 		public void UpdateElement()
 		{
-			_Owner.GetOwner().UpdateElement(this);
+			Quadtree.UpdateElement(this);
 		}
 	}
 }
