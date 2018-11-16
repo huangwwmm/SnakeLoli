@@ -56,7 +56,7 @@ public class hwmAssetRelationsInProjectWindow : EditorWindow
 		LoadAllRelationFromFile(false); // Q：为什么这里不输出LOG A：修改代码后返回UnityEditor都会触发这里，弹Log的Dialog太烦了
 	}
 
-	protected void Destroy()
+	protected void OnDisble()
 	{
 		m_ReferencesBuffer = null;
 		m_DependenciesBuffer = null;

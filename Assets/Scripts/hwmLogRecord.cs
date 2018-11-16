@@ -48,7 +48,7 @@ public class hwmLogRecord
 		}
 	}
 
-	public void Destroy()
+	public void Dispose()
 	{
 		StopReceivedLog();
 

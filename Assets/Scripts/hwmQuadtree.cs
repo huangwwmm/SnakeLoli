@@ -37,9 +37,9 @@ public class hwmQuadtree
 		m_Root.Initialize(this, null, worldBounds);
 	}
 
-	public void Destroy()
+	public void Dispose()
 	{
-		m_Root.Destroy();
+		m_Root.Dispose();
 		m_Root = null;
 	}
 
@@ -99,7 +99,7 @@ public class hwmQuadtree
 			m_Elements = new hwmFreeList<Element>();
 		}
 
-		public void Destroy()
+		public void Dispose()
 		{
 			m_Elements.Clear();
 			m_Elements = null;
@@ -219,7 +219,7 @@ public class hwmQuadtree
 					AddElement(iterElement);
 				}
 
-				iterChilder.Destroy();
+				iterChilder.Dispose();
 			}
 
 			m_IsLeaf = true;

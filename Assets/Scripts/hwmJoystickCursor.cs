@@ -51,8 +51,6 @@ public class hwmJoystickCursor : MonoBehaviour
 
 	protected void Awake()
 	{
-		MyCanvas.sortingOrder = hwmConstants.CANVAS_SORTORDER_JOYSTICKCURSOR;
-
 		CalculateMaxCursorPosition();
 		SetDisplay(false);
 	}

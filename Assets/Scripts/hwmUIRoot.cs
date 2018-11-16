@@ -17,11 +17,11 @@ public class hwmUIRoot : MonoBehaviour
 		OnUIRootDisplay();
 	}
 
-	public void OnUIRootDestroy()
+	public void OnUIRootDispose()
 	{
 		OnUIRootHide();
 
-		HandleUIRootDestroy();
+		HandleUIRootDispose();
 	}
 
 	public void OnUIRootDisplay()
@@ -40,7 +40,7 @@ public class hwmUIRoot : MonoBehaviour
 	{
 	}
 
-	protected virtual void HandleUIRootDestroy()
+	protected virtual void HandleUIRootDispose()
 	{
 	}
 

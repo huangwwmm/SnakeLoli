@@ -100,4 +100,12 @@ public struct hwmBounds2D
 			&& max.x >= bounds.max.x
 			&& max.y >= bounds.max.y;
 	}
+
+	public bool Contains(Vector2 point)
+	{
+		return min.x <= point.x
+			&& min.y <= point.y
+			&& max.x >= point.x
+			&& max.y >= point.y;
+	}
 }

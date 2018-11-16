@@ -49,7 +49,7 @@ public class hwmINIParser
 		}
 	}
 
-	public void Destroy()
+	public void Dispose()
 	{
 		m_Config.Clear();
 		m_Config = null;

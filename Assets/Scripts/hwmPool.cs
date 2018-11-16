@@ -33,18 +33,18 @@ public abstract class hwmPool<T>
 		return obj;
 	}
 
-	public void Destroy()
+	public void Dispose()
 	{
 		foreach (T obj in m_Pool)
 		{
-			HandleDestroyItem(obj);
+			HandleDisposeItem(obj);
 		}
 		m_Pool = null;
 	}
 
 	protected abstract T HandleCreateItem();
 
-	protected abstract void HandleDestroyItem(T item);
+	protected abstract void HandleDisposeItem(T item);
 
 	protected abstract void HandlePushItem(ref T item);
 

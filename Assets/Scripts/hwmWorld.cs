@@ -22,12 +22,12 @@ public class hwmWorld
 		m_GameState = Activator.CreateInstance(Type.GetType(m_Level.GameStateClassName)) as hwmGameState;
 		m_GameState.Initialize();
 		m_GameMode = m_GameplayFrameworkObject.AddComponent(Type.GetType(m_Level.GameModeClassName)) as hwmGameMode;
-		yield return m_GameMode.StartCoroutine(m_GameMode.StartPlay());
+		yield return m_GameMode.StartCoroutine(m_GameMode.InitGame());
 	}
 
 	public IEnumerator EndPlay()
 	{
-		m_GameState.Destroy();
+		m_GameState.Dispose();
 		m_GameState = null;
 		UnityEngine.Object.Destroy(m_GameMode);
 		UnityEngine.Object.Destroy(m_GameplayFrameworkObject);
@@ -39,5 +39,10 @@ public class hwmWorld
 	public hwmGameState GetGameState()
 	{
 		return m_GameState;
+	}
+
+	public hwmLevel GetLevel()
+	{
+		return m_Level;
 	}
 }

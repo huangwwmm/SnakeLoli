@@ -1,11 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class hwmConstants
+﻿public class hwmConstants
 {
-	public const int CANVAS_SORTORDER_JOYSTICKCURSOR = 30000;
-
 	/// <summary>
 	/// The order of the enum value will affect the UI display
 	/// </summary>

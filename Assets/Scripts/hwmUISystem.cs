@@ -10,11 +10,11 @@ public class hwmUISystem
 		m_UIRoots = new Dictionary<string, hwmUIRoot>();
 	}
 
-	public void Destroy()
+	public void Dispose()
 	{
 		foreach (KeyValuePair<string, hwmUIRoot> kv in m_UIRoots)
 		{
-			kv.Value.OnUIRootDestroy();
+			kv.Value.OnUIRootDispose();
 		}
 		m_UIRoots.Clear();
 		m_UIRoots = null;
@@ -32,12 +32,12 @@ public class hwmUISystem
 		return uiRoot as T;
 	}
 
-	public void DestroyUIRoot(string uiRootName)
+	public void DisposeUIRoot(string uiRootName)
 	{
 		hwmDebug.Assert(m_UIRoots.ContainsKey(uiRootName), "m_UIRoots.ContainsKey(uiRootName)");
 		hwmUIRoot uiRoot = m_UIRoots[uiRootName];
 		hwmDebug.Assert(uiRoot != null, "uiRoot != null");
-		uiRoot.OnUIRootDestroy();
+		uiRoot.OnUIRootDispose();
 		m_UIRoots.Remove(uiRootName);
 	}
 }

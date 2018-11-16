@@ -21,7 +21,7 @@ public class hwmLocalization
 		ParseLocalization();
 	}
 
-	public void Destroy()
+	public void Dispose()
 	{
 		m_Localization.Clear();
 		m_Localization = null;

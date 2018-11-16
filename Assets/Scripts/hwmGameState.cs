@@ -11,7 +11,7 @@ public class hwmGameState
 		m_PlayerStates = new List<hwmPlayerState>();
 	}
 
-	public void Destroy()
+	public void Dispose()
 	{
 		m_PlayerStates.Clear();
 		m_PlayerStates = null;

@@ -94,20 +94,20 @@ public class hwmSystem : MonoBehaviour
 
 			m_World = null;
 
-			m_UISystem.Destroy();
+			m_UISystem.Dispose();
 			m_UISystem = null;
 
-			m_Localization.Destroy();
+			m_Localization.Dispose();
 			m_Localization = null;
 
 			m_AssetLoader = null;
 
 			m_Input = null;
 
-			m_Config.Destroy();
+			m_Config.Dispose();
 			m_Config = null;
 
-			m_LogRecord.Destroy();
+			m_LogRecord.Dispose();
 			m_LogRecord = null;
 
 			ms_Instance = null;
