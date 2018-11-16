@@ -68,7 +68,7 @@ public class slMap : MonoBehaviour
 
 	private void CreatePresentation()
 	{
-		m_Presentation = (Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Common, "MapPresentation")) as GameObject).GetComponent<slMapPresentation>();
+		m_Presentation = (Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game, "MapPresentation")) as GameObject).GetComponent<slMapPresentation>();
 		m_Presentation.Initialize(this);
 	}
 

@@ -21,7 +21,7 @@ public class hwmAssetLoader
 	/// </summary>
 	public enum AssetType
 	{
-		Common,
+		Game,
 		UIRoot,
 		Level,
 	}
