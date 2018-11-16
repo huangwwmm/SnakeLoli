@@ -3,7 +3,7 @@ using UnityEngine.SceneManagement;
 
 public class slSceneFSMState_Lobby : slSceneFSMState
 {
-	private slLobbyUIRoot m_LobbyUIRoot;
+	private slUIRoot_Lobby m_LobbyUIRoot;
 
 	public override bool SupportCoroutineChange()
 	{
@@ -19,7 +19,7 @@ public class slSceneFSMState_Lobby : slSceneFSMState
 
 		if (m_LobbyUIRoot == null)
 		{
-			m_LobbyUIRoot = hwmSystem.GetInstance().GetUISystem().InstantiateUIRoot<slLobbyUIRoot>("Lobby");
+			m_LobbyUIRoot = hwmSystem.GetInstance().GetUISystem().InstantiateUIRoot<slUIRoot_Lobby>("Lobby");
 		}
 		else
 		{

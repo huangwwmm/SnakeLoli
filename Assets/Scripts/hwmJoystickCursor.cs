@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 
 public class hwmJoystickCursor : MonoBehaviour
 {
+	private const float SPEED_MULIT_WHEN_POINTER_OVER_GAMEOBJECT = 0.7f;
+	private const float AUTOHIDETIEM_MULIT_WHEN_POINTER_OVER_GAMEOBJECT = 1.5f;
+
 	public Canvas MyCanvas;
 	public GameObject Cursor;
 
@@ -63,6 +65,11 @@ public class hwmJoystickCursor : MonoBehaviour
 	{
 		Vector2 axis = new Vector2(Input.GetAxis(XInputAxesName) * CursorMoveSpeed
 			, Input.GetAxis(YInputAxesName) * CursorMoveSpeed);
+		bool isPointerOverGameObject = hwmSystem.GetInstance().GetInput().EventSystem.IsPointerOverGameObject();
+		if (isPointerOverGameObject)
+		{
+			axis *= SPEED_MULIT_WHEN_POINTER_OVER_GAMEOBJECT;
+		}
 		bool hasInput = false;
 
 		// has input
@@ -89,7 +96,7 @@ public class hwmJoystickCursor : MonoBehaviour
 		else if (m_Display)
 		{
 			float currentTime = hwmSystem.GetInstance().GetRealtimeSinceStartup();
-			if (currentTime - m_LastHasInputTime >= AutoHideCursorTime)
+			if (currentTime - m_LastHasInputTime >= (isPointerOverGameObject ? AUTOHIDETIEM_MULIT_WHEN_POINTER_OVER_GAMEOBJECT : 1.0f) * AutoHideCursorTime)
 			{
 				SetDisplay(false);
 			}
@@ -116,7 +123,7 @@ public class hwmJoystickCursor : MonoBehaviour
 				m_PressState = PressState.Notset;
 			}
 
-			CursorAnimator.SetBool(CursorAnimatorHoverParmeterName, hwmSystem.GetInstance().GetInput().EventSystem.IsPointerOverGameObject());
+			CursorAnimator.SetBool(CursorAnimatorHoverParmeterName, isPointerOverGameObject);
 		}
 		else
 		{
