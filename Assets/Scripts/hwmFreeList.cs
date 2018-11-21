@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 /// <summary>
-/// Note cant storage NULL
+/// unordered, fast
 /// </summary>
 public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, ICollection<T>, IList<T>
 {
@@ -47,7 +47,9 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 	public int Count { get; private set; }
 
 	/// <summary>
-	/// Gets and sets the capacity of this list.  The capacity is the size of the internal array used to hold items.  When set, the internal array of the list is reallocated to the given capacity.
+	/// Gets and sets the capacity of this list.
+	/// The capacity is the size of the internal array used to hold items.  
+	/// When set, the internal array of the list is reallocated to the given capacity.
 	/// </summary>
 	public int Capacity
 	{
@@ -125,7 +127,8 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 	}
 
 	/// <summary>
-	/// Constructs a List with a given initial capacity. The list is initially empty, but will have room for the given number of elements before any reallocations are required.
+	/// Constructs a List with a given initial capacity.
+	/// The list is initially empty, but will have room for the given number of elements before any reallocations are required.
 	/// </summary>
 	public hwmFreeList(int capacity)
 	{
@@ -249,7 +252,8 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 	}
 
 	/// <summary>
-	/// Returns an enumerator for this list with the given permission for removal of elements. If modifications made to the list while an enumeration is in progress, the MoveNext and GetObject methods of the enumerator will throw an exception.
+	/// Returns an enumerator for this list with the given permission for removal of elements.
+	/// If modifications made to the list while an enumeration is in progress, the MoveNext and GetObject methods of the enumerator will throw an exception.
 	/// </summary>
 	public Enumerator GetEnumerator()
 	{
@@ -264,7 +268,8 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 	}
 
 	/// <summary>
-	/// Ensures that the capacity of this list is at least the given minimum value. If the currect capacity of the list is less than min, the capacity is increased to twice the current capacity or to min, whichever is larger.
+	/// Ensures that the capacity of this list is at least the given minimum value. 
+	/// If the currect capacity of the list is less than min, the capacity is increased to twice the current capacity or to min, whichever is larger.
 	/// </summary>
 	private void EnsureCapacity(int min)
 	{
