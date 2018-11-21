@@ -25,7 +25,7 @@ public class hwmQuadtree
 		hwmDebug.Assert(maxDepth > 0, "maxDepth > 0");
 		hwmDebug.Assert(maxElementPerNode > 0, "maxElementPerNode > 0");
 		hwmDebug.Assert(minElementPreParentNode > 0, "minElementPreParentNode > 0");
-		hwmDebug.Assert(m_MaxElementPerNode > minElementPreParentNode, "m_MaxElementPerNode > minElementPreParentNode");
+		hwmDebug.Assert(maxElementPerNode > minElementPreParentNode, "maxElementPerNode > minElementPreParentNode");
 		hwmDebug.Assert(looseScale > 1, "looseScale > 0");
 
 		m_MaxDepth = maxDepth;
@@ -183,6 +183,11 @@ public class hwmQuadtree
 			}
 		}
 
+		public hwmFreeList<Element> GetElements()
+		{
+			return m_Elements;
+		}
+
 		private void SplitChilders()
 		{
 			hwmDebug.Assert(m_IsLeaf, "m_IsLeaf");
@@ -293,6 +298,14 @@ public class hwmQuadtree
 		public void UpdateElement()
 		{
 			Quadtree.UpdateElement(this);
+		}
+
+		public void RemoveElement()
+		{
+			if (_Owner != null)
+			{
+				_Owner.RemoveElement(this);
+			}
 		}
 	}
 }

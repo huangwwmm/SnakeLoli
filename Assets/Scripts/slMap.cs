@@ -7,15 +7,12 @@ public class slMap : MonoBehaviour
 	private BoxCollider2D[] m_Walls;
 	private hwmBounds2D m_MapBounds;
 
-	public void Initialize(Vector2 mapSize, bool enablePresentation)
+	public void Initialize(Vector2 mapSize)
 	{
 		m_MapBounds = new hwmBounds2D(Vector2.zero, mapSize);
 
 		CreateWall();
-		if (enablePresentation)
-		{
-			CreatePresentation();
-		}
+		CreatePresentation();
 	}
 
 	public void Dispose()
@@ -69,6 +66,7 @@ public class slMap : MonoBehaviour
 	private void CreatePresentation()
 	{
 		m_Presentation = (Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game, "MapPresentation")) as GameObject).GetComponent<slMapPresentation>();
+		m_Presentation.transform.SetParent(transform);
 		m_Presentation.Initialize(this);
 	}
 

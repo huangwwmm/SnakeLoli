@@ -7,12 +7,24 @@ using UnityEngine;
 /// </summary>
 public class hwmWorld
 {
-	private hwmLevel m_Level;
-	private GameObject m_GameplayFrameworkObject;
-	private hwmGameState m_GameState;
-	private hwmGameMode m_GameMode;
+	protected static hwmWorld ms_Instance;
 
-	public IEnumerator BeginPlay()
+	protected hwmLevel m_Level;
+	protected GameObject m_GameplayFrameworkObject;
+	protected hwmGameState m_GameState;
+	protected hwmGameMode m_GameMode;
+
+	public static hwmWorld GetInstance()
+	{
+		return ms_Instance;
+	}
+
+	public hwmWorld()
+	{
+		ms_Instance = this;
+	}
+
+	public IEnumerator BeginPlay_Co()
 	{
 		m_Level = hwmSystem.GetInstance().GetWaitingToPlayLevel();
 		hwmDebug.Assert(m_Level != null, "m_Level != null");
@@ -22,11 +34,14 @@ public class hwmWorld
 		m_GameState = Activator.CreateInstance(Type.GetType(m_Level.GameStateClassName)) as hwmGameState;
 		m_GameState.Initialize();
 		m_GameMode = m_GameplayFrameworkObject.AddComponent(Type.GetType(m_Level.GameModeClassName)) as hwmGameMode;
-		yield return m_GameMode.StartCoroutine(m_GameMode.InitGame());
+		yield return m_GameMode.StartCoroutine(HandleBeginPlay_Co());
+		yield return m_GameMode.StartCoroutine(m_GameMode.StartPlay_Co());
 	}
 
-	public IEnumerator EndPlay()
+	public IEnumerator EndPlay_Co()
 	{
+		yield return m_GameMode.StartCoroutine(EndBeginPlay_Co());
+		
 		m_GameState.Dispose();
 		m_GameState = null;
 		UnityEngine.Object.Destroy(m_GameMode);
@@ -44,5 +59,15 @@ public class hwmWorld
 	public hwmLevel GetLevel()
 	{
 		return m_Level;
+	}
+
+	protected virtual IEnumerator HandleBeginPlay_Co()
+	{
+		yield return null;
+	}
+
+	protected virtual IEnumerator EndBeginPlay_Co()
+	{
+		yield return null;
 	}
 }

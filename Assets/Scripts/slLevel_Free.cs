@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 
-public class slLevel_Free : hwmLevel 
+public class slLevel_Free : slLevel 
 {
-	public Vector2 MapSize;
-	public float BotDensity;
-	public float FoodDensity;
+
 }

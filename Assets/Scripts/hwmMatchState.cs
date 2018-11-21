@@ -1,6 +1,5 @@
 ﻿public enum hwmMatchState
 {
-	EnteringMap,
 	WaitingToStart,
 	InProgress,
 	WaitingPostMatch,

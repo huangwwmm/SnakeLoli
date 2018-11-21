@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -15,9 +16,9 @@ public class hwmSystem : MonoBehaviour
 	private hwmLocalization m_Localization;
 	private hwmUISystem m_UISystem;
 	private hwmAssetLoader m_AssetLoader;
-	private hwmWorld m_World;
 	private hwmLevel m_WaitingToPlayLevel;
 	private float m_RealtimeSinceStartup;
+	private object m_Level;
 
 	#region get/set function
 	public static hwmSystem GetInstance()
@@ -55,11 +56,6 @@ public class hwmSystem : MonoBehaviour
 		return m_Localization;
 	}
 
-	public hwmWorld GetWorld()
-	{
-		return m_World;
-	}
-
 	public hwmLevel GetWaitingToPlayLevel()
 	{
 		return m_WaitingToPlayLevel;
@@ -90,9 +86,8 @@ public class hwmSystem : MonoBehaviour
 	{
 		if (ms_Instance == this) // avoid multiple System
 		{
+			DestroyImmediate(m_SceneFSM);
 			m_SceneFSM = null;
-
-			m_World = null;
 
 			m_UISystem.Dispose();
 			m_UISystem = null;
@@ -102,6 +97,7 @@ public class hwmSystem : MonoBehaviour
 
 			m_AssetLoader = null;
 
+			DestroyImmediate(m_Input);
 			m_Input = null;
 
 			m_Config.Dispose();
@@ -162,7 +158,7 @@ public class hwmSystem : MonoBehaviour
 		m_UISystem.Initialize();
 		yield return null;
 
-		m_World = new hwmWorld();
+		Activator.CreateInstance(Type.GetType(SystemInitializer.WorldClassName));
 
 		m_SceneFSM = InstantiatePrefabAndSetParentThisTransform<hwmSceneFSM>(SystemInitializer.SceneFSMPrefab);
 		yield return StartCoroutine(m_SceneFSM.EnterStartupScene());
@@ -183,4 +179,5 @@ public class hwmSystemInitializer
 	public GameObject InputPrefab;
 	public GameObject SceneFSMPrefab;
 	public TextAsset Localization;
+	public string WorldClassName;
 }
