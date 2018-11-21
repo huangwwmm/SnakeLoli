@@ -14,13 +14,9 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 	private const int MAX_ARRAY_LENGTH = 0X7FEFFFFF;
 
 	private static readonly T[] ms_EmptyItems = new T[0];
-	private static readonly bool[] ms_EmptyItemValids = new bool[0];
 
 	private T[] m_Items;
-	private bool[] m_ItemValids;
-	private int m_Size;
-	private int m_ValidItemCount;
-	private Object m_SyncRoot;
+	private object m_SyncRoot;
 	/// <summary>
 	/// avoid add/remove when foreach
 	/// </summary>
@@ -31,31 +27,24 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 		get
 		{
 			// Following trick can reduce the range check by one
-			if ((uint)index >= (uint)m_Size)
+			if ((uint)index >= (uint)Count)
 			{
-				throw new ArgumentOutOfRangeException("index", string.Format("index:{0} m_Size:{1}", index, m_Size));
+				throw new ArgumentOutOfRangeException("index", string.Format("index:{0} m_Size:{1}", index, Count));
 			}
 			return m_Items[index];
 		}
 		set
 		{
-			if ((uint)index >= (uint)m_Size)
+			if ((uint)index >= (uint)Count)
 			{
 				throw new ArgumentOutOfRangeException("index");
 			}
 			m_Items[index] = value;
-			if (!m_ItemValids[index])
-			{
-				m_ItemValids[index] = true;
-				m_ValidItemCount++;
-			}
 			m_Version++;
 		}
 	}
 
-	public int Count { get { return m_Size; } }
-
-	public int ValidItemCount { get { return ValidItemCount; } }
+	public int Count { get; private set; }
 
 	/// <summary>
 	/// Gets and sets the capacity of this list.  The capacity is the size of the internal array used to hold items.  When set, the internal array of the list is reallocated to the given capacity.
@@ -68,7 +57,7 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 		}
 		set
 		{
-			if (value < m_Size)
+			if (value < Count)
 			{
 				throw new ArgumentOutOfRangeException("Capacity");
 			}
@@ -78,28 +67,15 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 				if (value > 0)
 				{
 					T[] newItems = new T[value];
-					bool[] newItemValids = GenerateItemValids(value);
-					if (m_Size > 0)
+					if (Count > 0)
 					{
-						Array.Copy(m_Items, 0, newItems, 0, m_Size);
-						Array.Copy(m_ItemValids, 0, newItemValids, 0, m_Size);
+						Array.Copy(m_Items, 0, newItems, 0, Count);
 					}
 					m_Items = newItems;
-					m_ItemValids = newItemValids;
-					m_ValidItemCount = 0;
-					for (int iItem = 0; iItem < m_ItemValids.Length; iItem++)
-					{
-						if (m_ItemValids[iItem])
-						{
-							m_ValidItemCount++;
-						}
-					}
 				}
 				else
 				{
 					m_Items = ms_EmptyItems;
-					m_ItemValids = ms_EmptyItemValids;
-					m_ValidItemCount = 0;
 				}
 			}
 		}
@@ -145,8 +121,7 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 	public hwmFreeList()
 	{
 		m_Items = ms_EmptyItems;
-		m_ItemValids = ms_EmptyItemValids;
-		m_ValidItemCount = 0;
+		Count = 0;
 	}
 
 	/// <summary>
@@ -159,9 +134,7 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 		m_Items = capacity == 0
 			? ms_EmptyItems
 			: new T[capacity];
-
-		m_ItemValids = GenerateItemValids(capacity);
-		m_ValidItemCount = 0;
+		Count = 0;
 	}
 
 	public int Add(T item)
@@ -171,43 +144,23 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 			throw new ArgumentNullException("item");
 		}
 
-		for (int iItem = 0; iItem < m_ItemValids.Length; iItem++)
+		if (Count == m_Items.Length)
 		{
-			if (!m_ItemValids[iItem])
-			{
-				m_Size = Math.Max(m_Size, iItem + 1);
-				m_Items[iItem] = item;
-				m_ItemValids[iItem] = true;
-				m_ValidItemCount++;
-				m_Version++;
-				return iItem;
-			}
+			EnsureCapacity(Count + 1);
 		}
-
-		if (m_Size == m_Items.Length)
-		{
-			EnsureCapacity(m_Size + 1);
-		}
-		int index = m_Size++;
+		int index = Count++;
 		m_Items[index] = item;
-		m_ItemValids[index] = true;
-		m_ValidItemCount++;
 		m_Version++;
 		return index;
 	}
 
 	public void Clear()
 	{
-		if (m_Size > 0)
+		if (Count > 0)
 		{
 			// Don't need to doc this but we clear the elements so that the gc can reclaim the references.
-			Array.Clear(m_Items, 0, m_Size);
-			for (int iItem = 0; iItem < m_ItemValids.Length; iItem++)
-			{
-				m_ItemValids[iItem] = false;
-			}
-			m_ValidItemCount = 0;
-			m_Size = 0;
+			Array.Clear(m_Items, 0, Count);
+			Count = 0;
 		}
 		m_Version++;
 	}
@@ -220,10 +173,9 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 		}
 
 		EqualityComparer<T> c = EqualityComparer<T>.Default;
-		for (int iItem = 0; iItem < m_Size; iItem++)
+		for (int iItem = 0; iItem < Count; iItem++)
 		{
-			if (m_ItemValids[iItem]
-				&& c.Equals(m_Items[iItem], item))
+			if (c.Equals(m_Items[iItem], item))
 			{
 				return true;
 			}
@@ -234,14 +186,13 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 	public void CopyTo(T[] array, int arrayIndex)
 	{
 		// Delegate rest of error checking to Array.Copy.
-		Array.Copy(m_Items, 0, array, arrayIndex, m_Size);
+		Array.Copy(m_Items, 0, array, arrayIndex, Count);
 	}
 
 	public bool Remove(T item)
 	{
 		int index = IndexOf(item);
-		if (index >= 0
-			&& m_ItemValids[index])
+		if (index >= 0)
 		{
 			RemoveAt(index);
 			return true;
@@ -252,18 +203,15 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 
 	public void RemoveAt(int index)
 	{
-		if ((uint)index >= (uint)m_Size)
+		if ((uint)index >= (uint)Count)
 		{
 			throw new ArgumentOutOfRangeException("Capacity");
 		}
 
-		if (m_ItemValids[index])
-		{
-			m_Items[index] = default(T);
-			m_ItemValids[index] = false;
-			m_ValidItemCount--;
-			m_Version++;
-		}
+		int lastIndex = --Count;
+		m_Items[index] = m_Items[lastIndex];
+		m_Items[lastIndex] = default(T);
+		m_Version++;
 	}
 
 	public int IndexOf(T item)
@@ -273,32 +221,25 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 			throw new ArgumentNullException("item");
 		}
 
-		return Array.IndexOf(m_Items, item, 0, m_Size);
+		return Array.IndexOf(m_Items, item, 0, Count);
 	}
 
 	public void Shrink(int reserve = 0)
 	{
-		T[] newItems = new T[m_ValidItemCount + reserve];
-		bool[] newItemVailds = GenerateItemValids(m_ValidItemCount + reserve);
+		T[] newItems = new T[Count + reserve];
 
 		int index = 0;
 		for (int iItem = 0; iItem < m_Items.Length; iItem++)
 		{
-			if (m_ItemValids[iItem])
+			if (index >= Count)
 			{
-				if (index >= m_ValidItemCount)
-				{
-					throw new ArgumentOutOfRangeException("m_ValidItemCount");
-				}
-				newItems[index] = m_Items[iItem];
-				newItemVailds[index] = true;
-				index++;
+				throw new ArgumentOutOfRangeException("m_ValidItemCount");
 			}
+			newItems[index] = m_Items[iItem];
+			index++;
 		}
 
-		m_Size = m_ValidItemCount;
 		m_Items = newItems;
-		m_ItemValids = newItemVailds;
 		m_Version++;
 	}
 
@@ -317,21 +258,8 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 
 	public T[] ToArray()
 	{
-		T[] array = new T[m_ValidItemCount];
-
-		int index = 0;
-		for (int iItem = 0; iItem < m_Items.Length; iItem++)
-		{
-			if (m_ItemValids[iItem])
-			{
-				if (index >= m_ValidItemCount)
-				{
-					throw new ArgumentOutOfRangeException("m_ValidItemCount");
-				}
-				array[index] = m_Items[iItem];
-				index++;
-			}
-		}
+		T[] array = new T[Count];
+		Array.Copy(m_Items, 0, array, 0, Count);
 		return array;
 	}
 
@@ -357,29 +285,6 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 		}
 	}
 
-	private bool[] GenerateItemValids(int capacity)
-	{
-		if (capacity < 0)
-		{
-			throw new ArgumentOutOfRangeException("capacity");
-		}
-
-		if (capacity == 0)
-		{
-			return ms_EmptyItemValids;
-		}
-		else
-		{
-			bool[] itemValids = new bool[capacity];
-
-			for (int iItem = 0; iItem < capacity; iItem++)
-			{
-				itemValids[iItem] = false;
-			}
-			return itemValids;
-		}
-	}
-
 	int IList.Add(object item)
 	{
 		return Add((T)item);
@@ -400,9 +305,9 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 		return GetEnumerator();
 	}
 
-	void ICollection.CopyTo(Array array, int index)
+	void ICollection.CopyTo(Array array, int arrayIndex)
 	{
-		throw new NotImplementedException();
+		Array.Copy(m_Items, 0, array, arrayIndex, Count);
 	}
 
 	bool IList.Contains(object item)
@@ -430,19 +335,18 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 	{
 		private hwmFreeList<T> m_List;
 		private int m_Index;
-		private int m_Version;
-		private T m_Current;
+		private readonly int m_Version;
 
-		public T Current { get { return m_Current; } }
+		public T Current { get; private set; }
 
-		object IEnumerator.Current { get { return m_Current; } }
+		object IEnumerator.Current { get { return Current; } }
 
 		internal Enumerator(hwmFreeList<T> list)
 		{
 			m_List = list;
 			m_Index = 0;
 			m_Version = list.m_Version;
-			m_Current = default(T);
+			Current = default(T);
 		}
 
 		public bool MoveNext()
@@ -456,36 +360,23 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 				// Q: why use localList?
 				hwmFreeList<T> localList = m_List;
 
-				while ((uint)m_Index < (uint)localList.m_Size)
+				while ((uint)m_Index < (uint)localList.Count)
 				{
-					if (localList.m_ItemValids[m_Index])
-					{
-						m_Current = localList.m_Items[m_Index];
-						m_Index++;
-						return true;
-					}
-					else
-					{
-						m_Current = default(T);
-						m_Index++;
-					}
+					Current = localList.m_Items[m_Index];
+					m_Index++;
+					return true;
 				}
 
-				return MoveNextRare();
+				m_Index = m_List.Count + 1;
+				Current = default(T);
+				return false;
 			}
 		}
 
 		public void Dispose()
 		{
 			m_List = null;
-			m_Current = default(T);
-		}
-
-		private bool MoveNextRare()
-		{
-			m_Index = m_List.m_Size + 1;
-			m_Current = default(T);
-			return false;
+			Current = default(T);
 		}
 
 		void IEnumerator.Reset()
@@ -496,7 +387,7 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 			}
 
 			m_Index = 0;
-			m_Current = default(T);
+			Current = default(T);
 		}
 	}
 }

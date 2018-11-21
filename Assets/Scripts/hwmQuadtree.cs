@@ -45,6 +45,8 @@ public class hwmQuadtree
 
 	public void UpdateElement(Element element)
 	{
+		hwmDebug.Assert(element.Quadtree == this, "element.Quadtree == this");
+
 		if (element._Owner != null)
 		{
 			Node elementOwner = element._Owner;
@@ -150,7 +152,7 @@ public class hwmQuadtree
 
 			if (m_IsLeaf
 				&& m_Depth < m_Owner.m_MaxDepth
-				&& m_Elements.ValidItemCount > m_Owner.m_MaxElementPerNode)
+				&& m_Elements.Count > m_Owner.m_MaxElementPerNode)
 			{
 				SplitChilders();
 			}
@@ -170,11 +172,11 @@ public class hwmQuadtree
 					&& parentChilders[1].m_IsLeaf
 					&& parentChilders[2].m_IsLeaf
 					&& parentChilders[3].m_IsLeaf
-					&& (parentChilders[0].m_Elements.ValidItemCount
-						+ parentChilders[1].m_Elements.ValidItemCount
-						+ parentChilders[2].m_Elements.ValidItemCount
-						+ parentChilders[3].m_Elements.ValidItemCount
-						+ m_Parent.m_Elements.ValidItemCount) < m_Owner.m_MinElementPreParentNode)
+					&& (parentChilders[0].m_Elements.Count
+						+ parentChilders[1].m_Elements.Count
+						+ parentChilders[2].m_Elements.Count
+						+ parentChilders[3].m_Elements.Count
+						+ m_Parent.m_Elements.Count) < m_Owner.m_MinElementPreParentNode)
 				{
 					m_Parent.MergeChilders();
 				}
