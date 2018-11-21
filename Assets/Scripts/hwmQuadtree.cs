@@ -25,7 +25,7 @@ public class hwmQuadtree
 		hwmDebug.Assert(maxDepth > 0, "maxDepth > 0");
 		hwmDebug.Assert(maxElementPerNode > 0, "maxElementPerNode > 0");
 		hwmDebug.Assert(minElementPreParentNode > 0, "minElementPreParentNode > 0");
-		hwmDebug.Assert(m_MaxElementPerNode > minElementPreParentNode, "m_MaxElementPerNode > minElementPreParentNode");
+		hwmDebug.Assert(maxElementPerNode > minElementPreParentNode, "maxElementPerNode > minElementPreParentNode");
 		hwmDebug.Assert(looseScale > 1, "looseScale > 0");
 
 		m_MaxDepth = maxDepth;
@@ -183,6 +183,11 @@ public class hwmQuadtree
 			}
 		}
 
+		public hwmFreeList<Element> GetElements()
+		{
+			return m_Elements;
+		}
+
 		private void SplitChilders()
 		{
 			hwmDebug.Assert(m_IsLeaf, "m_IsLeaf");
@@ -198,6 +203,7 @@ public class hwmQuadtree
 
 			Element[] elements = m_Elements.ToArray();
 			m_Elements.Clear();
+			m_Elements.Capacity = 4;
 
 			for (int iElement = 0; iElement < elements.Length; iElement++)
 			{
@@ -230,25 +236,26 @@ public class hwmQuadtree
 
 		private hwmBounds2D CalculateChilderBounds(ChilderIndex index)
 		{
-			Vector2 extents = m_Bounds.extents * 0.5f;
+			Vector2 size = m_Bounds.extents;
+			Vector2 extents = size * 0.5f;
 			switch (index)
 			{
 				case ChilderIndex.LeftUp:
 					return new hwmBounds2D(new Vector2(m_Bounds.center.x - extents.x
 							, m_Bounds.center.y + extents.y)
-						, extents);
+						, size);
 				case ChilderIndex.RightUp:
 					return new hwmBounds2D(new Vector2(m_Bounds.center.x + extents.x
 							, m_Bounds.center.y + extents.y)
-						, extents);
+						, size);
 				case ChilderIndex.LeftDown:
 					return new hwmBounds2D(new Vector2(m_Bounds.center.x - extents.x
 							, m_Bounds.center.y - extents.y)
-						, extents);
+						, size);
 				case ChilderIndex.RightDown:
 					return new hwmBounds2D(new Vector2(m_Bounds.center.x + extents.x
 							, m_Bounds.center.y - extents.y)
-						, extents);
+						, size);
 				default:
 					hwmDebug.Assert(false, "invalid ChilderIndex: " + index);
 					return new hwmBounds2D();
@@ -293,6 +300,14 @@ public class hwmQuadtree
 		public void UpdateElement()
 		{
 			Quadtree.UpdateElement(this);
+		}
+
+		public void RemoveElement()
+		{
+			if (_Owner != null)
+			{
+				_Owner.RemoveElement(this);
+			}
 		}
 	}
 }

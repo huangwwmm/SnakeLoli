@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,11 +14,10 @@ public class hwmSystem : MonoBehaviour
 	private hwmInput m_Input;
 	private hwmSceneFSM m_SceneFSM;
 	private hwmLocalization m_Localization;
-	private hwmUISystem m_UISystem;
 	private hwmAssetLoader m_AssetLoader;
-	private hwmWorld m_World;
 	private hwmLevel m_WaitingToPlayLevel;
 	private float m_RealtimeSinceStartup;
+	private object m_Level;
 
 	#region get/set function
 	public static hwmSystem GetInstance()
@@ -40,11 +40,6 @@ public class hwmSystem : MonoBehaviour
 		return m_RealtimeSinceStartup;
 	}
 
-	public hwmUISystem GetUISystem()
-	{
-		return m_UISystem;
-	}
-
 	public hwmAssetLoader GetAssetLoader()
 	{
 		return m_AssetLoader;
@@ -53,11 +48,6 @@ public class hwmSystem : MonoBehaviour
 	public hwmLocalization GetLocalization()
 	{
 		return m_Localization;
-	}
-
-	public hwmWorld GetWorld()
-	{
-		return m_World;
 	}
 
 	public hwmLevel GetWaitingToPlayLevel()
@@ -90,18 +80,15 @@ public class hwmSystem : MonoBehaviour
 	{
 		if (ms_Instance == this) // avoid multiple System
 		{
+			DestroyImmediate(m_SceneFSM);
 			m_SceneFSM = null;
-
-			m_World = null;
-
-			m_UISystem.Dispose();
-			m_UISystem = null;
 
 			m_Localization.Dispose();
 			m_Localization = null;
 
 			m_AssetLoader = null;
 
+			DestroyImmediate(m_Input);
 			m_Input = null;
 
 			m_Config.Dispose();
@@ -158,11 +145,7 @@ public class hwmSystem : MonoBehaviour
 		m_Localization.Initialize(SystemInitializer.Localization);
 		yield return null;
 
-		m_UISystem = new hwmUISystem();
-		m_UISystem.Initialize();
-		yield return null;
-
-		m_World = new hwmWorld();
+		Activator.CreateInstance(Type.GetType(SystemInitializer.WorldClassName));
 
 		m_SceneFSM = InstantiatePrefabAndSetParentThisTransform<hwmSceneFSM>(SystemInitializer.SceneFSMPrefab);
 		yield return StartCoroutine(m_SceneFSM.EnterStartupScene());
@@ -183,4 +166,5 @@ public class hwmSystemInitializer
 	public GameObject InputPrefab;
 	public GameObject SceneFSMPrefab;
 	public TextAsset Localization;
+	public string WorldClassName;
 }

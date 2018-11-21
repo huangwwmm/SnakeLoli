@@ -15,7 +15,7 @@ public class slSceneFSMState_Game : slSceneFSMState
 			yield return StartCoroutine(LoadScene_Co(slConstants.SCENE_NAME_GAME));
 		}
 
-		yield return StartCoroutine(hwmSystem.GetInstance().GetWorld().BeginPlay());
+		yield return StartCoroutine(hwmWorld.GetInstance().BeginPlay_Co());
 		// UNDONE move to player.cs
 		//hwmSystem.GetInstance().GetUISystem().InstantiateUIRoot<hwmGameUIRoot>("Game");
 	}
@@ -23,6 +23,6 @@ public class slSceneFSMState_Game : slSceneFSMState
 	public override IEnumerator Deactivate_Co()
 	{
 		//hwmSystem.GetInstance().GetUISystem().DestroyUIRoot("Game");
-		yield return StartCoroutine(hwmSystem.GetInstance().GetWorld().EndPlay());
+		yield return StartCoroutine(hwmWorld.GetInstance().EndPlay_Co());
 	}
 }

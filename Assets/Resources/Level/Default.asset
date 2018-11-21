@@ -13,6 +13,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   GameStateClassName: slGameState_Free
   GameModeClassName: slGameMode_Free
-  MapSize: {x: 800, y: 600}
-  BotDensity: 200
-  FoodDensity: 20
+  MapSize: {x: 160, y: 120}
+  BotDensity: 16000
+  FoodDensity: 100

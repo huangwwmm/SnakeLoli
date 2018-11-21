@@ -3,43 +3,25 @@ using UnityEngine;
 
 public class hwmGameMode : MonoBehaviour
 {
-	protected hwmLevel m_Level;
-	protected hwmGameState m_GameState;
-
-	public IEnumerator InitGame()
+	public IEnumerator StartPlay_Co()
 	{
-		m_Level = hwmSystem.GetInstance().GetWorld().GetLevel();
-		m_GameState = hwmSystem.GetInstance().GetWorld().GetGameState();
-
-		m_GameState.ChangeMatchState(hwmMatchState.EnteringMap);
-		yield return StartCoroutine(HandleInitGame());
-		yield return StartCoroutine(StartPlay());
+		yield return StartCoroutine(HandleStartPlay_Co());
+		hwmWorld.GetInstance().GetGameState().ChangeMatchState(hwmMatchState.WaitingToStart);
+		yield return StartCoroutine(StartMatch_Co());
 	}
 
-	public IEnumerator StartPlay()
+	public IEnumerator StartMatch_Co()
 	{
-		yield return StartCoroutine(HandleStartPlay());
-		m_GameState.ChangeMatchState(hwmMatchState.WaitingToStart);
-		yield return StartCoroutine(StartMatch());
+		yield return StartCoroutine(HandleStartMatch_Co());
+		hwmWorld.GetInstance().GetGameState().ChangeMatchState(hwmMatchState.InProgress);
 	}
 
-	public IEnumerator StartMatch()
-	{
-		yield return StartCoroutine(HandleStartMatch());
-		m_GameState.ChangeMatchState(hwmMatchState.InProgress);
-	}
-
-	protected virtual IEnumerator HandleInitGame()
+	protected virtual IEnumerator HandleStartPlay_Co()
 	{
 		yield return null;
 	}
 
-	protected virtual IEnumerator HandleStartPlay()
-	{
-		yield return null;
-	}
-
-	protected virtual IEnumerator HandleStartMatch()
+	protected virtual IEnumerator HandleStartMatch_Co()
 	{
 		yield return null;
 	}

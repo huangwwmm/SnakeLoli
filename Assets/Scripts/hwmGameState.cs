@@ -23,9 +23,6 @@ public class hwmGameState
 
 		switch(matchState)
 		{
-			case hwmMatchState.EnteringMap:
-				HandleEnteringMap();
-				break;
 			case hwmMatchState.WaitingToStart:
 				HandleWaitingToStart();
 				break;
@@ -66,10 +63,6 @@ public class hwmGameState
 	}
 
 	protected virtual void HandleWaitingToStart()
-	{
-	}
-
-	protected virtual void HandleEnteringMap()
 	{
 	}
 }
