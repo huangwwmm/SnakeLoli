@@ -46,8 +46,7 @@ public class hwmAssetRelationsInProjectWindow : EditorWindow
 	[MenuItem("Custom/Utility/Asset Relations In Project")]
 	public static void ShowWindow()
 	{
-		hwmAssetRelationsInProjectWindow window = GetWindow(typeof(hwmAssetRelationsInProjectWindow)) as hwmAssetRelationsInProjectWindow;
-		window.titleContent = new GUIContent("Relations");
+		GetWindow<hwmCreateAssetWindow>("Asset Relations", true);
 	}
 
 	protected void OnEnable()
@@ -80,7 +79,7 @@ public class hwmAssetRelationsInProjectWindow : EditorWindow
 		{
 			if (EditorUtility.DisplayDialog("提示", "确定要执行这个操作？这个操作可能需要数分钟", "确认", "取消"))
 			{
-				EditorCoroutine.Start(LoadAllRelationsAndSaveRecordFile());
+				hwmEditorCoroutine.Start(LoadAllRelationsAndSaveRecordFile());
 			}
 		}
 		EditorGUILayout.EndHorizontal();
@@ -299,43 +298,6 @@ public class hwmAssetRelationsInProjectWindow : EditorWindow
 			/// </summary>
 			[NonSerialized]
 			public HashSet<string> ReferencesCache = new HashSet<string>();
-		}
-	}
-
-	/// <summary>
-	/// 通用方法写在这里是为了方便工具从项目中分离
-	/// </summary>
-	public class EditorCoroutine
-	{
-		private readonly IEnumerator m_Routine;
-		EditorCoroutine(IEnumerator routine)
-		{
-			m_Routine = routine;
-		}
-
-		public static EditorCoroutine Start(IEnumerator routine)
-		{
-			EditorCoroutine coroutine = new EditorCoroutine(routine);
-			coroutine.Start();
-			return coroutine;
-		}
-
-		private void Start()
-		{
-			EditorApplication.update += Update;
-		}
-
-		public void Stop()
-		{
-			EditorApplication.update -= Update;
-		}
-
-		private void Update()
-		{
-			if (!m_Routine.MoveNext())
-			{
-				Stop();
-			}
 		}
 	}
 

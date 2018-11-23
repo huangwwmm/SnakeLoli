@@ -23,7 +23,7 @@ public class hwmCreateAssetWindow : EditorWindow
 	[MenuItem("Custom/Utility/Create Asset", false, 0)]
 	public static void ShowWindow()
 	{
-		GetWindow(typeof(hwmCreateAssetWindow)).titleContent = new GUIContent("Create Asset");
+		GetWindow<hwmCreateAssetWindow>("Create Asset", true);
 	}
 
 	protected void OnEnable()

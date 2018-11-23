@@ -17,6 +17,12 @@ public class slConstants
 	public static readonly Vector3 FOOD_DEACTIVE_POSITION = new Vector3(10000, 10000, 0);
 	public static readonly Vector2 FOOD_MAP_EDGE = new Vector2(2, 2);
 
+	public const int SNAKE_SPRITERENDERER_MAX_ORDERINLAYER = 32767;
+
+	public static readonly int SORTINGLAYER_MAP = SortingLayer.NameToID("Map");
+	public static readonly int SORTINGLAYER_FOOD = SortingLayer.NameToID("Food");
+	public static readonly int SORTINGLAYER_SNAKE = SortingLayer.NameToID("Snake");
+
 	public enum Layer
 	{
 		Wall = 8,

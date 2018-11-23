@@ -15,8 +15,8 @@ TagManager:
   - 
   - Wall
   - Food
-  - 
-  - 
+  - SnakeHead
+  - Snake
   - 
   - 
   - 
@@ -46,4 +46,7 @@ TagManager:
     locked: 0
   - name: Food
     uniqueID: 829751265
+    locked: 0
+  - name: Snake
+    uniqueID: 2034376655
     locked: 0
