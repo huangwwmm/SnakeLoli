@@ -3,6 +3,5 @@
 	WaitingToStart,
 	InProgress,
 	WaitingPostMatch,
-	LeavingMap,
 	Aborted,
 }

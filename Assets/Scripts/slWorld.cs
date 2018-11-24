@@ -42,6 +42,9 @@ public class slWorld : hwmWorld
 
 	protected override IEnumerator HandleBeginPlay_Co()
 	{
+		hwmSystem.GetInstance().GetInput().JoystickCursor.SetAvailable(false);
+		hwmSystem.GetInstance().GetInput().SetAllAxisEnable(true);
+
 		m_PlayerController = (Object.Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game, "PlayerController")) as GameObject)
 			.GetComponent<slPlayerController>();
 		m_PlayerController.Initialize();
@@ -64,5 +67,8 @@ public class slWorld : hwmWorld
 
 		m_Level = null;
 		m_PlayerController.Dispose();
+
+		hwmSystem.GetInstance().GetInput().SetAllAxisEnable(false);
+		hwmSystem.GetInstance().GetInput().JoystickCursor.SetAvailable(true);
 	}
 }

@@ -240,6 +240,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   EventSystem: {fileID: 114155711355192370}
   JoystickCursor: {fileID: 114143343869155770}
+  Axiss:
+  - Index: 0
+    MinValueKeyCode: 97
+    MaxValueKeyCode: 100
+    AxesName: GP_LAxis_X
+  - Index: 1
+    MinValueKeyCode: 119
+    MaxValueKeyCode: 115
+    AxesName: GP_LAxis_Y
 --- !u!114 &114143343869155770
 MonoBehaviour:
   m_ObjectHideFlags: 1

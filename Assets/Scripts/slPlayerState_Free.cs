@@ -2,4 +2,5 @@
 {
 	public slSnake ControllerSnake;
 	public string SnakeName;
+	public float LastDeadTime;
 }

@@ -33,6 +33,22 @@ public class hwmJoystickCursor : MonoBehaviour
 	/// </summary>
 	private Vector2 m_CursorPosition_ScreenSpace;
 	private PressState m_PressState = PressState.Notset;
+	private bool m_Available = true;
+
+	public void SetAvailable(bool available)
+	{
+		if (m_Available != available)
+		{
+			m_Available = available;
+
+			if (!m_Available)
+			{
+				SetDisplay(false);
+				m_LastHasInputTime = 0;
+				m_PressState = PressState.Notset;
+			}
+		}
+	}
 
 	public bool IsDisplay()
 	{
@@ -61,6 +77,11 @@ public class hwmJoystickCursor : MonoBehaviour
 
 	protected void Update()
 	{
+		if (!m_Available)
+		{
+			return;
+		}
+
 		Vector2 axis = new Vector2(Input.GetAxis(XInputAxesName) * CursorMoveSpeed
 			, Input.GetAxis(YInputAxesName) * CursorMoveSpeed);
 		bool isPointerOverGameObject = hwmSystem.GetInstance().GetInput().EventSystem.IsPointerOverGameObject();

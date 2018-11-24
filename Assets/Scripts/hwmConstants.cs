@@ -13,6 +13,23 @@
 
 	public const string PREFSKEY_LANGUAGE = "Language";
 
+	/// <summary>
+	/// first enum value must equal 0 and auto increment for preformance
+	/// </summary>
+	public enum ButtonIndex
+	{
+
+	}
+
+	/// <summary>
+	/// first enum value must equal 0 and auto increment for preformance
+	/// </summary>
+	public enum AxisIndex
+	{
+		MoveX = 0,
+		MoveY,
+	}
+
 	public enum NetRole
 	{
 		/// <summary>

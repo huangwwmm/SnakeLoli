@@ -32,13 +32,15 @@ public class hwmGameState
 			case hwmMatchState.WaitingPostMatch:
 				HandleWaitingPostMatch();
 				break;
-			case hwmMatchState.LeavingMap:
-				HandleLeavingMap();
-				break;
 			case hwmMatchState.Aborted:
 				HandleAborted();
 				break;
 		}
+	}
+
+	public List<hwmPlayerState> GetPlayerStates()
+	{
+		return m_PlayerStates;
 	}
 
 	public hwmMatchState GetMatchState()
@@ -64,10 +66,6 @@ public class hwmGameState
 	}
 
 	protected virtual void HandleAborted()
-	{
-	}
-
-	protected virtual void HandleLeavingMap()
 	{
 	}
 

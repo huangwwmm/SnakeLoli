@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class slSnake : hwmActor
@@ -18,6 +19,7 @@ public class slSnake : hwmActor
 
 	private float m_CumulativeMoveDistance;
 	private float m_CumulativeMoveTime;
+
 
 	public Vector3 GetHeadPosition()
 	{
@@ -59,7 +61,7 @@ public class slSnake : hwmActor
 		Vector3 bodyToBodyOffset = initializeData.HeadRotation * new Vector3(0, -MyProperties.NodeToNodeDistance, 0);
 		for (int iNode = 3; iNode <= initializeData.NodeCount; iNode++) // MagicNumber: 1->Head 2->Clothes 3->FirstBody
 		{
-			BodyNode node = CreateNode< BodyNode>("Body"
+			BodyNode node = CreateNode<BodyNode>("Body"
 				, m_Presentation != null ? m_Presentation.MyProperties.Body : null
 				, MyProperties.BodyColliderRadius
 				, m_Clothes.Node.transform.position + bodyToClothesOffset + bodyToBodyOffset * (iNode - 3)
@@ -69,20 +71,17 @@ public class slSnake : hwmActor
 			m_Bodys.PushBack(node);
 		}
 
-		if (IsConrtollerByThieDevice())
+		slBaseController controller;
+		if (initializeData.IsBot)
 		{
-			slBaseController controller;
-			if (initializeData.IsBot)
-			{
-				controller = gameObject.AddComponent<slAIController>();
-				controller.Initialize();
-			}
-			else
-			{
-				controller = slWorld.GetInstance().GetPlayerController();
-			}
-			controller.SetControllerSnake(this);
+			controller = gameObject.AddComponent<slAIController>();
+			controller.Initialize();
 		}
+		else
+		{
+			controller = slWorld.GetInstance().GetPlayerController();
+		}
+		controller.SetControllerSnake(this);
 
 		MoveDirection = (initializeData.HeadRotation * Vector2.up).normalized;
 		m_CurrentMoveDirection = MoveDirection;
@@ -91,6 +90,8 @@ public class slSnake : hwmActor
 
 	protected override void HandleDispose()
 	{
+		m_Head.Trigger.OnTriggerEnter -= OnTrigger;
+
 		Destroy(m_TweakableProperties);
 		m_TweakableProperties = null;
 
@@ -165,6 +166,16 @@ public class slSnake : hwmActor
 
 		node.Collider = node.Node.AddComponent<CircleCollider2D>();
 		node.Collider.radius = colliderRadius;
+		node.Collider.isTrigger = isHead;
+
+		if (isHead)
+		{
+			HeadNode headNode = node as HeadNode;
+			headNode.Trigger = headNode.Node.AddComponent<slSnakeHeadTrigger>();
+			headNode.Rigidbody = headNode.Node.AddComponent<Rigidbody2D>();
+			headNode.Rigidbody.isKinematic = true;
+			headNode.Trigger.OnTriggerEnter += OnTrigger;
+		}
 
 		if (presentation != null)
 		{
@@ -180,10 +191,23 @@ public class slSnake : hwmActor
 		return node;
 	}
 
+	private void OnTrigger(Collider2D collider)
+	{
+		switch (collider.gameObject.layer)
+		{
+			// dead
+			case (int)slConstants.Layer.Wall:
+			case (int)slConstants.Layer.Snake:
+			case (int)slConstants.Layer.SnakeHead:
+				hwmWorld.GetInstance().DestroyActor(this);
+				break;
+		}
+	}
+
 	private void ResetOrderInLayer()
 	{
 		int currentOrder = slConstants.SNAKE_SPRITERENDERER_MIN_ORDERINLAYER + m_Bodys.Count;
-		foreach(BodyNode body in m_Bodys)
+		foreach (BodyNode body in m_Bodys)
 		{
 			body.Sprite.sortingOrder = currentOrder--;
 		}
@@ -204,7 +228,7 @@ public class slSnake : hwmActor
 	[System.Serializable]
 	public class InitializeAdditionalData
 	{
-		public int NodeCount = 5;
+		public int NodeCount;
 		public bool IsBot;
 		public Vector3 HeadPosition = Vector3.zero;
 		public Quaternion HeadRotation = Quaternion.identity;
@@ -214,6 +238,8 @@ public class slSnake : hwmActor
 	public class HeadNode : BodyNode
 	{
 		public new SpriteRenderer[] Sprite;
+		public slSnakeHeadTrigger Trigger;
+		public Rigidbody2D Rigidbody;
 	}
 
 	public class ClothesNode : BodyNode

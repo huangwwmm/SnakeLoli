@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class slGameMode_Free : hwmGameMode
@@ -8,6 +10,7 @@ public class slGameMode_Free : hwmGameMode
 
 	protected override IEnumerator HandleStartPlay_Co()
 	{
+		hwmObserver.OnActorDestroy += HandleActorDestroy;
 		yield return StartCoroutine(slWorld.GetInstance().GetFoodSystem().EnterMap_Co());
 
 		m_SnakeSpawnMinPosition = slWorld.GetInstance().GetMap().GetMapBounds().min + slConstants.SNAKE_SPAWN_SAFEAREA_MAP_EDGE;
@@ -27,8 +30,6 @@ public class slGameMode_Free : hwmGameMode
 
 			// for aviod snakes together update move
 			yield return null;
-			yield return null;
-			yield return null;
 		}
 
 		slPlayerState_Free playerState = new slPlayerState_Free();
@@ -38,6 +39,42 @@ public class slGameMode_Free : hwmGameMode
 		playerState.SnakeName = "Snake_10000";
 		slWorld.GetInstance().GetGameState().AddPlayerState(playerState);
 		SpawnPlayer(playerState);
+	}
+
+	private void HandleActorDestroy(hwmActor actor)
+	{
+		if (actor is slSnake)
+		{
+			slPlayerState_Free playerState = slWorld.GetInstance().GetGameState().FindPlayerStateByPlayerID(actor.GetGuid()) as slPlayerState_Free;
+			playerState.LastDeadTime = Time.time;
+		}
+	}
+
+	protected override IEnumerator HandleEndPlay_Co()
+	{
+		yield return null;
+		hwmObserver.OnActorDestroy -= HandleActorDestroy;
+	}
+
+	protected void Update()
+	{
+		if (slWorld.GetInstance().GetGameState().GetMatchState() == hwmMatchState.InProgress)
+		{
+			if ((Time.frameCount + 7) % 10 == 0)
+			{
+				List<hwmPlayerState> playerStates = slWorld.GetInstance().GetGameState().GetPlayerStates();
+				for (int iPlayerState = 0; iPlayerState < playerStates.Count; iPlayerState++)
+				{
+					slPlayerState_Free iterPlayerState = playerStates[iPlayerState] as slPlayerState_Free;
+
+					if (iterPlayerState.ControllerSnake == null
+						&& Time.time - iterPlayerState.LastDeadTime > slWorld.GetInstance().GetLevel().RespawnTime)
+					{
+						SpawnPlayer(iterPlayerState);
+					}
+				}
+			}
+		}
 	}
 
 	private void SpawnPlayer(slPlayerState_Free playerState)
@@ -55,8 +92,9 @@ public class slGameMode_Free : hwmGameMode
 		initializeAdditionalData.HeadRotation = spawnRotation;
 		initializeAdditionalData.IsBot = playerState.IsBot;
 		initializeAdditionalData.TweakableProperties = slConstants.DEFAULT_SNAKE_TWEAKABLE_PROPERTIES;
-		initializeAdditionalData.NodeCount = 50;
+		initializeAdditionalData.NodeCount = 5;
 		playerState.ControllerSnake = slWorld.GetInstance().CreateActor("Snake_" + playerState.PlayerID.ToString()
+			, playerState.PlayerID
 			, playerState.SnakeName
 			, Vector3.zero
 			, Quaternion.identity
