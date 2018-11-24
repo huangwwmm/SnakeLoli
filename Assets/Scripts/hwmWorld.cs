@@ -40,7 +40,7 @@ public class hwmWorld
 
 	public IEnumerator EndPlay_Co()
 	{
-		yield return m_GameMode.StartCoroutine(EndBeginPlay_Co());
+		yield return m_GameMode.StartCoroutine(HandleEndPlay_Co());
 
 		m_GameState.Dispose();
 		m_GameState = null;
@@ -82,7 +82,7 @@ public class hwmWorld
 		yield return null;
 	}
 
-	protected virtual IEnumerator EndBeginPlay_Co()
+	protected virtual IEnumerator HandleEndPlay_Co()
 	{
 		yield return null;
 	}

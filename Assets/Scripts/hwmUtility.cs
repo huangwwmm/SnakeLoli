@@ -18,4 +18,24 @@ public static class hwmUtility
 			return child.GetComponent<T>();
 		}
 	}
+
+	public static Vector2 CircleLerp(Vector2 from, Vector2 to, float angle)
+	{
+		if (from == to)
+		{
+			return to;
+		}
+		else if (angle < 0)
+		{
+			return from;
+		}
+
+		float angleOffset = Vector2.SignedAngle(to,from);
+		return Quaternion.Euler(0
+				, 0
+				, angleOffset > 0 
+					? -Mathf.Min(angleOffset, angle)
+					: Mathf.Min(-angleOffset, angle)
+			) * from;
+	}
 }

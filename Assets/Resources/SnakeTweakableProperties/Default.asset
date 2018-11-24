@@ -8,11 +8,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 97aa255f4ad7b7a49be8752c90ebcbf5, type: 3}
+  m_Script: {fileID: 11500000, guid: 7646d9267c45b0348801684c03276c36, type: 3}
   m_Name: Default
   m_EditorClassIdentifier: 
-  GameStateClassName: slGameState_Free
-  GameModeClassName: slGameMode_Free
-  MapSize: {x: 160, y: 120}
-  BotDensity: 3600
-  FoodDensity: 100
+  NormalSpeed: 12
+  MaxTurnAngularSpeed: 180

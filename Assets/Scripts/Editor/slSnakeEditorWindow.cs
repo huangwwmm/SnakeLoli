@@ -110,13 +110,17 @@ public class slSnakeEditorWindow : EditorWindow
 			}
 			if (m_SnakeEditor.Body1 != null)
 			{
-				m_SnakeEditor.Body1.transform.position = new Vector3(0, Mathf.Min(m_SnakeEditor.Body1.transform.position.y, m_SnakeEditor.Clothes.transform.position.y), 0);
+				m_SnakeEditor.Body1.transform.position = new Vector3(0
+					, m_SnakeEditor.Clothes.transform.position.y * 2.0f - m_SnakeEditor.Head.transform.position.y
+					, 0);
 				m_SnakeEditor.Body1.transform.rotation = Quaternion.identity;
 				ForeachSetSpriteRendererOrderInLayer(m_SnakeEditor.Body1, ref currentOrderInLayer);
 			}
 			if (m_SnakeEditor.Body2 != null)
 			{
-				m_SnakeEditor.Body2.transform.position = new Vector3(0, Mathf.Min(m_SnakeEditor.Body1.transform.position.y, m_SnakeEditor.Body2.transform.position.y), 0);
+				m_SnakeEditor.Body2.transform.position = new Vector3(0
+					, m_SnakeEditor.Body1.transform.position.y * 2.0f - m_SnakeEditor.Clothes.transform.position.y
+					, 0);
 				m_SnakeEditor.Body2.transform.rotation = Quaternion.identity;
 				ForeachSetSpriteRendererOrderInLayer(m_SnakeEditor.Body2, ref currentOrderInLayer);
 			}
@@ -156,9 +160,7 @@ public class slSnakeEditorWindow : EditorWindow
 		snake.MyProperties.HeadColliderRadius = m_SnakeEditor.Head.GetComponent<CircleCollider2D>().radius;
 		snake.MyProperties.ClothesColliderRadius = m_SnakeEditor.Clothes.GetComponent<CircleCollider2D>().radius;
 		snake.MyProperties.BodyColliderRadius = m_SnakeEditor.Body1.GetComponent<CircleCollider2D>().radius;
-		snake.MyProperties.ClothesToHeadDistance = m_SnakeEditor.Head.transform.position.y - m_SnakeEditor.Clothes.transform.position.y;
-		snake.MyProperties.BodyToClothesDistance = m_SnakeEditor.Clothes.transform.position.y - m_SnakeEditor.Body1.transform.position.y;
-		snake.MyProperties.BodyToBodyDistance = m_SnakeEditor.Body1.transform.position.y - m_SnakeEditor.Body2.transform.position.y;
+		snake.MyProperties.NodeToNodeDistance = m_SnakeEditor.Head.transform.position.y - m_SnakeEditor.Clothes.transform.position.y;
 		PrefabUtility.CreatePrefab(snakePrefabPath, snakeGameObject);
 		DestroyImmediate(snakeGameObject);
 

@@ -6,9 +6,9 @@ public class slWorld : hwmWorld
 	protected new static slWorld ms_Instance;
 
 	protected new slLevel m_Level;
-	private slPlayer m_Player;
 	private slMap m_Map;
 	private slFoodSystem m_FoodSystem;
+	private slPlayerController m_PlayerController;
 
 	public new static slWorld GetInstance()
 	{
@@ -30,22 +30,23 @@ public class slWorld : hwmWorld
 		return m_Map;
 	}
 
-	public slPlayer GetPlayer()
-	{
-		return m_Player;
-	}
-
 	public slFoodSystem GetFoodSystem()
 	{
 		return m_FoodSystem;
 	}
 
+	public slPlayerController GetPlayerController()
+	{
+		return m_PlayerController;
+	}
+
 	protected override IEnumerator HandleBeginPlay_Co()
 	{
-		m_Level = base.m_Level as slLevel;
+		m_PlayerController = (Object.Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game, "PlayerController")) as GameObject)
+			.GetComponent<slPlayerController>();
+		m_PlayerController.Initialize();
 
-		m_Player = (Object.Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game, "Player")) as GameObject).GetComponent<slPlayer>();
-		m_Player.Initialize();
+		m_Level = base.m_Level as slLevel;
 
 		m_Map = (Object.Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game, "Map")) as GameObject).GetComponent<slMap>();
 		m_Map.Initialize(m_Level.MapSize);
@@ -53,5 +54,15 @@ public class slWorld : hwmWorld
 
 		m_FoodSystem = new slFoodSystem();
 		m_FoodSystem.Initialize(m_Level);
+	}
+
+	protected override IEnumerator HandleEndPlay_Co()
+	{
+		m_FoodSystem.Dispose();
+		m_Map.Dispose();
+		yield return null;
+
+		m_Level = null;
+		m_PlayerController.Dispose();
 	}
 }
