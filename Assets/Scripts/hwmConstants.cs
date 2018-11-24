@@ -12,4 +12,24 @@
 	public const SupportLanguage DEFAULT_LANGUAGE = SupportLanguage.English;
 
 	public const string PREFSKEY_LANGUAGE = "Language";
+
+	public enum NetRole
+	{
+		/// <summary>
+		/// No role at all.
+		/// </summary>
+		None,
+		/// <summary>
+		/// Locally simulated proxy of this actor.
+		/// </summary>
+		SimulatedProxy,
+		/// <summary>
+		/// Locally autonomous proxy of this actor.
+		/// </summary>
+		AutonomousProxy,
+		/// <summary>
+		/// Authoritative control over the actor.
+		/// </summary>
+		Authority,
+	}
 }

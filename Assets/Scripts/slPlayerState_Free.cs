@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-public class slPlayerState_Free : hwmPlayerState
+﻿public class slPlayerState_Free : hwmPlayerState
 {
-
+	public slSnake ControllerSnake;
 }

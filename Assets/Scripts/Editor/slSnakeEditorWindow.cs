@@ -5,10 +5,8 @@ using UnityEngine;
 
 public class slSnakeEditorWindow : EditorWindow
 {
-	private const string SNAKE_PREFAB_PATH = "Assets/Resources/Snake/";
+	private const string SNAKE_PREFAB_PATH = "Assets/Resources/Actor/";
 	private const string SNAKE_EDITOR_PREfAB_NAME_STARTWITHS = "SnakeEditor_";
-	private const string SNAKE_PREfAB_NAME_STARTWITHS = "Snake_";
-	private const string SNAKE_PRESENTATION_PREfAB_NAME_STARTWITHS = "SnakePresentation_";
 
 	private EditorState m_EditorState;
 	private GameObject m_SnakeEditorPrefab;
@@ -150,21 +148,22 @@ public class slSnakeEditorWindow : EditorWindow
 		PrefabUtility.ReplacePrefab(m_SnakeEditor.gameObject, PrefabUtility.GetPrefabParent(m_SnakeEditor.gameObject), ReplacePrefabOptions.ConnectToPrefab);
 		string snakeName = m_SnakeEditor.gameObject.name.Remove(0, SNAKE_EDITOR_PREfAB_NAME_STARTWITHS.Length);
 
-		string snakePrefabPath = string.Format("{0}{1}{2}.prefab", SNAKE_PREFAB_PATH, SNAKE_PREfAB_NAME_STARTWITHS, snakeName);
-		GameObject snakeGameObject = new GameObject(SNAKE_PREfAB_NAME_STARTWITHS + snakeName);
+		string snakePrefabPath = string.Format("{0}{1}{2}.prefab", SNAKE_PREFAB_PATH, slConstants.SNAKE_PREfAB_NAME_STARTWITHS, snakeName);
+		GameObject snakeGameObject = new GameObject(slConstants.SNAKE_PREfAB_NAME_STARTWITHS + snakeName);
 		slSnake snake = snakeGameObject.AddComponent<slSnake>();
 		snake.MyProperties = new slSnake.Properties();
+		snake.MyProperties.SnakeName = snakeName;
 		snake.MyProperties.HeadColliderRadius = m_SnakeEditor.Head.GetComponent<CircleCollider2D>().radius;
 		snake.MyProperties.ClothesColliderRadius = m_SnakeEditor.Clothes.GetComponent<CircleCollider2D>().radius;
 		snake.MyProperties.BodyColliderRadius = m_SnakeEditor.Body1.GetComponent<CircleCollider2D>().radius;
 		snake.MyProperties.ClothesToHeadDistance = m_SnakeEditor.Head.transform.position.y - m_SnakeEditor.Clothes.transform.position.y;
 		snake.MyProperties.BodyToClothesDistance = m_SnakeEditor.Clothes.transform.position.y - m_SnakeEditor.Body1.transform.position.y;
-		snake.MyProperties.BodyToBodyDistance = m_SnakeEditor.Body2.transform.position.y - m_SnakeEditor.Body1.transform.position.y;
+		snake.MyProperties.BodyToBodyDistance = m_SnakeEditor.Body1.transform.position.y - m_SnakeEditor.Body2.transform.position.y;
 		PrefabUtility.CreatePrefab(snakePrefabPath, snakeGameObject);
 		DestroyImmediate(snakeGameObject);
 
-		string snakePresentationPrefabPath = string.Format("{0}{1}{2}.prefab", SNAKE_PREFAB_PATH, SNAKE_PRESENTATION_PREfAB_NAME_STARTWITHS, snakeName);
-		GameObject snakePresentationGameObject = new GameObject(SNAKE_PRESENTATION_PREfAB_NAME_STARTWITHS + snakeName);
+		string snakePresentationPrefabPath = string.Format("{0}{1}{2}.prefab", SNAKE_PREFAB_PATH, slConstants.SNAKE_PRESENTATION_PREfAB_NAME_STARTWITHS, snakeName);
+		GameObject snakePresentationGameObject = new GameObject(slConstants.SNAKE_PRESENTATION_PREfAB_NAME_STARTWITHS + snakeName);
 		slSnakePresentation snakePresentation = snakePresentationGameObject.AddComponent<slSnakePresentation>();
 		GameObject snakePresentationPropertiesGameObject = new GameObject("Properties");
 		snakePresentationPropertiesGameObject.SetActive(false);
@@ -182,6 +181,7 @@ public class slSnakeEditorWindow : EditorWindow
 	private GameObject InstantiateFromSnakeEditorToSnakePresentation(GameObject snakeEditor, GameObject snakePresentation)
 	{
 		GameObject go = Instantiate(snakeEditor);
+		DestroyImmediate(go.GetComponent<CircleCollider2D>());
 		go.name = go.name.Replace("(Clone)", "");
 		go.transform.SetParent(snakePresentation.transform);
 		go.transform.transform.localPosition = Vector3.zero;

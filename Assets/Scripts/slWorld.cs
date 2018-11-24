@@ -20,6 +20,11 @@ public class slWorld : hwmWorld
 		ms_Instance = this;
 	}
 
+	public new slLevel GetLevel()
+	{
+		return m_Level;
+	}
+
 	public slMap GetMap()
 	{
 		return m_Map;

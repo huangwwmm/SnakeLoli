@@ -10,8 +10,12 @@ public class slFoodSystem
 	private Vector2 m_FoodMinPosition;
 	private Vector2 m_FoodMaxPosition;
 
+	private GameObject m_FoodRoot;
+
 	public void Initialize(slLevel level)
 	{
+		m_FoodRoot = new GameObject("Foods");
+
 		m_FoodMaxPosition = level.MapSize * 0.5f - slConstants.FOOD_MAP_EDGE;
 		m_FoodMinPosition = -m_FoodMaxPosition;
 
@@ -34,6 +38,8 @@ public class slFoodSystem
 
 		m_Pool.Dispose();
 		m_Pool = null;
+
+		Object.Destroy(m_FoodRoot);
 	}
 
 	public hwmQuadtree GetQuadtree()
@@ -64,6 +70,11 @@ public class slFoodSystem
 		}
 	}
 
+	public GameObject GetFoodRoot()
+	{
+		return m_FoodRoot;
+	}
+
 	public class Pool : hwmPool<slFood>
 	{
 		public Pool(int initialSize = 4) : base(initialSize)
@@ -73,6 +84,7 @@ public class slFoodSystem
 		protected override slFood HandleCreateItem()
 		{
 			slFood food = (Object.Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game, "Food")) as GameObject).GetComponent<slFood>();
+			food.transform.SetParent(slWorld.GetInstance().GetFoodSystem().GetFoodRoot().transform);
 			food.Initialize();
 			return food;
 		}

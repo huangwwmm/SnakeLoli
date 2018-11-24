@@ -17,7 +17,6 @@ public class hwmSystem : MonoBehaviour
 	private hwmAssetLoader m_AssetLoader;
 	private hwmLevel m_WaitingToPlayLevel;
 	private float m_RealtimeSinceStartup;
-	private object m_Level;
 
 	#region get/set function
 	public static hwmSystem GetInstance()

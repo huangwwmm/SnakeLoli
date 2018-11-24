@@ -46,6 +46,23 @@ public class hwmGameState
 		return m_MatchState;
 	}
 
+	public hwmPlayerState FindPlayerStateByPlayerID(int playerID)
+	{
+		for (int iPlayer = 0; iPlayer < m_PlayerStates.Count; iPlayer++)
+		{
+			if (m_PlayerStates[iPlayer].PlayerID == playerID)
+			{
+				return m_PlayerStates[iPlayer];
+			}
+		}
+		return null;
+	}
+
+	public void AddPlayerState(hwmPlayerState playerState)
+	{
+		m_PlayerStates.Add(playerState);
+	}
+
 	protected virtual void HandleAborted()
 	{
 	}

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class slFood : hwmActor 
+public class slFood : hwmActor
 {
 	public CircleCollider2D NormalCollider;
 	public CircleCollider2D LargeCollider;
@@ -10,14 +10,19 @@ public class slFood : hwmActor
 
 	public void Initialize()
 	{
-		m_Presentation = (Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game, "FoodPresentation")) as GameObject).GetComponent<slFoodPresentation>();
-		m_Presentation.transform.SetParent(transform);
+		if (slWorld.GetInstance().NeedPresentation())
+		{
+			m_Presentation = (Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game, "FoodPresentation")) as GameObject).GetComponent<slFoodPresentation>();
+			m_Presentation.transform.SetParent(transform);
+		}
 
 		m_QuadtreeElement = new hwmQuadtree.Element(slWorld.GetInstance().GetFoodSystem().GetQuadtree());
 	}
 
 	public void Dispose()
 	{
+		m_Presentation = null;
+
 		m_QuadtreeElement.RemoveElement();
 		m_QuadtreeElement = null;
 	}
@@ -35,7 +40,7 @@ public class slFood : hwmActor
 
 	public void ChangeFoodType(FoodType foodType, Color color)
 	{
-		switch(foodType)
+		switch (foodType)
 		{
 			case FoodType.Normal:
 				NormalCollider.enabled = true;
@@ -49,7 +54,10 @@ public class slFood : hwmActor
 				break;
 		}
 
-		m_Presentation.ChangeFoodType(foodType, color);
+		if (m_Presentation)
+		{
+			m_Presentation.ChangeFoodType(foodType, color);
+		}
 	}
 
 	public void UpdateQuadtreeElement()

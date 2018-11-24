@@ -41,7 +41,7 @@ public class hwmWorld
 	public IEnumerator EndPlay_Co()
 	{
 		yield return m_GameMode.StartCoroutine(EndBeginPlay_Co());
-		
+
 		m_GameState.Dispose();
 		m_GameState = null;
 		UnityEngine.Object.Destroy(m_GameMode);
@@ -59,6 +59,22 @@ public class hwmWorld
 	public hwmLevel GetLevel()
 	{
 		return m_Level;
+	}
+
+	public hwmActor CreateActor(string name, string prefabName, Vector3 position, Quaternion rotation, object additionalData = null)
+	{
+		GameObject actorPrefab = hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Actor, prefabName) as GameObject;
+
+		GameObject actorGameObject = UnityEngine.Object.Instantiate(actorPrefab, position, rotation) as GameObject;
+		actorGameObject.name = name;
+		hwmActor actor = actorGameObject.GetComponent(typeof(hwmActor)) as hwmActor;
+		actor.Initialize(hwmConstants.NetRole.Authority, additionalData);
+		return actor;
+	}
+
+	public bool NeedPresentation()
+	{
+		return true;
 	}
 
 	protected virtual IEnumerator HandleBeginPlay_Co()
