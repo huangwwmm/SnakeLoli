@@ -16,3 +16,4 @@ MonoBehaviour:
   MapSize: {x: 160, y: 120}
   BotDensity: 3600
   FoodDensity: 100
+  RespawnTime: 1

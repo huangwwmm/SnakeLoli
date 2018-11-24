@@ -55,7 +55,7 @@ public class slWorld : hwmWorld
 		m_Map.Initialize(m_Level.MapSize);
 		yield return null;
 
-		m_FoodSystem = new slFoodSystem();
+		m_FoodSystem = (Object.Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game, "FoodSystem")) as GameObject).GetComponent<slFoodSystem>();
 		m_FoodSystem.Initialize(m_Level);
 	}
 

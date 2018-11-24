@@ -6,9 +6,9 @@ public class slFoodPresentation : MonoBehaviour
 	public SpriteRenderer LargeSprite;
 	public SpriteRenderer LargeInSprite;
 
-	public void ChangeFoodType(slFood.FoodType foodType, Color color)
+	public void ChangeFoodType(slFood.FoodProperties foodProperties, Color color)
 	{
-		switch (foodType)
+		switch (foodProperties.MyType)
 		{
 			case slFood.FoodType.Normal:
 				NormalSprite.enabled = true;

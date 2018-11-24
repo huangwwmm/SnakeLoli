@@ -246,8 +246,8 @@ MonoBehaviour:
     MaxValueKeyCode: 100
     AxesName: GP_LAxis_X
   - Index: 1
-    MinValueKeyCode: 119
-    MaxValueKeyCode: 115
+    MinValueKeyCode: 115
+    MaxValueKeyCode: 119
     AxesName: GP_LAxis_Y
 --- !u!114 &114143343869155770
 MonoBehaviour:

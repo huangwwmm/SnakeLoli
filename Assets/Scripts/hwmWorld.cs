@@ -72,9 +72,9 @@ public class hwmWorld
 		return actor;
 	}
 
-	public void DestroyActor(hwmActor actor)
+	public void DestroyActor(hwmActor actor, object additionalData)
 	{
-		actor.Dispose();
+		actor.Dispose(additionalData);
 		UnityEngine.Object.Destroy(actor.gameObject);
 	}
 

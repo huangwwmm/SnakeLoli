@@ -1,16 +1,23 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class slFoodSystem
+public class slFoodSystem : MonoBehaviour
 {
+	public slFood.FoodProperties NormalFoodProperties;
+	public slFood.FoodProperties LargeFoodProperties;
+
 	private hwmQuadtree m_Quadtree;
 	private Pool m_Pool;
 	private int m_MaxFood;
+	private int m_FoodCount;
 
 	private Vector2 m_FoodMinPosition;
 	private Vector2 m_FoodMaxPosition;
 
 	private GameObject m_FoodRoot;
+
+	private Queue<CreateEvent> m_CreateEvents;
 
 	public void Initialize(slLevel level)
 	{
@@ -29,10 +36,19 @@ public class slFoodSystem
 			, new hwmBounds2D(Vector2.zero, level.MapSize));
 
 		m_Pool = new Pool(m_MaxFood);
+
+		m_CreateEvents = new Queue<CreateEvent>();
+
+		m_FoodCount = 0;
+
+		enabled = true;
 	}
 
 	public void Dispose()
 	{
+		m_CreateEvents.Clear();
+		m_CreateEvents = null;
+
 		m_Quadtree.Dispose();
 		m_Quadtree = null;
 
@@ -50,9 +66,26 @@ public class slFoodSystem
 	public void CreateFood(slFood.FoodType foodType, Vector3 position, Color color)
 	{
 		slFood food = m_Pool.Pop();
-		food.ChangeFoodType(foodType, color);
+		switch (foodType)
+		{
+			case slFood.FoodType.Normal:
+				food.ChangeFoodType(NormalFoodProperties, color);
+				break;
+			case slFood.FoodType.Large:
+				food.ChangeFoodType(LargeFoodProperties, color);
+				break;
+		}
 		food.transform.position = position;
 		food.UpdateQuadtreeElement();
+
+		m_FoodCount++;
+	}
+
+	public void DestroyFood(slFood food)
+	{
+		m_Pool.Push(food);
+
+		m_FoodCount--;
 	}
 
 	public IEnumerator EnterMap_Co()
@@ -73,6 +106,35 @@ public class slFoodSystem
 	public GameObject GetFoodRoot()
 	{
 		return m_FoodRoot;
+	}
+
+	public void AddCreateEvent(slFood.FoodType foodType, Vector3 position, Color color )
+	{
+		CreateEvent createEvent = new CreateEvent();
+		createEvent.FoodType = foodType;
+		createEvent.Position = position;
+		createEvent.Color = color;
+		m_CreateEvents.Enqueue(createEvent);
+	}
+
+	protected void Update()
+	{
+		int canCreateFoodCount = slConstants.FOOD_SYSTEM_MAXCREATE_PREFRAME;
+		int createEventCount = Mathf.Min(m_CreateEvents.Count, canCreateFoodCount);
+		while (createEventCount -- > 0)
+		{
+			CreateEvent createEvent = m_CreateEvents.Dequeue();
+			CreateFood(createEvent.FoodType, createEvent.Position, createEvent.Color);
+		}
+		canCreateFoodCount -= createEventCount;
+
+		int needCreateFood = Mathf.Min(m_MaxFood - m_FoodCount, canCreateFoodCount);
+		while (needCreateFood-- > 0)
+		{
+			CreateFood(slFood.FoodType.Normal
+				, hwmRandom.NextVector2(m_FoodMinPosition, m_FoodMaxPosition)
+				, hwmRandom.RandColorRGB());
+		}
 	}
 
 	public class Pool : hwmPool<slFood>
@@ -103,5 +165,12 @@ public class slFoodSystem
 		{
 			item.DeactiveFood();
 		}
+	}
+
+	public struct CreateEvent
+	{
+		public Vector3 Position;
+		public Color Color;
+		public slFood.FoodType FoodType;
 	}
 }

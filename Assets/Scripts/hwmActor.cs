@@ -14,11 +14,11 @@ public class hwmActor : MonoBehaviour
 		hwmObserver.NotifyActorCreate(this);
 	}
 
-	public void Dispose()
+	public void Dispose(object additionalData)
 	{
 		hwmObserver.NotifyActorDestroy(this);
 
-		HandleDispose();
+		HandleDispose(additionalData);
 	}
 
 	public int GetGuid()
@@ -31,7 +31,7 @@ public class hwmActor : MonoBehaviour
 
 	}
 
-	protected virtual void HandleDispose()
+	protected virtual void HandleDispose(object additionalData)
 	{
 
 	}

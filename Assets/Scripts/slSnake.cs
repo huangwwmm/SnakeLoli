@@ -20,7 +20,6 @@ public class slSnake : hwmActor
 	private float m_CumulativeMoveDistance;
 	private float m_CumulativeMoveTime;
 
-
 	public Vector3 GetHeadPosition()
 	{
 		return m_Head.Node.transform.localPosition;
@@ -88,9 +87,23 @@ public class slSnake : hwmActor
 		m_CumulativeMoveTime = 0;
 	}
 
-	protected override void HandleDispose()
+	protected override void HandleDispose(object additionalData)
 	{
+		DisposeAdditionalData disposeAdditionalData = additionalData as DisposeAdditionalData;
+		if (disposeAdditionalData.MyDeadType != DeadType.FinishGame)
+		{
+			slWorld.GetInstance().GetFoodSystem().AddCreateEvent(slFood.FoodType.Large, m_Head.Node.transform.position, MyProperties.DeadFoodColor);
+			slWorld.GetInstance().GetFoodSystem().AddCreateEvent(slFood.FoodType.Large, m_Clothes.Node.transform.position, MyProperties.DeadFoodColor);
+			foreach(BodyNode node in m_Bodys)
+			{
+				slWorld.GetInstance().GetFoodSystem().AddCreateEvent(slFood.FoodType.Large, node.Node.transform.position, MyProperties.DeadFoodColor);
+			}
+		}
+
 		m_Head.Trigger.OnTriggerEnter -= OnTrigger;
+
+		m_Bodys.Clear();
+		m_Bodys = null;
 
 		Destroy(m_TweakableProperties);
 		m_TweakableProperties = null;
@@ -102,23 +115,27 @@ public class slSnake : hwmActor
 		}
 	}
 
-	protected void FixedUpdate()
+	protected void Update()
 	{
-		float deltaTime = Time.fixedDeltaTime;
+		float deltaTime = Time.deltaTime;
+		UpdateMovement(deltaTime);
+	}
+
+	private void UpdateMovement(float deltaTime)
+	{
 		m_CumulativeMoveDistance += deltaTime * m_TweakableProperties.NormalSpeed;
 		m_CumulativeMoveTime += deltaTime;
 
-		bool needMove = false;
-		if (m_CumulativeMoveDistance >= MyProperties.NodeToNodeDistance)
+		int moveCount = 0;
+		while (m_CumulativeMoveDistance >= MyProperties.NodeToNodeDistance)
 		{
-			needMove = true;
-
 			m_CurrentMoveDirection = hwmUtility.CircleLerp(m_CurrentMoveDirection, MoveDirection, m_TweakableProperties.MaxTurnAngularSpeed * m_CumulativeMoveTime).normalized;
 			m_CumulativeMoveDistance -= MyProperties.NodeToNodeDistance;
 			m_CumulativeMoveTime = 0;
+			moveCount++;
 		}
 
-		if (needMove)
+		while (moveCount-- > 0)
 		{
 			Quaternion headRotation = Quaternion.Euler(0, 0, -Vector2.SignedAngle(m_CurrentMoveDirection, Vector2.up));
 			Vector3 lastNodePosition = m_Head.Node.transform.localPosition;
@@ -199,7 +216,15 @@ public class slSnake : hwmActor
 			case (int)slConstants.Layer.Wall:
 			case (int)slConstants.Layer.Snake:
 			case (int)slConstants.Layer.SnakeHead:
-				hwmWorld.GetInstance().DestroyActor(this);
+				DisposeAdditionalData disposeAdditionalData = new DisposeAdditionalData();
+				disposeAdditionalData.MyDeadType = collider.gameObject.layer == (int)slConstants.Layer.Wall
+					? DeadType.HitWall
+					: DeadType.HitSnake;
+				hwmWorld.GetInstance().DestroyActor(this, disposeAdditionalData);
+				break;
+			case (int)slConstants.Layer.Food:
+				slFood food = collider.gameObject.GetComponent<slFood>();
+				food.BeEat(m_Head.Node.transform);
 				break;
 		}
 	}
@@ -223,6 +248,8 @@ public class slSnake : hwmActor
 		public float BodyColliderRadius;
 
 		public float NodeToNodeDistance;
+
+		public Color DeadFoodColor;
 	}
 
 	[System.Serializable]
@@ -233,6 +260,12 @@ public class slSnake : hwmActor
 		public Vector3 HeadPosition = Vector3.zero;
 		public Quaternion HeadRotation = Quaternion.identity;
 		public string TweakableProperties;
+	}
+
+	[System.Serializable]
+	public class DisposeAdditionalData
+	{
+		public DeadType MyDeadType;
 	}
 
 	public class HeadNode : BodyNode
@@ -251,5 +284,12 @@ public class slSnake : hwmActor
 		public GameObject Node;
 		public CircleCollider2D Collider;
 		public SpriteRenderer Sprite;
+	}
+
+	public enum DeadType
+	{
+		HitWall,
+		HitSnake,
+		FinishGame
 	}
 }

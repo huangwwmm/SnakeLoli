@@ -161,6 +161,7 @@ public class slSnakeEditorWindow : EditorWindow
 		snake.MyProperties.ClothesColliderRadius = m_SnakeEditor.Clothes.GetComponent<CircleCollider2D>().radius;
 		snake.MyProperties.BodyColliderRadius = m_SnakeEditor.Body1.GetComponent<CircleCollider2D>().radius;
 		snake.MyProperties.NodeToNodeDistance = m_SnakeEditor.Head.transform.position.y - m_SnakeEditor.Clothes.transform.position.y;
+		snake.MyProperties.DeadFoodColor = m_SnakeEditor.DeadFoodColor;
 		PrefabUtility.CreatePrefab(snakePrefabPath, snakeGameObject);
 		DestroyImmediate(snakeGameObject);
 

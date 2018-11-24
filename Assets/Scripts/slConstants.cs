@@ -17,6 +17,9 @@ public class slConstants
 	public static readonly Vector3 FOOD_DEACTIVE_POSITION = new Vector3(10000, 10000, 0);
 	public static readonly Vector2 FOOD_MAP_EDGE = new Vector2(2, 2);
 
+	public const float FOOD_BEEAT_MOVE_SPEED = 12;
+	public const int FOOD_SYSTEM_MAXCREATE_PREFRAME = 20;
+
 	public const int SNAKE_SPRITERENDERER_MAX_ORDERINLAYER = 32767;
 	public const int SNAKE_SPRITERENDERER_MIN_ORDERINLAYER = -30000;
 

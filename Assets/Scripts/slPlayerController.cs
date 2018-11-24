@@ -2,12 +2,15 @@
 
 public class slPlayerController : slBaseController
 {
+	public float CameraSmoothTime;
+
 	private Camera m_Camera;
 	private slHUD m_HUD;
 	/// <summary>
 	/// cache for update call
 	/// </summary>
 	private hwmInput m_Input;
+	private Vector3 m_CameraVelocity = Vector3.zero;
 
 	protected override void HandleInitialize()
 	{
@@ -23,6 +26,15 @@ public class slPlayerController : slBaseController
 		m_Camera = null;
 	}
 
+	protected override void HandleSetController()
+	{
+		Vector3 cameraPosition = m_Camera.transform.localPosition;
+		Vector3 snakeHaedPosition = m_Snake.GetHeadPosition();
+		cameraPosition.x = snakeHaedPosition.x;
+		cameraPosition.y = snakeHaedPosition.y;
+		m_Camera.transform.localPosition = cameraPosition;
+	}
+
 	protected void Update()
 	{
 		if (m_Snake == null)
@@ -34,7 +46,7 @@ public class slPlayerController : slBaseController
 		Vector3 snakeHaedPosition = m_Snake.GetHeadPosition();
 		cameraPosition.x = snakeHaedPosition.x;
 		cameraPosition.y = snakeHaedPosition.y;
-		m_Camera.transform.localPosition = cameraPosition;
+		m_Camera.transform.localPosition = Vector3.SmoothDamp(m_Camera.transform.localPosition, cameraPosition, ref m_CameraVelocity, CameraSmoothTime);
 
 		Vector2 axis = new Vector2(m_Input.GetAxisValue(hwmConstants.AxisIndex.MoveX)
 			, m_Input.GetAxisValue(hwmConstants.AxisIndex.MoveY));

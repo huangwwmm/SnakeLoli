@@ -7,4 +7,6 @@ public class slSnakeEditor : MonoBehaviour
 	public GameObject Body1;
 	public GameObject Body2;
 	public GameObject Body3;
+
+	public Color DeadFoodColor;
 }
