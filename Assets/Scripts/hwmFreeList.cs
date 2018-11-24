@@ -350,7 +350,7 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 		{
 			m_List = list;
 			m_Index = 0;
-			m_Version = list.m_Version;
+			m_Version = m_List.m_Version;
 			Current = default(T);
 		}
 
@@ -365,16 +365,17 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 				// Q: why use localList?
 				hwmFreeList<T> localList = m_List;
 
-				while ((uint)m_Index < (uint)localList.Count)
+				if ((uint)m_Index < (uint)localList.Count)
 				{
-					Current = localList.m_Items[m_Index];
-					m_Index++;
+					Current = localList.m_Items[m_Index++];
 					return true;
 				}
-
-				m_Index = m_List.Count + 1;
-				Current = default(T);
-				return false;
+				else
+				{
+					m_Index = m_List.Count + 1;
+					Current = default(T);
+					return false;
+				}
 			}
 		}
 
