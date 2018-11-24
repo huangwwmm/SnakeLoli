@@ -11,5 +11,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7646d9267c45b0348801684c03276c36, type: 3}
   m_Name: Default
   m_EditorClassIdentifier: 
-  NormalSpeed: 12
-  MaxTurnAngularSpeed: 360
+  MaxTurnAngularSpeed: 720
+  PowerToNode: 5

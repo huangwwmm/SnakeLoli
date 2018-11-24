@@ -21,10 +21,12 @@ public class hwmLogRecord
 		m_RecordStackTrace = recordStackTrace;
 
 		string logDirectory;
-
 		string logFile;
 #if UNITY_EDITOR || UNITY_STANDALONE
 		logDirectory = Application.dataPath + "/../Temp/LogRecord/";
+		logFile = DateTime.Now.ToString("yyyy-M-dd--HH-mm-ss") + ".log";
+#elif UNITY_ANDROID
+		logDirectory = Application.persistentDataPath + "/LogRecord/";
 		logFile = DateTime.Now.ToString("yyyy-M-dd--HH-mm-ss") + ".log";
 #endif
 
@@ -44,7 +46,7 @@ public class hwmLogRecord
 		}
 		catch (Exception e)
 		{
-			hwmDebug.Assert(false, "Create LogRecord file failed. Exception:\n" + e.ToString());
+			Debug.LogError("Create LogRecord file failed. Exception:\n" + e.ToString());
 		}
 	}
 
@@ -67,6 +69,7 @@ public class hwmLogRecord
 
 	public void StartReceivedLog()
 	{
+		Debug.Log("start received log");
 		if (!m_IsRegisteredOnLogEvent)
 		{
 			Application.logMessageReceived += OnLog;

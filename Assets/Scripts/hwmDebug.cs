@@ -14,11 +14,11 @@ public class hwmDebug
 	{
 		if (!valid)
 		{
+			Debug.LogError(message, context);
 #if UNITY_EDITOR
 			UnityEditor.EditorUtility.DisplayDialog("Assert Failed", message, "OK");
-#endif
-			Debug.LogAssertion(message, context);
 			Debug.Break();
+#endif
 			hwmSystem.GetInstance().GetLogRecord().FlushStreamWriter();
 		}
 		return valid;

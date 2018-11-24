@@ -144,7 +144,7 @@ public class hwmSystem : MonoBehaviour
 		m_Localization.Initialize(SystemInitializer.Localization);
 		yield return null;
 
-		Activator.CreateInstance(Type.GetType(SystemInitializer.WorldClassName));
+		Instantiate(m_AssetLoader.LoadAsset(hwmAssetLoader.AssetType.Game, "World"));
 
 		m_SceneFSM = InstantiatePrefabAndSetParentThisTransform<hwmSceneFSM>(SystemInitializer.SceneFSMPrefab);
 		yield return StartCoroutine(m_SceneFSM.EnterStartupScene());
@@ -165,5 +165,4 @@ public class hwmSystemInitializer
 	public GameObject InputPrefab;
 	public GameObject SceneFSMPrefab;
 	public TextAsset Localization;
-	public string WorldClassName;
 }

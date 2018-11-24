@@ -9,6 +9,8 @@ public class slWorld : hwmWorld
 	private slMap m_Map;
 	private slFoodSystem m_FoodSystem;
 	private slPlayerController m_PlayerController;
+	private bool m_SnakeUpdateMovementEnable = false;
+	private float m_SnakeUpdateMovementTime = 0;
 
 	public new static slWorld GetInstance()
 	{
@@ -38,6 +40,11 @@ public class slWorld : hwmWorld
 	public slPlayerController GetPlayerController()
 	{
 		return m_PlayerController;
+	}
+
+	public bool GetSnakeUpdateMovementEnable()
+	{
+		return m_SnakeUpdateMovementEnable;
 	}
 
 	protected override IEnumerator HandleBeginPlay_Co()
@@ -70,5 +77,20 @@ public class slWorld : hwmWorld
 
 		hwmSystem.GetInstance().GetInput().SetAllAxisEnable(false);
 		hwmSystem.GetInstance().GetInput().JoystickCursor.SetAvailable(true);
+	}
+
+	protected void FixedUpdate()
+	{
+		m_SnakeUpdateMovementTime += Time.deltaTime;
+
+		if (m_SnakeUpdateMovementTime >= slConstants.SNAKE_UPDATE_MOVEMENT_TIEM_INTERVAL)
+		{
+			m_SnakeUpdateMovementTime -= slConstants.SNAKE_UPDATE_MOVEMENT_TIEM_INTERVAL;
+			m_SnakeUpdateMovementEnable = true;
+		}
+		else
+		{
+			m_SnakeUpdateMovementEnable = false;
+		}
 	}
 }

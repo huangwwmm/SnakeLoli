@@ -104,14 +104,14 @@ public class slSnakeEditorWindow : EditorWindow
 			}
 			if (m_SnakeEditor.Clothes != null)
 			{
-				m_SnakeEditor.Clothes.transform.position = new Vector3(0, Mathf.Min(m_SnakeEditor.Clothes.transform.position.y, 0), 0);
+				m_SnakeEditor.Clothes.transform.position = new Vector3(0, -slConstants.SNAKE_NODE_TO_NODE_DISTANCE, 0);
 				m_SnakeEditor.Clothes.transform.rotation = Quaternion.identity;
 				ForeachSetSpriteRendererOrderInLayer(m_SnakeEditor.Clothes, ref currentOrderInLayer);
 			}
 			if (m_SnakeEditor.Body1 != null)
 			{
 				m_SnakeEditor.Body1.transform.position = new Vector3(0
-					, m_SnakeEditor.Clothes.transform.position.y * 2.0f - m_SnakeEditor.Head.transform.position.y
+					, -slConstants.SNAKE_NODE_TO_NODE_DISTANCE * 2
 					, 0);
 				m_SnakeEditor.Body1.transform.rotation = Quaternion.identity;
 				ForeachSetSpriteRendererOrderInLayer(m_SnakeEditor.Body1, ref currentOrderInLayer);
@@ -119,7 +119,7 @@ public class slSnakeEditorWindow : EditorWindow
 			if (m_SnakeEditor.Body2 != null)
 			{
 				m_SnakeEditor.Body2.transform.position = new Vector3(0
-					, m_SnakeEditor.Body1.transform.position.y * 2.0f - m_SnakeEditor.Clothes.transform.position.y
+					, -slConstants.SNAKE_NODE_TO_NODE_DISTANCE * 3
 					, 0);
 				m_SnakeEditor.Body2.transform.rotation = Quaternion.identity;
 				ForeachSetSpriteRendererOrderInLayer(m_SnakeEditor.Body2, ref currentOrderInLayer);
@@ -127,7 +127,7 @@ public class slSnakeEditorWindow : EditorWindow
 			if (m_SnakeEditor.Body3 != null)
 			{
 				m_SnakeEditor.Body3.transform.position = new Vector3(0
-					, m_SnakeEditor.Body2.transform.position.y * 2.0f - m_SnakeEditor.Body1.transform.position.y
+					, -slConstants.SNAKE_NODE_TO_NODE_DISTANCE * 4
 					, 0);
 				m_SnakeEditor.Body3.transform.rotation = Quaternion.identity;
 				ForeachSetSpriteRendererOrderInLayer(m_SnakeEditor.Body3, ref currentOrderInLayer);
@@ -160,7 +160,6 @@ public class slSnakeEditorWindow : EditorWindow
 		snake.MyProperties.HeadColliderRadius = m_SnakeEditor.Head.GetComponent<CircleCollider2D>().radius;
 		snake.MyProperties.ClothesColliderRadius = m_SnakeEditor.Clothes.GetComponent<CircleCollider2D>().radius;
 		snake.MyProperties.BodyColliderRadius = m_SnakeEditor.Body1.GetComponent<CircleCollider2D>().radius;
-		snake.MyProperties.NodeToNodeDistance = m_SnakeEditor.Head.transform.position.y - m_SnakeEditor.Clothes.transform.position.y;
 		snake.MyProperties.DeadFoodColor = m_SnakeEditor.DeadFoodColor;
 		PrefabUtility.CreatePrefab(snakePrefabPath, snakeGameObject);
 		DestroyImmediate(snakeGameObject);

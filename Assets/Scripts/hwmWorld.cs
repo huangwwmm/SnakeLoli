@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>
 /// TODO support multiplayer
 /// </summary>
-public class hwmWorld
+public class hwmWorld : MonoBehaviour
 {
 	protected static hwmWorld ms_Instance;
 
