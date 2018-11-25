@@ -43,25 +43,37 @@ public class hwmQuadtree
 		m_Root = null;
 	}
 
+	public bool TryFindNode(ref Node foundNode, hwmBounds2D bounds, Node rootNode = null)
+	{
+		if (rootNode == null)
+		{
+			rootNode = m_Root;
+		}
+		return rootNode.TryFindNode(ref foundNode, bounds);
+	}
+
 	public void UpdateElement(Element element)
 	{
 		hwmDebug.Assert(element.Quadtree == this, "element.Quadtree == this");
 
+		Node foundNode = null;
 		if (element._Owner != null)
 		{
 			Node elementOwner = element._Owner;
 			elementOwner.RemoveElement(element);
-
-			if (element._Owner.UpdateElement(element))
-			{
-				return;
-			}
+			TryFindNode(ref foundNode, element.Bounds, elementOwner);
 		}
 
-		if (!m_Root.UpdateElement(element))
+		if (foundNode == null)
 		{
-			m_Root.AddElement(element);
+			TryFindNode(ref foundNode, element.Bounds);
 		}
+		if (foundNode == null)
+		{
+			foundNode = m_Root;
+		}
+
+		foundNode.AddElement(element);
 	}
 
 	public class Node
@@ -109,32 +121,25 @@ public class hwmQuadtree
 			m_Parent = null;
 		}
 
-		public bool UpdateElement(Element element)
+		public bool TryFindNode(ref Node foundNode, hwmBounds2D bounds)
 		{
-			if (m_LooseBounds.Contains(element.Bounds))
+			if (m_LooseBounds.Contains(bounds))
 			{
 				if (m_IsLeaf)
 				{
-					AddElement(element);
+					foundNode = this;
 					return true;
 				}
 				else
 				{
-					bool updateInChildersSuccess = false;
 					for (int iChilder = 0; iChilder < CHILDER_COUNT; iChilder++)
 					{
-						if (m_Childers[iChilder].UpdateElement(element))
+						if (m_Childers[iChilder].TryFindNode(ref foundNode, bounds))
 						{
-							updateInChildersSuccess = true;
-							break;
+							return true;
 						}
 					}
-
-					if (!updateInChildersSuccess)
-					{
-						AddElement(element);
-					}
-					return true;
+					return false;
 				}
 			}
 			else
@@ -209,7 +214,6 @@ public class hwmQuadtree
 			{
 				Element iterElement = elements[iElement];
 				iterElement._Owner = null;
-				hwmDebug.Assert(UpdateElement(elements[iElement]), "UpdateElement(elements[iElement])");
 			}
 		}
 
