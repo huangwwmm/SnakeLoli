@@ -85,8 +85,6 @@ public class hwmSystem : MonoBehaviour
 			m_Localization.Dispose();
 			m_Localization = null;
 
-			m_AssetLoader = null;
-
 			DestroyImmediate(m_Input);
 			m_Input = null;
 
@@ -95,6 +93,8 @@ public class hwmSystem : MonoBehaviour
 
 			m_LogRecord.Dispose();
 			m_LogRecord = null;
+
+			m_AssetLoader = null;
 
 			ms_Instance = null;
 		}
@@ -123,8 +123,12 @@ public class hwmSystem : MonoBehaviour
 #endif
 		yield return null;
 
+		m_AssetLoader = new hwmAssetLoader();
+		yield return null;
+
 		m_Config = new hwmINIParser();
-		m_Config.Initialize(SystemInitializer.Config.text);
+		TextAsset configTextAsset = m_AssetLoader.LoadAsset(hwmAssetLoader.AssetType.System, SystemInitializer.ConfigAssetName) as TextAsset;
+		m_Config.Initialize(configTextAsset.text);
 		System.Text.StringBuilder configLogString = new System.Text.StringBuilder(512);
 		configLogString.AppendLine("Loaded Config");
 		foreach (KeyValuePair<string, string> kv in m_Config.GetConfig())
@@ -133,24 +137,21 @@ public class hwmSystem : MonoBehaviour
 		}
 		Debug.Log(configLogString.ToString());
 		yield return null;
-
-		m_Input = InstantiatePrefabAndSetParentThisTransform<hwmInput>(SystemInitializer.InputPrefab);
-		yield return null;
-
-		m_AssetLoader = new hwmAssetLoader();
+		
+		m_Input = InstantiatePrefabAndSetParentThisTransform<hwmInput>(m_AssetLoader.LoadAsset(hwmAssetLoader.AssetType.System, SystemInitializer.InputAssetName));
 		yield return null;
 
 		m_Localization = new hwmLocalization();
-		m_Localization.Initialize(SystemInitializer.Localization);
+		m_Localization.Initialize(m_AssetLoader.LoadAsset(hwmAssetLoader.AssetType.System, SystemInitializer.LocalizationAssetName) as TextAsset);
 		yield return null;
 
 		Instantiate(m_AssetLoader.LoadAsset(hwmAssetLoader.AssetType.Game, "World"));
 
-		m_SceneFSM = InstantiatePrefabAndSetParentThisTransform<hwmSceneFSM>(SystemInitializer.SceneFSMPrefab);
+		m_SceneFSM = InstantiatePrefabAndSetParentThisTransform<hwmSceneFSM>(m_AssetLoader.LoadAsset(hwmAssetLoader.AssetType.System, SystemInitializer.SceneFSMAssetName));
 		yield return StartCoroutine(m_SceneFSM.EnterStartupScene());
 	}
 
-	private T InstantiatePrefabAndSetParentThisTransform<T>(GameObject prefab)
+	private T InstantiatePrefabAndSetParentThisTransform<T>(UnityEngine.Object prefab)
 	{
 		GameObject obj = Instantiate(prefab) as GameObject;
 		obj.transform.SetParent(transform, false);
@@ -161,8 +162,8 @@ public class hwmSystem : MonoBehaviour
 [System.Serializable]
 public class hwmSystemInitializer
 {
-	public TextAsset Config;
-	public GameObject InputPrefab;
-	public GameObject SceneFSMPrefab;
-	public TextAsset Localization;
+	public string ConfigAssetName;
+	public string InputAssetName;
+	public string SceneFSMAssetName;
+	public string LocalizationAssetName;
 }

@@ -38,7 +38,7 @@ public class slConstants
 	public static readonly Vector2 SNAKE_SPAWN_SAFEAREA_SIZE = new Vector2(6, 12);
 	public const float SNAKE_SPAWN_SAFEAREA_YAXIS_OFFSET = -1.6f;
 	public const float SNAKE_NODE_TO_NODE_DISTANCE = 0.9f;
-	public const float SNAKE_UPDATE_MOVEMENT_TIEM_INTERVAL = 0.06f;
+	public const float SNAKE_UPDATE_MOVEMENT_TIEM_INTERVAL = 0.1f;
 
 	public const string DEFAULT_SNAKE_TWEAKABLE_PROPERTIES = "Default";
 

@@ -52,10 +52,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   SystemInitializer:
-    Config: {fileID: 4900000, guid: 01ee0bc6c796dbe4c8ebebb337b07434, type: 3}
-    InputPrefab: {fileID: 1717198655298722, guid: f40b5a64c7a90984092d7144c8885f40,
-      type: 2}
-    SceneFSMPrefab: {fileID: 1150128558821594, guid: ddcc261d50d47bd4499b129282daf249,
-      type: 2}
-    Localization: {fileID: 4900000, guid: a72d5df06fb806b49898371b1fa5ef8c, type: 3}
-    WorldClassName: slWorld
+    ConfigAssetName: Config_Debug
+    InputAssetName: Input
+    SceneFSMAssetName: SceneFSM
+    LocalizationAssetName: Localization

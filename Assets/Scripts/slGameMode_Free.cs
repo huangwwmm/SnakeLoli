@@ -58,21 +58,19 @@ public class slGameMode_Free : hwmGameMode
 
 	protected void Update()
 	{
-		if (slWorld.GetInstance().GetGameState().GetMatchState() == hwmMatchState.InProgress)
+		if (slWorld.GetInstance().GetGameState().GetMatchState() == hwmMatchState.InProgress
+			&& (Time.frameCount + 3) % 5 == 0) // for performance
 		{
-			if ((Time.frameCount + 7) % 10 == 0)
+			List<hwmPlayerState> playerStates = slWorld.GetInstance().GetGameState().GetPlayerStates();
+			for (int iPlayerState = 0; iPlayerState < playerStates.Count; iPlayerState++)
 			{
-				List<hwmPlayerState> playerStates = slWorld.GetInstance().GetGameState().GetPlayerStates();
-				for (int iPlayerState = 0; iPlayerState < playerStates.Count; iPlayerState++)
-				{
-					slPlayerState_Free iterPlayerState = playerStates[iPlayerState] as slPlayerState_Free;
+				slPlayerState_Free iterPlayerState = playerStates[iPlayerState] as slPlayerState_Free;
 
-					if (iterPlayerState.ControllerSnake == null
-						&& !slWorld.GetInstance().GetSnakeUpdateMovementEnable() // for preformance
-						&& Time.time - iterPlayerState.LastDeadTime > slWorld.GetInstance().GetLevel().RespawnTime)
-					{
-						SpawnPlayer(iterPlayerState);
-					}
+				if (iterPlayerState.ControllerSnake == null
+					&& !slWorld.GetInstance().GetSnakeUpdateMovementEnable() // for preformance
+					&& Time.time - iterPlayerState.LastDeadTime > slWorld.GetInstance().GetLevel().RespawnTime)
+				{
+					SpawnPlayer(iterPlayerState);
 				}
 			}
 		}
