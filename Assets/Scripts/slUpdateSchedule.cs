@@ -49,11 +49,11 @@ public class slUpdateSchedule : MonoBehaviour
 			// update ai
 			if (m_Snakes.Count > 0)
 			{
-				int needUpdateAICount = Mathf.CeilToInt(m_Snakes.Count / slConstants.UPDATE_ALL_AI_FRAME);
+				int needUpdateAICount = Mathf.CeilToInt((float)m_Snakes.Count / slConstants.UPDATE_ALL_AI_FRAME);
 				int currentAIIndex = m_LastUpdateAISnakeIndex;
 				int whileTime = 0;
 				while (whileTime++ < m_Snakes.Count
-					|| needUpdateAICount == 0)
+					&& needUpdateAICount > 0)
 				{
 					currentAIIndex = GetNextSnakeIndex(currentAIIndex);
 
