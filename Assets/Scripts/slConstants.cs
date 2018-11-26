@@ -46,12 +46,13 @@ public class slConstants
 
 	public const float UPDATE_SNAKE_MOVEMENT_TIEM_INTERVAL = 0.1f;
 	public const int UPDATE_RESPAWN_FRAME_INTERVAL = 3;
-	public const int UPDATE_ALL_AI_FRAME = 3;
+	public const int UPDATE_ALL_AI_FRAME = 5;
 
 	#region maybe package to aiSetting
 	public const float SNAKE_AIMOVEMENT_SAFEAREA_MAP_EDGE = 5;
 	public const float SNAKE_DETECT_DISTANCE = SNAKE_NODE_TO_NODE_DISTANCE * 10.0f;
 	public const float SNAKE_DETECT_ANGLE = 12.0f;
+	public const int SNAKE_AI_CALCULATE_TIMES = (int)(360.0f / SNAKE_DETECT_ANGLE);
 	public const float SNAKE_BEGIN_DETECT_RAND_MAXANGLE = 60.0f;
 	public const int SNAKE_RANDMOVEMOENT_WHENNOTCHANGED_TIMES = 5;
 	public const float SNAKE_RANDMOVEMOENT_WHENNOTCHANGED_PROBABILITY = 0.2f;
