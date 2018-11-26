@@ -4,15 +4,14 @@ using UnityEngine;
 
 public class slUpdateSchedule : MonoBehaviour
 {
-	private List<slSnake> m_Snakes;
+	private List<SnakeUpdteScheduleParmeter> m_Snakes;
 	private float m_UpdateSnakeMovementTime = 0;
 	private int m_UpdateRespawnPlayerFrame = 0;
-	private int m_UpdateAIFrame = 0;
 	private int m_LastUpdateAISnakeIndex = -1;
 
 	protected void Awake()
 	{
-		m_Snakes = new List<slSnake>();
+		m_Snakes = new List<SnakeUpdteScheduleParmeter>();
 
 		hwmObserver.OnActorCreate += OnActorCreate;
 		hwmObserver.OnActorDestroy += OnActorDestroy;
@@ -39,43 +38,37 @@ public class slUpdateSchedule : MonoBehaviour
 			m_UpdateSnakeMovementTime -= slConstants.UPDATE_SNAKE_MOVEMENT_TIEM_INTERVAL;
 			for (int iSnake = 0; iSnake < m_Snakes.Count; iSnake++)
 			{
-				m_Snakes[iSnake].DoUpdateMovement(slConstants.UPDATE_SNAKE_MOVEMENT_TIEM_INTERVAL);
+				SnakeUpdteScheduleParmeter snake = m_Snakes[iSnake];
+				snake.Owner.DoUpdateMovement(1, slConstants.UPDATE_SNAKE_MOVEMENT_TIEM_INTERVAL);
+				snake.NeedUpdateAI = true;
 			}
 		}
-
 
 		if (!currentUpdateSnakeMovement)
 		{
 			// update ai
-			if (m_Snakes.Count > 0
-				&& ++m_UpdateAIFrame >= slConstants.UPDATE_AI_FRAME_INTERVAL)
+			if (m_Snakes.Count > 0)
 			{
-				m_UpdateAIFrame -= slConstants.UPDATE_AI_FRAME_INTERVAL;
+				int needUpdateAICount = Mathf.CeilToInt(m_Snakes.Count / slConstants.UPDATE_ALL_AI_FRAME);
 				int currentAIIndex = m_LastUpdateAISnakeIndex;
 				int whileTime = 0;
-				while (true)
+				while (whileTime++ < m_Snakes.Count
+					|| needUpdateAICount == 0)
 				{
 					currentAIIndex = GetNextSnakeIndex(currentAIIndex);
-					if (currentAIIndex == m_LastUpdateAISnakeIndex
-						&& whileTime != 0)
-					{
-						break;
-					}
 
-					slSnake snake = m_Snakes[currentAIIndex];
-					if (snake.GetController() != null
-						&& snake.GetController().IsAI())
+					SnakeUpdteScheduleParmeter snake = m_Snakes[currentAIIndex];
+					if (snake.NeedUpdateAI
+						&& snake.Owner.GetController() != null
+						&& snake.Owner.GetController().IsAI())
 					{
-						(snake.GetController() as slAIController).DoAIUpdate();
-
+						snake.NeedUpdateAI = false;
+						(snake.Owner.GetController() as slAIController).DoAIUpdate();
 						m_LastUpdateAISnakeIndex = currentAIIndex;
-						break;
+						needUpdateAICount--;
 					}
-
-					whileTime++;
 				}
 			}
-
 
 			// update respawn player
 			if (++m_UpdateRespawnPlayerFrame >= slConstants.UPDATE_RESPAWN_FRAME_INTERVAL)
@@ -86,24 +79,34 @@ public class slUpdateSchedule : MonoBehaviour
 		}
 	}
 
-	private void OnActorDestroy(hwmActor actor)
-	{
-		if (actor is slSnake)
-		{
-			int snakeIndexOf = m_Snakes.IndexOf(actor as slSnake);
-			m_Snakes.RemoveAt(snakeIndexOf);
-			if (m_LastUpdateAISnakeIndex == snakeIndexOf)
-			{
-				m_LastUpdateAISnakeIndex--;
-			}
-		}
-	}
-
 	private void OnActorCreate(hwmActor actor)
 	{
 		if (actor is slSnake)
 		{
-			m_Snakes.Add(actor as slSnake);
+			SnakeUpdteScheduleParmeter snakeParmeter = new SnakeUpdteScheduleParmeter();
+			snakeParmeter.Owner = actor as slSnake;
+			snakeParmeter.NeedUpdateAI = true;
+			m_Snakes.Add(snakeParmeter);
+		}
+	}
+
+	private void OnActorDestroy(hwmActor actor)
+	{
+		if (actor is slSnake)
+		{
+			slSnake snake = actor as slSnake;
+			for (int iSnake = 0; iSnake < m_Snakes.Count; iSnake++)
+			{
+				if (m_Snakes[iSnake].Owner == snake)
+				{
+					m_Snakes.RemoveAt(iSnake);
+					if (m_LastUpdateAISnakeIndex == iSnake)
+					{
+						m_LastUpdateAISnakeIndex--;
+					}
+					break;
+				}
+			}
 		}
 	}
 
@@ -112,5 +115,11 @@ public class slUpdateSchedule : MonoBehaviour
 		return index >= m_Snakes.Count - 1
 			? 0
 			: index + 1;
+	}
+
+	private struct SnakeUpdteScheduleParmeter
+	{
+		public slSnake Owner;
+		public bool NeedUpdateAI;
 	}
 }

@@ -11,7 +11,7 @@ public class hwmLocalization
 
 	private Dictionary<string, string> m_Localization;
 	private TextAsset m_CSVAsset;
-	private hwmConstants.SupportLanguage m_Language;
+	private hwmConstants.SupportLanguage m_Language = hwmConstants.SupportLanguage.Chinese;
 
 	public void Initialize(TextAsset csvAsset)
 	{

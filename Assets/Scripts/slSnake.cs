@@ -6,7 +6,7 @@ public class slSnake : hwmActor
 {
 	public Properties MyProperties;
 
-	public Vector2 MoveDirection;
+	public Vector2 TargetMoveDirection;
 
 	private Vector2 m_CurrentMoveDirection;
 
@@ -26,15 +26,19 @@ public class slSnake : hwmActor
 		return m_Head.Node.transform.localPosition;
 	}
 
-	public void DoUpdateMovement(float deltaTime)
+	public Vector2 GetCurrentMoveDirection()
+	{
+		return m_CurrentMoveDirection;
+	}
+
+	public void DoUpdateMovement(int moveCount, float deltaTime)
 	{
 		int bodyCountOffset = (m_Power / m_TweakableProperties.PowerToNode - 2)
 			- m_Bodys.Count;
 
-		int moveCount = 1;
 		while (moveCount-- > 0)
 		{
-			m_CurrentMoveDirection = hwmUtility.CircleLerp(m_CurrentMoveDirection, MoveDirection, m_TweakableProperties.MaxTurnAngularSpeed * deltaTime);
+			m_CurrentMoveDirection = hwmUtility.CircleLerp(m_CurrentMoveDirection, TargetMoveDirection, m_TweakableProperties.MaxTurnAngularSpeed * deltaTime);
 			Quaternion headRotation = Quaternion.Euler(0, 0, -Vector2.SignedAngle(m_CurrentMoveDirection, Vector2.up));
 			Vector3 lastNodePosition = m_Head.Node.transform.localPosition;
 			Quaternion lastNodeRotation = m_Head.Node.transform.localRotation;
@@ -145,8 +149,8 @@ public class slSnake : hwmActor
 		}
 		m_Controller.SetControllerSnake(this);
 
-		MoveDirection = (initializeData.HeadRotation * Vector2.up).normalized;
-		m_CurrentMoveDirection = MoveDirection;
+		TargetMoveDirection = (initializeData.HeadRotation * Vector2.up).normalized;
+		m_CurrentMoveDirection = TargetMoveDirection;
 	}
 
 	protected override void HandleDispose(object additionalData)

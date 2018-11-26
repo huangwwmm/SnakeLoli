@@ -100,7 +100,6 @@ public class slSnakeEditorWindow : EditorWindow
 			{
 				m_SnakeEditor.Head.transform.position = Vector3.zero;
 				m_SnakeEditor.Head.transform.rotation = Quaternion.identity;
-				ForeachSetSpriteRendererOrderInLayer(m_SnakeEditor.Head, ref currentOrderInLayer);
 			}
 			if (m_SnakeEditor.Clothes != null)
 			{

@@ -12,7 +12,6 @@ public class hwmWorld : MonoBehaviour
 	protected hwmLevel m_Level;
 	protected hwmGameState m_GameState;
 	protected hwmGameMode m_GameMode;
-	protected hwmAISystem m_AISystem;
 
 	public static hwmWorld GetInstance()
 	{
@@ -31,9 +30,6 @@ public class hwmWorld : MonoBehaviour
 		m_Level = hwmSystem.GetInstance().GetWaitingToPlayLevel();
 		hwmDebug.Assert(m_Level != null, "m_Level != null");
 
-		m_AISystem = (Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game, "AISystem")) as GameObject).GetComponent<hwmAISystem>();
-		m_AISystem.transform.SetParent(transform);
-
 		m_GameState = Activator.CreateInstance(Type.GetType(m_Level.GameStateClassName)) as hwmGameState;
 		m_GameState.Initialize();
 		m_GameMode = gameObject.AddComponent(Type.GetType(m_Level.GameModeClassName)) as hwmGameMode;
@@ -45,9 +41,6 @@ public class hwmWorld : MonoBehaviour
 	public IEnumerator EndPlay_Co()
 	{
 		yield return m_GameMode.StartCoroutine(HandleBeforeEndPlay_Co());
-
-		Destroy(m_AISystem);
-		m_AISystem = null;
 
 		m_GameState.Dispose();
 		m_GameState = null;

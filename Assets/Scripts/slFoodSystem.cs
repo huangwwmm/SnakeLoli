@@ -23,10 +23,10 @@ public class slFoodSystem : MonoBehaviour
 	{
 		m_FoodRoot = new GameObject("Foods");
 
-		m_FoodMaxPosition = level.MapSize * 0.5f - slConstants.FOOD_MAP_EDGE;
+		m_FoodMaxPosition = level.MapSize * 0.5f - new Vector2(slConstants.FOOD_MAP_EDGE, slConstants.FOOD_MAP_EDGE);
 		m_FoodMinPosition = -m_FoodMaxPosition;
 
-		m_MaxFood = (int)(level.MapSize.x * level.MapSize.y / level.FoodDensity);
+		m_MaxFood = level.FoodCount;
 
 		m_Quadtree = new hwmQuadtree();
 		m_Quadtree.Initialize(slConstants.FOOD_QUADTREE_MAXDEPTH

@@ -11,6 +11,7 @@ public class slWorld : hwmWorld
 	private slFoodSystem m_FoodSystem;
 	private slPlayerController m_PlayerController;
 	private slUpdateSchedule m_UpdateSchedule;
+	private slAISystem m_AISystem;
 
 	public new static slWorld GetInstance()
 	{
@@ -30,6 +31,11 @@ public class slWorld : hwmWorld
 	public new slGameMode_Free GetGameMode()
 	{
 		return m_GameMode;
+	}
+
+	public slAISystem GetAISystem()
+	{
+		return m_AISystem;
 	}
 
 	public slMap GetMap()
@@ -72,6 +78,7 @@ public class slWorld : hwmWorld
 		m_FoodSystem = (Object.Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game, "FoodSystem")) as GameObject).GetComponent<slFoodSystem>();
 		m_FoodSystem.Initialize(m_Level);
 
+		m_AISystem = gameObject.AddComponent<slAISystem>();
 		m_UpdateSchedule = gameObject.AddComponent<slUpdateSchedule>();
 	}
 

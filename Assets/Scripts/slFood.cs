@@ -29,23 +29,26 @@ public class slFood : MonoBehaviour
 		m_State = State.Idle;
 
 		gameObject.SetActive(true);
+		Collider.enabled = true;
+
 		m_QuadtreeElement = new hwmQuadtree.Element(slWorld.GetInstance().GetFoodSystem().GetQuadtree());
 	}
 
 	public void DeactiveFood()
 	{
-		m_State = State.Notset;
-
 		if (m_QuadtreeElement != null)
 		{
 			m_QuadtreeElement.RemoveElement();
 			m_QuadtreeElement = null;
 		}
 
+		Collider.enabled = false;
 		gameObject.SetActive(false);
 		gameObject.transform.position = slConstants.FOOD_DEACTIVE_POSITION;
 
 		m_Properties = null;
+
+		m_State = State.Notset;
 	}
 
 	public void ChangeFoodType(FoodProperties foodProperties, Color color)
@@ -71,6 +74,7 @@ public class slFood : MonoBehaviour
 		if (m_State == State.Idle)
 		{
 			m_State = State.BeEat;
+			Collider.enabled = false;
 			m_BeEatTransform = beEatTransform;
 			return m_Properties.AddPower;
 		}

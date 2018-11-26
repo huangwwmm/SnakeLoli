@@ -59,7 +59,7 @@ public class slPlayerController : slBaseController
 
 		if (axis != Vector2.zero)
 		{
-			m_Snake.MoveDirection = axis;
+			m_Snake.TargetMoveDirection = axis;
 		}
 	}
 }

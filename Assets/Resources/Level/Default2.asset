@@ -9,11 +9,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 97aa255f4ad7b7a49be8752c90ebcbf5, type: 3}
-  m_Name: Default
+  m_Name: Default2
   m_EditorClassIdentifier: 
   GameStateClassName: slGameState_Free
   GameModeClassName: slGameMode_Free
-  MapSize: {x: 24, y: 16}
-  BotCount: 1
-  FoodCount: 10
+  MapSize: {x: 360, y: 240}
+  BotCount: 50
+  FoodCount: 1000
   RespawnTime: 1
