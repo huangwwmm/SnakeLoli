@@ -24,6 +24,64 @@ public class slSnake : hwmActor
 		return m_Head.Node.transform.localPosition;
 	}
 
+	public void DoUpdateMovement(float deltaTime)
+	{
+		int bodyCountOffset = (m_Power / m_TweakableProperties.PowerToNode - 2)
+			- m_Bodys.Count;
+
+		int moveCount = 1;
+		while (moveCount-- > 0)
+		{
+			m_CurrentMoveDirection = hwmUtility.CircleLerp(m_CurrentMoveDirection, MoveDirection, m_TweakableProperties.MaxTurnAngularSpeed * deltaTime);
+			Quaternion headRotation = Quaternion.Euler(0, 0, -Vector2.SignedAngle(m_CurrentMoveDirection, Vector2.up));
+			Vector3 lastNodePosition = m_Head.Node.transform.localPosition;
+			Quaternion lastNodeRotation = m_Head.Node.transform.localRotation;
+			m_Head.Node.transform.localPosition = m_Head.Node.transform.localPosition + headRotation * new Vector2(0, slConstants.SNAKE_NODE_TO_NODE_DISTANCE);
+			m_Head.Node.transform.localRotation = headRotation;
+
+			Vector3 swapNodePosition = m_Clothes.Node.transform.localPosition;
+			Quaternion swapNodeRotation = m_Clothes.Node.transform.localRotation;
+			m_Clothes.Node.transform.localPosition = lastNodePosition;
+			m_Clothes.Node.transform.localRotation = lastNodeRotation;
+			lastNodePosition = swapNodePosition;
+			lastNodeRotation = swapNodeRotation;
+
+			if (m_Bodys.Count > 0)
+			{
+				BodyNode newFrontNode;
+				if (bodyCountOffset > 0)
+				{
+					bodyCountOffset--;
+					newFrontNode = CreateNode<BodyNode>("Body"
+						, m_Presentation != null ? m_Presentation.MyProperties.Body : null
+						, MyProperties.BodyColliderRadius
+						, slConstants.SNAKE_BODYNODE_CREATE_POSITION
+						, Quaternion.identity);
+				}
+				else
+				{
+					newFrontNode = m_Bodys.PopBack();
+				}
+				BodyNode oldFrontNode = m_Bodys.PeekFront();
+				newFrontNode.Sprite.sortingOrder = oldFrontNode.Sprite.sortingOrder + 1;
+				newFrontNode.Node.transform.localPosition = lastNodePosition;
+				newFrontNode.Node.transform.localRotation = lastNodeRotation;
+				m_Bodys.PushFront(newFrontNode);
+
+				if (newFrontNode.Sprite.sortingOrder >= slConstants.SNAKE_SPRITERENDERER_MAX_ORDERINLAYER)
+				{
+					ResetOrderInLayer();
+				}
+			}
+		}
+
+		while (bodyCountOffset++ < 0)
+		{
+			BodyNode backNode = m_Bodys.PopBack();
+			Destroy(backNode.Node);
+		}
+	}
+
 	protected override void HandleInitialize(object additionalData)
 	{
 		InitializeAdditionalData initializeData = additionalData as InitializeAdditionalData;
@@ -110,72 +168,6 @@ public class slSnake : hwmActor
 		{
 			Destroy(m_Presentation.gameObject);
 			m_Presentation = null;
-		}
-	}
-
-	protected void FixedUpdate()
-	{
-		if (slWorld.GetInstance().GetSnakeUpdateMovementEnable())
-		{
-			UpdateMovement(slConstants.SNAKE_UPDATE_MOVEMENT_TIEM_INTERVAL);
-		}
-	}
-
-	private void UpdateMovement(float deltaTime)
-	{
-		int bodyCountOffset = (m_Power / m_TweakableProperties.PowerToNode - 2)
-			- m_Bodys.Count;
-
-		int moveCount = 1;
-		while (moveCount-- > 0)
-		{
-			m_CurrentMoveDirection = hwmUtility.CircleLerp(m_CurrentMoveDirection, MoveDirection, m_TweakableProperties.MaxTurnAngularSpeed * deltaTime);
-			Quaternion headRotation = Quaternion.Euler(0, 0, -Vector2.SignedAngle(m_CurrentMoveDirection, Vector2.up));
-			Vector3 lastNodePosition = m_Head.Node.transform.localPosition;
-			Quaternion lastNodeRotation = m_Head.Node.transform.localRotation;
-			m_Head.Node.transform.localPosition = m_Head.Node.transform.localPosition + headRotation * new Vector2(0, slConstants.SNAKE_NODE_TO_NODE_DISTANCE);
-			m_Head.Node.transform.localRotation = headRotation;
-
-			Vector3 swapNodePosition = m_Clothes.Node.transform.localPosition;
-			Quaternion swapNodeRotation = m_Clothes.Node.transform.localRotation;
-			m_Clothes.Node.transform.localPosition = lastNodePosition;
-			m_Clothes.Node.transform.localRotation = lastNodeRotation;
-			lastNodePosition = swapNodePosition;
-			lastNodeRotation = swapNodeRotation;
-
-			if (m_Bodys.Count > 0)
-			{
-				BodyNode newFrontNode;
-				if (bodyCountOffset > 0)
-				{
-					bodyCountOffset--;
-					newFrontNode = CreateNode<BodyNode>("Body"
-						, m_Presentation != null ? m_Presentation.MyProperties.Body : null
-						, MyProperties.BodyColliderRadius
-						, slConstants.SNAKE_BODYNODE_CREATE_POSITION
-						, Quaternion.identity);
-				}
-				else
-				{
-					newFrontNode = m_Bodys.PopBack();
-				}
-				BodyNode oldFrontNode = m_Bodys.PeekFront();
-				newFrontNode.Sprite.sortingOrder = oldFrontNode.Sprite.sortingOrder + 1;
-				newFrontNode.Node.transform.localPosition = lastNodePosition;
-				newFrontNode.Node.transform.localRotation = lastNodeRotation;
-				m_Bodys.PushFront(newFrontNode);
-
-				if (newFrontNode.Sprite.sortingOrder >= slConstants.SNAKE_SPRITERENDERER_MAX_ORDERINLAYER)
-				{
-					ResetOrderInLayer();
-				}
-			}
-		}
-
-		while (bodyCountOffset ++ < 0)
-		{
-			BodyNode backNode = m_Bodys.PopBack();
-			Destroy(backNode.Node);
 		}
 	}
 

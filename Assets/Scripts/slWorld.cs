@@ -6,11 +6,11 @@ public class slWorld : hwmWorld
 	protected new static slWorld ms_Instance;
 
 	protected new slLevel m_Level;
+	protected new slGameMode_Free m_GameMode;
 	private slMap m_Map;
 	private slFoodSystem m_FoodSystem;
 	private slPlayerController m_PlayerController;
-	private bool m_SnakeUpdateMovementEnable = false;
-	private float m_SnakeUpdateMovementTime = 0;
+	private slUpdateSchedule m_UpdateSchedule;
 
 	public new static slWorld GetInstance()
 	{
@@ -25,6 +25,11 @@ public class slWorld : hwmWorld
 	public new slLevel GetLevel()
 	{
 		return m_Level;
+	}
+
+	public new slGameMode_Free GetGameMode()
+	{
+		return m_GameMode;
 	}
 
 	public slMap GetMap()
@@ -42,13 +47,15 @@ public class slWorld : hwmWorld
 		return m_PlayerController;
 	}
 
-	public bool GetSnakeUpdateMovementEnable()
+	public slUpdateSchedule GetUpdateSchedule()
 	{
-		return m_SnakeUpdateMovementEnable;
+		return m_UpdateSchedule;
 	}
 
-	protected override IEnumerator HandleBeginPlay_Co()
+	protected override IEnumerator HandleAfterBeginPlay_Co()
 	{
+		m_GameMode = base.m_GameMode as slGameMode_Free;
+
 		hwmSystem.GetInstance().GetInput().JoystickCursor.SetAvailable(false);
 		hwmSystem.GetInstance().GetInput().SetAllAxisEnable(true);
 
@@ -64,10 +71,15 @@ public class slWorld : hwmWorld
 
 		m_FoodSystem = (Object.Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game, "FoodSystem")) as GameObject).GetComponent<slFoodSystem>();
 		m_FoodSystem.Initialize(m_Level);
+
+		m_UpdateSchedule = gameObject.AddComponent<slUpdateSchedule>();
 	}
 
-	protected override IEnumerator HandleEndPlay_Co()
+	protected override IEnumerator HandleBeforeEndPlay_Co()
 	{
+		Destroy(m_UpdateSchedule);
+		m_UpdateSchedule = null;
+
 		m_FoodSystem.Dispose();
 		m_Map.Dispose();
 		yield return null;
@@ -77,20 +89,7 @@ public class slWorld : hwmWorld
 
 		hwmSystem.GetInstance().GetInput().SetAllAxisEnable(false);
 		hwmSystem.GetInstance().GetInput().JoystickCursor.SetAvailable(true);
-	}
 
-	protected void FixedUpdate()
-	{
-		m_SnakeUpdateMovementTime += Time.deltaTime;
-
-		if (m_SnakeUpdateMovementTime >= slConstants.SNAKE_UPDATE_MOVEMENT_TIEM_INTERVAL)
-		{
-			m_SnakeUpdateMovementTime -= slConstants.SNAKE_UPDATE_MOVEMENT_TIEM_INTERVAL;
-			m_SnakeUpdateMovementEnable = true;
-		}
-		else
-		{
-			m_SnakeUpdateMovementEnable = false;
-		}
+		m_GameMode = null;
 	}
 }

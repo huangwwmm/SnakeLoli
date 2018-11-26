@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class hwmBaseVirtualJoystick : MonoBehaviour 
+public class hwmBaseVirtualJoystick : MonoBehaviour
 {
 	public hwmConstants.AxisIndex XAxis;
 	public hwmConstants.AxisIndex YAxis;
@@ -17,10 +17,12 @@ public class hwmBaseVirtualJoystick : MonoBehaviour
 
 	protected void OnDisable()
 	{
-		hwmSystem.GetInstance().GetInput().Axiss[(int)XAxis].OnGetValueFromUI -= OnGetAxisX;
-		hwmSystem.GetInstance().GetInput().Axiss[(int)YAxis].OnGetValueFromUI -= OnGetAxisY;
+		if (hwmSystem.GetInstance() != null) // system equal null when game application abort
+		{
+			hwmSystem.GetInstance().GetInput().Axiss[(int)XAxis].OnGetValueFromUI -= OnGetAxisX;
+			hwmSystem.GetInstance().GetInput().Axiss[(int)YAxis].OnGetValueFromUI -= OnGetAxisY;
+		}
 	}
-
 
 	private void OnGetAxisX(hwmInput.AxisUIEventArgs args)
 	{

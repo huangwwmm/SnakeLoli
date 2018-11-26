@@ -10,9 +10,9 @@ public class hwmWorld : MonoBehaviour
 	protected static hwmWorld ms_Instance;
 
 	protected hwmLevel m_Level;
-	protected GameObject m_GameplayFrameworkObject;
 	protected hwmGameState m_GameState;
 	protected hwmGameMode m_GameMode;
+	protected hwmAISystem m_AISystem;
 
 	public static hwmWorld GetInstance()
 	{
@@ -26,34 +26,46 @@ public class hwmWorld : MonoBehaviour
 
 	public IEnumerator BeginPlay_Co()
 	{
+		yield return StartCoroutine(HandleBeforeBeginPlay_Co());
+
 		m_Level = hwmSystem.GetInstance().GetWaitingToPlayLevel();
 		hwmDebug.Assert(m_Level != null, "m_Level != null");
 
-		m_GameplayFrameworkObject = new GameObject("Gameplay Framework");
+		m_AISystem = (Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game, "AISystem")) as GameObject).GetComponent<hwmAISystem>();
+		m_AISystem.transform.SetParent(transform);
 
 		m_GameState = Activator.CreateInstance(Type.GetType(m_Level.GameStateClassName)) as hwmGameState;
 		m_GameState.Initialize();
-		m_GameMode = m_GameplayFrameworkObject.AddComponent(Type.GetType(m_Level.GameModeClassName)) as hwmGameMode;
-		yield return m_GameMode.StartCoroutine(HandleBeginPlay_Co());
-		yield return m_GameMode.StartCoroutine(m_GameMode.StartPlay_Co());
+		m_GameMode = gameObject.AddComponent(Type.GetType(m_Level.GameModeClassName)) as hwmGameMode;
+
+		yield return StartCoroutine(HandleAfterBeginPlay_Co());
+		yield return StartCoroutine(m_GameMode.StartPlay_Co());
 	}
 
 	public IEnumerator EndPlay_Co()
 	{
-		yield return m_GameMode.StartCoroutine(HandleEndPlay_Co());
+		yield return m_GameMode.StartCoroutine(HandleBeforeEndPlay_Co());
+
+		Destroy(m_AISystem);
+		m_AISystem = null;
 
 		m_GameState.Dispose();
 		m_GameState = null;
-		UnityEngine.Object.Destroy(m_GameMode);
-		UnityEngine.Object.Destroy(m_GameplayFrameworkObject);
+		Destroy(m_GameMode);
+		m_GameMode = null;
 
 		m_Level = null;
-		yield return null;
+		yield return m_GameMode.StartCoroutine(HandleAfterEndPlay_Co());
 	}
 
 	public hwmGameState GetGameState()
 	{
 		return m_GameState;
+	}
+
+	public hwmGameMode GetGameMode()
+	{
+		return m_GameMode;
 	}
 
 	public hwmLevel GetLevel()
@@ -83,12 +95,22 @@ public class hwmWorld : MonoBehaviour
 		return true;
 	}
 
-	protected virtual IEnumerator HandleBeginPlay_Co()
+	protected virtual IEnumerator HandleAfterBeginPlay_Co()
 	{
 		yield return null;
 	}
 
-	protected virtual IEnumerator HandleEndPlay_Co()
+	protected virtual IEnumerator HandleBeforeEndPlay_Co()
+	{
+		yield return null;
+	}
+
+	protected virtual IEnumerator HandleAfterEndPlay_Co()
+	{
+		yield return null;
+	}
+
+	protected virtual IEnumerator HandleBeforeBeginPlay_Co()
 	{
 		yield return null;
 	}

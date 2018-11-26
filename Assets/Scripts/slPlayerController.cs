@@ -10,6 +10,7 @@ public class slPlayerController : slBaseController
 	/// cache for update call
 	/// </summary>
 	private hwmInput m_Input;
+
 	private Vector3 m_CameraVelocity = Vector3.zero;
 
 	protected override void HandleInitialize()

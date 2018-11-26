@@ -48,6 +48,7 @@ public class slBaseController : MonoBehaviour
 	{
 
 	}
+
 	protected virtual void HandleUnController()
 	{
 

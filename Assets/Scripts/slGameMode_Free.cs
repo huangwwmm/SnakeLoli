@@ -8,6 +8,25 @@ public class slGameMode_Free : hwmGameMode
 	private Vector2 m_SnakeSpawnMinPosition;
 	private Vector2 m_SnakeSpawnMaxPosition;
 
+	public void DoUpdateRespawnPlayer()
+	{
+		if (slWorld.GetInstance().GetGameState().GetMatchState() == hwmMatchState.InProgress)
+		{
+			List<hwmPlayerState> playerStates = slWorld.GetInstance().GetGameState().GetPlayerStates();
+			for (int iPlayerState = 0; iPlayerState < playerStates.Count; iPlayerState++)
+			{
+				slPlayerState_Free iterPlayerState = playerStates[iPlayerState] as slPlayerState_Free;
+
+				if (iterPlayerState.ControllerSnake == null
+					&& Time.time - iterPlayerState.LastDeadTime > slWorld.GetInstance().GetLevel().RespawnTime)
+				{
+					SpawnPlayer(iterPlayerState);
+					return;
+				}
+			}
+		}
+	}
+
 	protected override IEnumerator HandleStartPlay_Co()
 	{
 		hwmObserver.OnActorDestroy += HandleActorDestroy;
@@ -41,39 +60,10 @@ public class slGameMode_Free : hwmGameMode
 		SpawnPlayer(playerState);
 	}
 
-	private void HandleActorDestroy(hwmActor actor)
-	{
-		if (actor is slSnake)
-		{
-			slPlayerState_Free playerState = slWorld.GetInstance().GetGameState().FindPlayerStateByPlayerID(actor.GetGuid()) as slPlayerState_Free;
-			playerState.LastDeadTime = Time.time;
-		}
-	}
-
 	protected override IEnumerator HandleEndPlay_Co()
 	{
 		yield return null;
 		hwmObserver.OnActorDestroy -= HandleActorDestroy;
-	}
-
-	protected void Update()
-	{
-		if (slWorld.GetInstance().GetGameState().GetMatchState() == hwmMatchState.InProgress
-			&& (Time.frameCount + 3) % 5 == 0) // for performance
-		{
-			List<hwmPlayerState> playerStates = slWorld.GetInstance().GetGameState().GetPlayerStates();
-			for (int iPlayerState = 0; iPlayerState < playerStates.Count; iPlayerState++)
-			{
-				slPlayerState_Free iterPlayerState = playerStates[iPlayerState] as slPlayerState_Free;
-
-				if (iterPlayerState.ControllerSnake == null
-					&& !slWorld.GetInstance().GetSnakeUpdateMovementEnable() // for preformance
-					&& Time.time - iterPlayerState.LastDeadTime > slWorld.GetInstance().GetLevel().RespawnTime)
-				{
-					SpawnPlayer(iterPlayerState);
-				}
-			}
-		}
 	}
 
 	private void SpawnPlayer(slPlayerState_Free playerState)
@@ -107,5 +97,14 @@ public class slGameMode_Free : hwmGameMode
 		position = hwmRandom.NextVector2(m_SnakeSpawnMinPosition, m_SnakeSpawnMaxPosition);
 
 		// UNDONE check safe
+	}
+
+	private void HandleActorDestroy(hwmActor actor)
+	{
+		if (actor is slSnake)
+		{
+			slPlayerState_Free playerState = slWorld.GetInstance().GetGameState().FindPlayerStateByPlayerID(actor.GetGuid()) as slPlayerState_Free;
+			playerState.LastDeadTime = Time.time;
+		}
 	}
 }
