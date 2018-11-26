@@ -84,10 +84,14 @@ public class slBaseController : MonoBehaviour
 		{
 			if (hits[iHit].collider.transform.parent != m_Snake.transform)
 			{
-				return true;
+				return false;
+			}
+			else if (hits[iHit].collider.gameObject.layer == (int)slConstants.Layer.Wall)
+			{
+				return false;
 			}
 		}
-		return false;
+		return true;
 	}
 
 	protected bool IsHitPredict()
