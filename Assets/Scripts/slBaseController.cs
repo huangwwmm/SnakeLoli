@@ -34,6 +34,16 @@ public class slBaseController : MonoBehaviour
 		m_Snake = null;
 	}
 
+	public virtual bool IsAI()
+	{
+		return false;
+	}
+
+	public virtual bool IsPlayer()
+	{
+		return false;
+	}
+
 	protected virtual void HandleInitialize()
 	{
 

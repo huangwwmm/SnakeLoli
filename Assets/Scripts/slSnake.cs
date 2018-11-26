@@ -13,6 +13,8 @@ public class slSnake : hwmActor
 	private slSnakePresentation m_Presentation;
 	private slSnakeTweakableProperties m_TweakableProperties;
 
+	private slBaseController m_Controller;
+
 	private HeadNode m_Head;
 	private ClothesNode m_Clothes;
 	private hwmDeque<BodyNode> m_Bodys;
@@ -82,6 +84,11 @@ public class slSnake : hwmActor
 		}
 	}
 
+	public slBaseController GetController()
+	{
+		return m_Controller;
+	}
+
 	protected override void HandleInitialize(object additionalData)
 	{
 		InitializeAdditionalData initializeData = additionalData as InitializeAdditionalData;
@@ -127,17 +134,16 @@ public class slSnake : hwmActor
 			m_Bodys.PushBack(node);
 		}
 
-		slBaseController controller;
 		if (initializeData.IsBot)
 		{
-			controller = gameObject.AddComponent<slAIController>();
-			controller.Initialize();
+			m_Controller = gameObject.AddComponent<slAIController>();
+			m_Controller.Initialize();
 		}
 		else
 		{
-			controller = slWorld.GetInstance().GetPlayerController();
+			m_Controller = slWorld.GetInstance().GetPlayerController();
 		}
-		controller.SetControllerSnake(this);
+		m_Controller.SetControllerSnake(this);
 
 		MoveDirection = (initializeData.HeadRotation * Vector2.up).normalized;
 		m_CurrentMoveDirection = MoveDirection;
@@ -155,6 +161,8 @@ public class slSnake : hwmActor
 				slWorld.GetInstance().GetFoodSystem().AddCreateEvent(slFood.FoodType.Large, node.Node.transform.position, MyProperties.DeadFoodColor);
 			}
 		}
+
+		m_Controller = null;
 
 		m_Head.Trigger.OnTriggerEnter -= OnTrigger;
 

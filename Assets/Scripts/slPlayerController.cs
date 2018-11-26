@@ -13,6 +13,11 @@ public class slPlayerController : slBaseController
 
 	private Vector3 m_CameraVelocity = Vector3.zero;
 
+	public override bool IsPlayer()
+	{
+		return true;
+	}
+
 	protected override void HandleInitialize()
 	{
 		m_Camera = transform.Find("Camera").GetComponent<Camera>();
