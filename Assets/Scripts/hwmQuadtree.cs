@@ -95,7 +95,7 @@ public class hwmQuadtree
 		/// </summary>
 		private bool m_IsLeaf;
 		private int m_Depth;
-		private hwmFreeList<Element> m_Elements;
+		private hwmBetterList<Element> m_Elements;
 
 		public void Initialize(hwmQuadtree owner, Node parent, hwmBounds2D bounds)
 		{
@@ -110,7 +110,7 @@ public class hwmQuadtree
 
 			m_IsLeaf = true;
 			m_Depth = isRoot ? 1 : parent.m_Depth + 1;
-			m_Elements = new hwmFreeList<Element>();
+			m_Elements = new hwmBetterList<Element>();
 		}
 
 		public void Dispose()
@@ -188,7 +188,7 @@ public class hwmQuadtree
 			}
 		}
 
-		public hwmFreeList<Element> GetElements()
+		public hwmBetterList<Element> GetElements()
 		{
 			return m_Elements;
 		}

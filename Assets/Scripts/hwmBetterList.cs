@@ -5,7 +5,7 @@ using System.Collections.Generic;
 /// <summary>
 /// unordered, fast
 /// </summary>
-public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, ICollection<T>, IList<T>
+public class hwmBetterList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, ICollection<T>, IList<T>
 {
 	private const int DEFAULT_CAPACITY = 4;
 	/// <summary>
@@ -120,7 +120,7 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 	/// The list is initially empty and has a capacity of zero.
 	/// Upon adding the first element to the list the capacity is increased to 16, and then increased in multiples of two as required.
 	/// </summary>
-	public hwmFreeList()
+	public hwmBetterList()
 	{
 		m_Items = ms_EmptyItems;
 		Count = 0;
@@ -130,7 +130,7 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 	/// Constructs a List with a given initial capacity.
 	/// The list is initially empty, but will have room for the given number of elements before any reallocations are required.
 	/// </summary>
-	public hwmFreeList(int capacity)
+	public hwmBetterList(int capacity)
 	{
 		hwmDebug.Assert(capacity >= 0, "capacity >= 0");
 
@@ -338,7 +338,7 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 	[Serializable]
 	public struct Enumerator : IEnumerator<T>, IEnumerator
 	{
-		private hwmFreeList<T> m_List;
+		private hwmBetterList<T> m_List;
 		private int m_Index;
 		private readonly int m_Version;
 
@@ -346,7 +346,7 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 
 		object IEnumerator.Current { get { return Current; } }
 
-		internal Enumerator(hwmFreeList<T> list)
+		internal Enumerator(hwmBetterList<T> list)
 		{
 			m_List = list;
 			m_Index = 0;
@@ -363,7 +363,7 @@ public class hwmFreeList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, I
 			else
 			{
 				// Q: why use localList?
-				hwmFreeList<T> localList = m_List;
+				hwmBetterList<T> localList = m_List;
 
 				if ((uint)m_Index < (uint)localList.Count)
 				{

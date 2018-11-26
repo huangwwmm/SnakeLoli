@@ -3,13 +3,13 @@ using UnityEngine;
 
 public class slUpdateSchedule : MonoBehaviour
 {
-	private hwmFreeList<slSnake> m_Snakes;
+	private hwmBetterList<slSnake> m_Snakes;
 	private float m_UpdateSnakeMovementTime = 0;
 	private int m_UpdateRespawnPlayerFrame = 0;
 
 	protected void Awake()
 	{
-		m_Snakes = new hwmFreeList<slSnake>();
+		m_Snakes = new hwmBetterList<slSnake>();
 
 		hwmObserver.OnActorCreate += OnActorCreate;
 		hwmObserver.OnActorDestroy += OnActorDestroy;
