@@ -39,6 +39,8 @@ public class slSnake : hwmActor
 			Quaternion lastNodeRotation = m_Head.Node.transform.localRotation;
 			m_Head.Node.transform.localPosition = m_Head.Node.transform.localPosition + headRotation * new Vector2(0, slConstants.SNAKE_NODE_TO_NODE_DISTANCE);
 			m_Head.Node.transform.localRotation = headRotation;
+			m_Head.Predict.transform.localPosition = m_Head.Node.transform.localPosition;
+			m_Head.Predict.transform.localRotation = m_Head.Node.transform.localRotation;
 
 			Vector3 swapNodePosition = m_Clothes.Node.transform.localPosition;
 			Quaternion swapNodeRotation = m_Clothes.Node.transform.localRotation;
@@ -86,19 +88,6 @@ public class slSnake : hwmActor
 	public slBaseController GetController()
 	{
 		return m_Controller;
-	}
-
-	public void SetColliderEnableForAI(bool enable)
-	{
-		m_Head.Collider.enabled = enable;
-		m_Head.PredictCollider.enabled = enable;
-
-		m_Clothes.Collider.enabled = enable;
-
-		foreach(BodyNode node in m_Bodys)
-		{
-			node.Collider.enabled = enable;
-		}
 	}
 
 	protected override void HandleInitialize(object additionalData)
@@ -220,10 +209,12 @@ public class slSnake : hwmActor
 			headNode.Rigidbody = headNode.Node.AddComponent<Rigidbody2D>();
 			headNode.Rigidbody.isKinematic = true;
 			headNode.Trigger.OnTriggerEnter += OnTrigger;
-			GameObject predictGameObject = new GameObject("Predict");
-			predictGameObject.transform.SetParent(headNode.Node.transform, false);
-			predictGameObject.layer = (int)slConstants.Layer.SnakePredict;
-			headNode.PredictCollider = predictGameObject.AddComponent<BoxCollider2D>();
+			headNode.Predict = new GameObject("Predict");
+			headNode.Predict.transform.SetParent(transform);
+			headNode.Predict.transform.localPosition = position;
+			headNode.Predict.transform.localRotation = rotation;
+			headNode.Predict.layer = (int)slConstants.Layer.SnakePredict;
+			headNode.PredictCollider = headNode.Predict.AddComponent<BoxCollider2D>();
 			headNode.PredictCollider.size = new Vector2(colliderRadius * slConstants.SNAKE_PREDICT_SIZE_X, slConstants.SNAKE_NODE_TO_NODE_DISTANCE * slConstants.SNAKE_PREDICT_SIZE_Y);
 			headNode.PredictCollider.offset = new Vector2(0, headNode.PredictCollider.size.y * 0.5f + colliderRadius);
 		}
@@ -305,6 +296,7 @@ public class slSnake : hwmActor
 		public new SpriteRenderer[] Sprite;
 		public slSnakeHeadTrigger Trigger;
 		public Rigidbody2D Rigidbody;
+		public GameObject Predict;
 		public BoxCollider2D PredictCollider;
 	}
 

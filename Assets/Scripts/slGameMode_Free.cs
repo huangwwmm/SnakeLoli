@@ -44,6 +44,7 @@ public class slGameMode_Free : hwmGameMode
 			iterBotState.PlayerName = "Bot_" + iBot.ToString();
 			iterBotState.PlayerID = iBot;
 			iterBotState.SnakeName = "10000";
+			iterBotState.CreateNodeCount = 5;
 			slWorld.GetInstance().GetGameState().AddPlayerState(iterBotState);
 			SpawnPlayer(iterBotState);
 
@@ -56,6 +57,7 @@ public class slGameMode_Free : hwmGameMode
 		playerState.PlayerName = "Player";
 		playerState.PlayerID = 1000;
 		playerState.SnakeName = "40000";
+		playerState.CreateNodeCount = 5;
 		slWorld.GetInstance().GetGameState().AddPlayerState(playerState);
 		SpawnPlayer(playerState);
 	}
@@ -81,7 +83,7 @@ public class slGameMode_Free : hwmGameMode
 		initializeAdditionalData.HeadRotation = spawnRotation;
 		initializeAdditionalData.IsBot = playerState.IsBot;
 		initializeAdditionalData.TweakableProperties = slConstants.DEFAULT_SNAKE_TWEAKABLE_PROPERTIES;
-		initializeAdditionalData.NodeCount = 5;
+		initializeAdditionalData.NodeCount = playerState.CreateNodeCount;
 		playerState.ControllerSnake = slWorld.GetInstance().CreateActor("Snake_" + playerState.PlayerID.ToString()
 			, playerState.PlayerID
 			, "Snake_" + playerState.SnakeName

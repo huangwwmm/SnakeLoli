@@ -13,13 +13,15 @@ public class slAIController : slBaseController
 
 	public void DoAIUpdate()
 	{
-		m_Snake.SetColliderEnableForAI(false);
 		Vector2 targetDirection = m_Snake.TargetMoveDirection;
 
-		if (m_NotChangeDirectionTimes >= slConstants.SNAKE_RANDMOVEMOENT_WHENNOTCHANGED_TIMES
-			&& hwmRandom.RandFloat() < slConstants.SNAKE_RANDMOVEMOENT_WHENNOTCHANGED_PROBABILITY)
+		if (m_NotChangeDirectionTimes >= slConstants.SNAKE_RANDMOVEMOENT_WHENNOTCHANGED_TIMES)
 		{
-			targetDirection = hwmRandom.RandVector2(-Vector2.one, Vector2.one);
+			if (hwmRandom.RandFloat() < slConstants.SNAKE_RANDMOVEMOENT_WHENNOTCHANGED_PROBABILITY)
+			{ 
+				targetDirection = hwmRandom.RandVector2(-Vector2.one, Vector2.one);
+			}
+			m_NotChangeDirectionTimes = -1;
 		}
 
 		CalculateSafeArea(ref targetDirection.x, m_Snake.GetHeadPosition().x, m_SafeAreaMinPosition.x, m_SafeAreaMaxPosition.x);
@@ -32,7 +34,8 @@ public class slAIController : slBaseController
 					? -slConstants.SNAKE_DETECT_ANGLE
 					: slConstants.SNAKE_DETECT_ANGLE);
 			float totalAngle = 0;
-			Vector2 currentCalculateDirection = targetDirection;
+			Vector2 currentCalculateDirection = Quaternion.Euler(0, 0, hwmRandom.RandFloat(-slConstants.SNAKE_BEGIN_DETECT_RAND_MAXANGLE, slConstants.SNAKE_BEGIN_DETECT_RAND_MAXANGLE))
+				* targetDirection;
 			bool ignorePredict = IsHitPredict();
 			while (true)
 			{
@@ -51,10 +54,9 @@ public class slAIController : slBaseController
 			}
 		}
 
-		m_NotChangeDirectionTimes = m_Snake.TargetMoveDirection == targetDirection.normalized 
+		m_NotChangeDirectionTimes = m_Snake.TargetMoveDirection == targetDirection.normalized
 			? m_NotChangeDirectionTimes + 1 : 0;
 		m_Snake.TargetMoveDirection = targetDirection.normalized;
-		m_Snake.SetColliderEnableForAI(true);
 	}
 
 	protected override void HandleInitialize()
