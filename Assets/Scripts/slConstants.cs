@@ -38,13 +38,23 @@ public class slConstants
 	public static readonly Vector2 SNAKE_SPAWN_SAFEAREA_SIZE = new Vector2(6, 12);
 	public const float SNAKE_SPAWN_SAFEAREA_YAXIS_OFFSET = -1.6f;
 	public const float SNAKE_NODE_TO_NODE_DISTANCE = 0.9f;
-	public const float SNAKE_AIMOVEMENT_SAFEAREA_MAP_EDGE = 5;
+
+	public const float SNAKE_PREDICT_SIZE_X = 2.4f;
+	public const float SNAKE_PREDICT_SIZE_Y = 6.0f;
 
 	public const string DEFAULT_SNAKE_TWEAKABLE_PROPERTIES = "Default";
 
 	public const float UPDATE_SNAKE_MOVEMENT_TIEM_INTERVAL = 0.1f;
 	public const int UPDATE_RESPAWN_FRAME_INTERVAL = 3;
-	public const int UPDATE_ALL_AI_FRAME = 5;
+	public const int UPDATE_ALL_AI_FRAME = 3;
+
+	#region maybe package to aiSetting
+	public const float SNAKE_AIMOVEMENT_SAFEAREA_MAP_EDGE = 5;
+	public const float SNAKE_DETECT_DISTANCE = SNAKE_NODE_TO_NODE_DISTANCE * 6.0f;
+	public const float SNAKE_DETECT_ANGLE = 12.0f;
+	public const int SNAKE_RANDMOVEMOENT_WHENNOTCHANGED_TIMES = 16;
+	public const float SNAKE_RANDMOVEMOENT_WHENNOTCHANGED_PROBABILITY = 0.1f;
+	#endregion
 
 	public enum Layer
 	{
@@ -52,5 +62,6 @@ public class slConstants
 		Food = 9,
 		SnakeHead = 10,
 		Snake = 11,
+		SnakePredict = 12,
 	}
 }

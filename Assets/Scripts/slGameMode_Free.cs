@@ -94,7 +94,7 @@ public class slGameMode_Free : hwmGameMode
 	{
 		float angle = hwmRandom.RandFloat(0, 360);// TODO calculate spawn rotation
 		rotation = Quaternion.Euler(0, 0, angle);
-		position = hwmRandom.NextVector2(m_SnakeSpawnMinPosition, m_SnakeSpawnMaxPosition);
+		position = hwmRandom.RandVector2(m_SnakeSpawnMinPosition, m_SnakeSpawnMaxPosition);
 
 		// UNDONE check safe
 	}

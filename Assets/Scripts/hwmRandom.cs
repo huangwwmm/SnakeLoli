@@ -24,7 +24,7 @@ public static class hwmRandom
 		return new Color(RandFloat(), RandFloat(), RandFloat(), a);
 	}
 
-	public static Vector2 NextVector2(Vector2 min, Vector2 max)
+	public static Vector2 RandVector2(Vector2 min, Vector2 max)
 	{
 		return new Vector2(RandFloat(min.x, max.x), RandFloat(min.y, max.y));
 	}

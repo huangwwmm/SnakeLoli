@@ -26,11 +26,6 @@ public class slSnake : hwmActor
 		return m_Head.Node.transform.localPosition;
 	}
 
-	public Vector2 GetCurrentMoveDirection()
-	{
-		return m_CurrentMoveDirection;
-	}
-
 	public void DoUpdateMovement(int moveCount, float deltaTime)
 	{
 		int bodyCountOffset = (m_Power / m_TweakableProperties.PowerToNode - 2)
@@ -91,6 +86,19 @@ public class slSnake : hwmActor
 	public slBaseController GetController()
 	{
 		return m_Controller;
+	}
+
+	public void SetColliderEnableForAI(bool enable)
+	{
+		m_Head.Collider.enabled = enable;
+		m_Head.PredictCollider.enabled = enable;
+
+		m_Clothes.Collider.enabled = enable;
+
+		foreach(BodyNode node in m_Bodys)
+		{
+			node.Collider.enabled = enable;
+		}
 	}
 
 	protected override void HandleInitialize(object additionalData)
@@ -183,6 +191,12 @@ public class slSnake : hwmActor
 		}
 	}
 
+	protected void OnDrawGizmos()
+	{
+		Gizmos.color = Color.black;
+		Gizmos.DrawLine(m_Head.Node.transform.localPosition, m_Head.Node.transform.localPosition + (Vector3)TargetMoveDirection * slConstants.SNAKE_DETECT_DISTANCE);
+	}
+
 	private T CreateNode<T>(string name, GameObject presentation, float colliderRadius, Vector3 position, Quaternion rotation) where T : BodyNode, new()
 	{
 		T node = new T();
@@ -206,6 +220,12 @@ public class slSnake : hwmActor
 			headNode.Rigidbody = headNode.Node.AddComponent<Rigidbody2D>();
 			headNode.Rigidbody.isKinematic = true;
 			headNode.Trigger.OnTriggerEnter += OnTrigger;
+			GameObject predictGameObject = new GameObject("Predict");
+			predictGameObject.transform.SetParent(headNode.Node.transform, false);
+			predictGameObject.layer = (int)slConstants.Layer.SnakePredict;
+			headNode.PredictCollider = predictGameObject.AddComponent<BoxCollider2D>();
+			headNode.PredictCollider.size = new Vector2(colliderRadius * slConstants.SNAKE_PREDICT_SIZE_X, slConstants.SNAKE_NODE_TO_NODE_DISTANCE * slConstants.SNAKE_PREDICT_SIZE_Y);
+			headNode.PredictCollider.offset = new Vector2(0, headNode.PredictCollider.size.y * 0.5f + colliderRadius);
 		}
 
 		if (presentation != null)
@@ -285,6 +305,7 @@ public class slSnake : hwmActor
 		public new SpriteRenderer[] Sprite;
 		public slSnakeHeadTrigger Trigger;
 		public Rigidbody2D Rigidbody;
+		public BoxCollider2D PredictCollider;
 	}
 
 	public class ClothesNode : BodyNode

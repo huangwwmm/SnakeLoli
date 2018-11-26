@@ -93,7 +93,7 @@ public class slFoodSystem : MonoBehaviour
 		for (int iFood = 0; iFood < m_MaxFood; iFood++)
 		{
 			CreateFood(slFood.FoodType.Normal
-				, hwmRandom.NextVector2(m_FoodMinPosition, m_FoodMaxPosition)
+				, hwmRandom.RandVector2(m_FoodMinPosition, m_FoodMaxPosition)
 				, hwmRandom.RandColorRGB());
 
 			if (iFood % 1000 == 0)
@@ -132,7 +132,7 @@ public class slFoodSystem : MonoBehaviour
 		while (needCreateFood-- > 0)
 		{
 			CreateFood(slFood.FoodType.Normal
-				, hwmRandom.NextVector2(m_FoodMinPosition, m_FoodMaxPosition)
+				, hwmRandom.RandVector2(m_FoodMinPosition, m_FoodMaxPosition)
 				, hwmRandom.RandColorRGB());
 		}
 	}
