@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class slSnake : hwmActor
 {
@@ -18,6 +16,7 @@ public class slSnake : hwmActor
 	private HeadNode m_Head;
 	private ClothesNode m_Clothes;
 	private hwmDeque<BodyNode> m_Bodys;
+	private SpeedState m_SpeedState;
 
 	private int m_Power;
 
@@ -26,12 +25,32 @@ public class slSnake : hwmActor
 		return m_Head.Node.transform.localPosition;
 	}
 
-	public void DoUpdateMovement(int moveCount, float deltaTime)
+	public void DoUpdateMovement(int moveTimes, float deltaTime)
 	{
 		int bodyCountOffset = (m_Power / m_TweakableProperties.PowerToNode - 2)
 			- m_Bodys.Count;
 
-		while (moveCount-- > 0)
+		int moveNodeCountPreTime = 0;
+		switch(m_SpeedState)
+		{
+			case SpeedState.Normal:
+				moveNodeCountPreTime = m_TweakableProperties.NormalMoveNodeCount;
+				break;
+			case SpeedState.SpeedUp:
+				moveNodeCountPreTime = m_TweakableProperties.SpeedUpMoveNodeCount;
+				m_Power -= moveTimes * m_TweakableProperties.SpeedUpCostPower;
+				if (!CanKeepSpeedUp())
+				{
+					m_SpeedState = SpeedState.Normal;
+				}
+				break;
+			default:
+				hwmDebug.Assert(false, "invalid SpeedState: " + m_SpeedState);
+				break;
+		}
+
+		int moveNodeCount = moveNodeCountPreTime * moveTimes;
+		while (moveNodeCount-- > 0)
 		{
 			m_CurrentMoveDirection = hwmUtility.CircleLerp(m_CurrentMoveDirection, TargetMoveDirection, m_TweakableProperties.MaxTurnAngularSpeed * deltaTime);
 			Quaternion headRotation = Quaternion.Euler(0, 0, -Vector2.SignedAngle(m_CurrentMoveDirection, Vector2.up));
@@ -88,6 +107,23 @@ public class slSnake : hwmActor
 	public slBaseController GetController()
 	{
 		return m_Controller;
+	}
+
+	public bool CanSpeedUp()
+	{
+		return m_SpeedState == SpeedState.Normal
+			? CanEnterSpeedUp()
+			: CanKeepSpeedUp();
+	}
+
+	public void TryChangeSpeedState(SpeedState speedState)
+	{
+		if (m_SpeedState == SpeedState.SpeedUp
+			&& !CanSpeedUp())
+		{
+			m_SpeedState = SpeedState.Normal;
+		}
+		m_SpeedState = speedState;
 	}
 
 	protected override void HandleInitialize(object additionalData)
@@ -148,6 +184,7 @@ public class slSnake : hwmActor
 
 		TargetMoveDirection = (initializeData.HeadRotation * Vector2.up).normalized;
 		m_CurrentMoveDirection = TargetMoveDirection;
+		m_SpeedState = SpeedState.Normal;
 	}
 
 	protected override void HandleDispose(object additionalData)
@@ -163,6 +200,7 @@ public class slSnake : hwmActor
 			}
 		}
 
+		m_Controller.UnControllerSnake();
 		m_Controller = null;
 
 		m_Head.Trigger.OnTriggerEnter -= OnTrigger;
@@ -263,6 +301,16 @@ public class slSnake : hwmActor
 		}
 	}
 
+	private bool CanEnterSpeedUp()
+	{
+		return m_Power > m_TweakableProperties.SpeedUpEnterRequiredNode * m_TweakableProperties.PowerToNode;
+	}
+
+	private bool CanKeepSpeedUp()
+	{
+		return m_Power > m_TweakableProperties.SpeedUpKeepRequiredNode * m_TweakableProperties.PowerToNode;
+	}
+
 	[System.Serializable]
 	public class Properties
 	{
@@ -316,5 +364,11 @@ public class slSnake : hwmActor
 		HitWall,
 		HitSnake,
 		FinishGame
+	}
+
+	public enum SpeedState
+	{
+		Normal,
+		SpeedUp,
 	}
 }

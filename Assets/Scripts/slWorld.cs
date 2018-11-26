@@ -5,8 +5,6 @@ public class slWorld : hwmWorld
 {
 	protected new static slWorld ms_Instance;
 
-	protected new slLevel m_Level;
-	protected new slGameMode_Free m_GameMode;
 	private slMap m_Map;
 	private slFoodSystem m_FoodSystem;
 	private slPlayerController m_PlayerController;
@@ -24,12 +22,12 @@ public class slWorld : hwmWorld
 
 	public new slLevel GetLevel()
 	{
-		return m_Level;
+		return m_Level as slLevel;
 	}
 
 	public new slGameMode_Free GetGameMode()
 	{
-		return m_GameMode;
+		return m_GameMode as slGameMode_Free;
 	}
 
 	public slMap GetMap()
@@ -57,7 +55,8 @@ public class slWorld : hwmWorld
 		m_GameMode = base.m_GameMode as slGameMode_Free;
 
 		hwmSystem.GetInstance().GetInput().JoystickCursor.SetAvailable(false);
-		hwmSystem.GetInstance().GetInput().SetAllAxisEnable(true);
+		hwmSystem.GetInstance().GetInput().SetAllAxisEnable(false);
+		hwmSystem.GetInstance().GetInput().SetAllButtonEnable(false);
 
 		m_PlayerController = (Object.Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game, "PlayerController")) as GameObject)
 			.GetComponent<slPlayerController>();
@@ -66,11 +65,11 @@ public class slWorld : hwmWorld
 		m_Level = base.m_Level as slLevel;
 
 		m_Map = (Object.Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game, "Map")) as GameObject).GetComponent<slMap>();
-		m_Map.Initialize(m_Level.MapSize);
+		m_Map.Initialize(GetLevel().MapSize);
 		yield return null;
 
 		m_FoodSystem = (Object.Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game, "FoodSystem")) as GameObject).GetComponent<slFoodSystem>();
-		m_FoodSystem.Initialize(m_Level);
+		m_FoodSystem.Initialize(GetLevel());
 
 		m_UpdateSchedule = gameObject.AddComponent<slUpdateSchedule>();
 	}
@@ -81,15 +80,17 @@ public class slWorld : hwmWorld
 		m_UpdateSchedule = null;
 
 		m_FoodSystem.Dispose();
+		Destroy(m_FoodSystem);
+		m_FoodSystem = null;
+
 		m_Map.Dispose();
+		Destroy(m_Map);
+		m_Map = null;
 		yield return null;
 
-		m_Level = null;
 		m_PlayerController.Dispose();
 
 		hwmSystem.GetInstance().GetInput().SetAllAxisEnable(false);
 		hwmSystem.GetInstance().GetInput().JoystickCursor.SetAvailable(true);
-
-		m_GameMode = null;
 	}
 }

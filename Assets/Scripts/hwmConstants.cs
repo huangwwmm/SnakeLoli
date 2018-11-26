@@ -18,7 +18,7 @@
 	/// </summary>
 	public enum ButtonIndex
 	{
-
+		Skill1 = 0,
 	}
 
 	/// <summary>

@@ -9,6 +9,8 @@ public class slFood : MonoBehaviour
 	private FoodProperties m_Properties;
 	private State m_State;
 	private Transform m_BeEatTransform;
+	private float m_BeEatAnimationRemainTime;
+	private float m_RemainLifeTime;
 
 	public void Initialize()
 	{
@@ -56,6 +58,7 @@ public class slFood : MonoBehaviour
 		m_Properties = foodProperties;
 		Collider.radius = m_Properties.BeEatRadius;
 		m_QuadtreeElement.Bounds.extents = new Vector2(m_Properties.SpriteRadius, m_Properties.SpriteRadius);
+		m_RemainLifeTime = m_Properties.LifeTime;
 
 		if (m_Presentation)
 		{
@@ -76,6 +79,7 @@ public class slFood : MonoBehaviour
 			m_State = State.BeEat;
 			Collider.enabled = false;
 			m_BeEatTransform = beEatTransform;
+			m_BeEatAnimationRemainTime = Vector3.Distance(m_BeEatTransform.localPosition, transform.localPosition) / slConstants.FOOD_BEEAT_MOVE_SPEED;
 			return m_Properties.AddPower;
 		}
 		else
@@ -92,12 +96,22 @@ public class slFood : MonoBehaviour
 			{
 				Vector3 moveToPosition = Vector3.MoveTowards(transform.localPosition, m_BeEatTransform.localPosition, slConstants.FOOD_BEEAT_MOVE_SPEED * Time.deltaTime);
 				transform.localPosition = moveToPosition;
-				if ((moveToPosition - m_BeEatTransform.localPosition).sqrMagnitude < 0.1f)
+				m_BeEatAnimationRemainTime -= Time.deltaTime;
+				if (m_BeEatAnimationRemainTime <= 0
+					|| (moveToPosition - m_BeEatTransform.localPosition).sqrMagnitude < 0.1f)
 				{
 					slWorld.GetInstance().GetFoodSystem().DestroyFood(this);
 				}
 			}
 			else
+			{
+				slWorld.GetInstance().GetFoodSystem().DestroyFood(this);
+			}
+		}
+		else if (m_State == State.Idle)
+		{
+			m_RemainLifeTime -= Time.deltaTime;
+			if (m_RemainLifeTime < 0)
 			{
 				slWorld.GetInstance().GetFoodSystem().DestroyFood(this);
 			}
@@ -124,5 +138,6 @@ public class slFood : MonoBehaviour
 		public float SpriteRadius;
 		public float BeEatRadius;
 		public int AddPower;
+		public float LifeTime;
 	}
 }

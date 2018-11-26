@@ -15,7 +15,7 @@ public class slConstants
 	public const float FOOD_QUADTREE_LOOSESCALE = 1.2f;
 
 	public static readonly Vector3 FOOD_DEACTIVE_POSITION = new Vector3(10000, 10000, 0);
-	public const float FOOD_MAP_EDGE = 2;
+	public const float FOOD_MAP_EDGE = 0.5f;
 
 	public const float FOOD_BEEAT_MOVE_SPEED = 12;
 	public const int FOOD_SYSTEM_MAXCREATE_PREFRAME = 20;

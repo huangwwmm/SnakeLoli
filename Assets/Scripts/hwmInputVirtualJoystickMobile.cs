@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class hwmVirtualJoystickMobile : hwmBaseVirtualJoystick, IBeginDragHandler, IDragHandler, IEndDragHandler
+public class hwmInputVirtualJoystickMobile : hwmBaseInputVirtualJoystick, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
 	public RectTransform JoystickRect;
 	public RectTransform CursorRect;

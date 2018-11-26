@@ -37,6 +37,21 @@ public class slPlayerController : slBaseController
 		cameraPosition.x = snakeHaedPosition.x;
 		cameraPosition.y = snakeHaedPosition.y;
 		m_Camera.transform.localPosition = cameraPosition;
+
+		hwmSystem.GetInstance().GetInput().SetAllAxisEnable(true);
+		hwmSystem.GetInstance().GetInput().GetButton(hwmConstants.ButtonIndex.Skill1).SetEnable(true);
+
+		m_HUD.SetDisplayMoveVirtualJoystick(true);
+		m_HUD.SetSpeedUpButtonDisplap(true);
+	}
+
+	protected override void HandleUnController()
+	{
+		m_HUD.SetSpeedUpButtonDisplap(false);
+		m_HUD.SetDisplayMoveVirtualJoystick(false);
+
+		hwmSystem.GetInstance().GetInput().SetAllAxisEnable(false);
+		hwmSystem.GetInstance().GetInput().SetAllButtonEnable(false);
 	}
 
 	protected void Update()
@@ -52,12 +67,18 @@ public class slPlayerController : slBaseController
 		cameraPosition.y = snakeHaedPosition.y;
 		m_Camera.transform.localPosition = cameraPosition;
 
-		Vector2 axis = new Vector2(m_Input.GetAxisValue(hwmConstants.AxisIndex.MoveX)
-			, m_Input.GetAxisValue(hwmConstants.AxisIndex.MoveY));
+		Vector2 axis = new Vector2(m_Input.GetAxis(hwmConstants.AxisIndex.MoveX).GetValue()
+			, m_Input.GetAxis(hwmConstants.AxisIndex.MoveY).GetValue());
 
 		if (axis != Vector2.zero)
 		{
 			m_Snake.TargetMoveDirection = axis.normalized;
 		}
+
+		bool canSpeedUp = m_Snake.CanSpeedUp();
+		m_HUD.SetCanSpeedUp(canSpeedUp);
+		hwmInput.Button speedUpButton = hwmSystem.GetInstance().GetInput().GetButton(hwmConstants.ButtonIndex.Skill1);
+		speedUpButton.SetEnable(canSpeedUp);
+		m_Snake.TryChangeSpeedState(speedUpButton.IsPress() ? slSnake.SpeedState.SpeedUp : slSnake.SpeedState.Normal);
 	}
 }

@@ -29,16 +29,16 @@ public class slAIController : slBaseController
 		CalculateSafeArea(ref targetDirection.x, m_Snake.GetHeadPosition().x, m_SafeAreaMinPosition.x, m_SafeAreaMaxPosition.x);
 		CalculateSafeArea(ref targetDirection.y, m_Snake.GetHeadPosition().y, m_SafeAreaMinPosition.y, m_SafeAreaMaxPosition.y);
 
-		if (!IsSafe(targetDirection, slConstants.SNAKE_DETECT_DISTANCE, false)
-			|| !IsSafe(m_ClockwiseDetectAngle * targetDirection, slConstants.SNAKE_DETECT_DISTANCE, false)
-			|| !IsSafe(m_CounterclockwiseDetectAngle * targetDirection, slConstants.SNAKE_DETECT_DISTANCE, false))
+		bool ignorePredict = IsHitPredict();
+		if (!IsSafe(targetDirection, slConstants.SNAKE_DETECT_DISTANCE, ignorePredict)
+			|| !IsSafe(m_ClockwiseDetectAngle * targetDirection, slConstants.SNAKE_DETECT_DISTANCE, ignorePredict)
+			|| !IsSafe(m_CounterclockwiseDetectAngle * targetDirection, slConstants.SNAKE_DETECT_DISTANCE, ignorePredict))
 		{
 			Quaternion angle = hwmRandom.RandFloat() > 0.5f
 				? m_ClockwiseDetectAngle
 				: m_CounterclockwiseDetectAngle;
 			Vector2 currentCalculateDirection = Quaternion.Euler(0, 0, hwmRandom.RandFloat(-slConstants.SNAKE_BEGIN_DETECT_RAND_MAXANGLE, slConstants.SNAKE_BEGIN_DETECT_RAND_MAXANGLE))
 				* targetDirection;
-			bool ignorePredict = IsHitPredict();
 			for (int iCalculate = 0; iCalculate < slConstants.SNAKE_AI_CALCULATE_TIMES; iCalculate++)
 			{
 				currentCalculateDirection = angle * currentCalculateDirection;

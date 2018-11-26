@@ -63,24 +63,6 @@ public class slFoodSystem : MonoBehaviour
 		return m_Quadtree;
 	}
 
-	public void CreateFood(slFood.FoodType foodType, Vector3 position, Color color)
-	{
-		slFood food = m_Pool.Pop();
-		switch (foodType)
-		{
-			case slFood.FoodType.Normal:
-				food.ChangeFoodType(NormalFoodProperties, color);
-				break;
-			case slFood.FoodType.Large:
-				food.ChangeFoodType(LargeFoodProperties, color);
-				break;
-		}
-		food.transform.position = position;
-		food.UpdateQuadtreeElement();
-
-		m_FoodCount++;
-	}
-
 	public void DestroyFood(slFood food)
 	{
 		m_Pool.Push(food);
@@ -108,20 +90,23 @@ public class slFoodSystem : MonoBehaviour
 		return m_FoodRoot;
 	}
 
-	public void AddCreateEvent(slFood.FoodType foodType, Vector3 position, Color color )
+	public void AddCreateEvent(slFood.FoodType foodType, Vector3 position, Color color)
 	{
-		CreateEvent createEvent = new CreateEvent();
-		createEvent.FoodType = foodType;
-		createEvent.Position = position;
-		createEvent.Color = color;
-		m_CreateEvents.Enqueue(createEvent);
+		if (CanCreateFoodAt(position))
+		{
+			CreateEvent createEvent = new CreateEvent();
+			createEvent.FoodType = foodType;
+			createEvent.Position = position;
+			createEvent.Color = color;
+			m_CreateEvents.Enqueue(createEvent);
+		}
 	}
 
 	protected void Update()
 	{
 		int canCreateFoodCount = slConstants.FOOD_SYSTEM_MAXCREATE_PREFRAME;
 		int createEventCount = Mathf.Min(m_CreateEvents.Count, canCreateFoodCount);
-		while (createEventCount -- > 0)
+		while (createEventCount-- > 0)
 		{
 			CreateEvent createEvent = m_CreateEvents.Dequeue();
 			CreateFood(createEvent.FoodType, createEvent.Position, createEvent.Color);
@@ -135,6 +120,32 @@ public class slFoodSystem : MonoBehaviour
 				, hwmRandom.RandVector2(m_FoodMinPosition, m_FoodMaxPosition)
 				, hwmRandom.RandColorRGB());
 		}
+	}
+
+	private void CreateFood(slFood.FoodType foodType, Vector3 position, Color color)
+	{
+		slFood food = m_Pool.Pop();
+		switch (foodType)
+		{
+			case slFood.FoodType.Normal:
+				food.ChangeFoodType(NormalFoodProperties, color);
+				break;
+			case slFood.FoodType.Large:
+				food.ChangeFoodType(LargeFoodProperties, color);
+				break;
+		}
+		food.transform.position = position;
+		food.UpdateQuadtreeElement();
+
+		m_FoodCount++;
+	}
+
+	private bool CanCreateFoodAt(Vector2 position)
+	{
+		return position.x >= m_FoodMinPosition.x
+			&& position.y >= m_FoodMinPosition.y
+			&& position.x <= m_FoodMaxPosition.x
+			&& position.y <= m_FoodMaxPosition.y;
 	}
 
 	public class Pool : hwmPool<slFood>

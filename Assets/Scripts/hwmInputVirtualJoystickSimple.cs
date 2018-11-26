@@ -2,7 +2,7 @@
 using UnityEngine.EventSystems;
 
 
-public class hwmVirtualJoystickSimple : hwmBaseVirtualJoystick, IDragHandler, IEndDragHandler
+public class hwmInputVirtualJoystickSimple : hwmBaseInputVirtualJoystick, IDragHandler, IEndDragHandler
 {
 	public RectTransform CursorRect;
 	public float MaxMoveDistance = 50;

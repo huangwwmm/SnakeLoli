@@ -56,8 +56,10 @@ MonoBehaviour:
     SpriteRadius: 0.2
     BeEatRadius: 2
     AddPower: 1
+    LifeTime: 30
   LargeFoodProperties:
     MyType: 1
     SpriteRadius: 0.3
     BeEatRadius: 2
     AddPower: 3
+    LifeTime: 10
