@@ -28,7 +28,6 @@ public class slSnake : hwmActor
 
 	public void DoUpdateMovement(int moveTimes, float deltaTime)
 	{
-		if (2 > 1) return;
 		int bodyCountOffset = (m_Power / m_TweakableProperties.PowerToNode - 2)
 			- m_Bodys.Count;
 

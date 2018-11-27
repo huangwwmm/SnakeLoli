@@ -4,32 +4,36 @@ using UnityEngine;
 
 public class slFoodSystem
 {
-	private slFoodProperties m_NormalFoodProperties;
-	private slFoodProperties m_LargeFoodProperties;
 
 	private hwmQuadtree<slFood> m_Quadtree;
-	private Pool m_Pool;
+	private slFoodProperties[] m_FoodPropertiess;
+	private FoodPool m_FoodPool;
+	private FoodPresentationPool[] m_FoodPresentationPools;
 	private int m_MaxFood;
 	private int m_FoodCount;
 
 	private Vector2 m_FoodMinPosition;
 	private Vector2 m_FoodMaxPosition;
 
-	private GameObject m_FoodRoot;
+	private Transform m_FoodRoot;
 
 	private Queue<CreateEvent> m_CreateEvents;
 
 	public void Initialize(slLevel level)
 	{
-		m_FoodRoot = new GameObject("Foods");
+		m_FoodRoot = new GameObject("Foods").transform;
 
 		m_FoodMaxPosition = level.MapSize * 0.5f - new Vector2(slConstants.FOOD_MAP_EDGE, slConstants.FOOD_MAP_EDGE);
 		m_FoodMinPosition = -m_FoodMaxPosition;
 
 		m_MaxFood = level.FoodCount;
 
-		m_NormalFoodProperties = hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game, "NormalFoodProperties") as slFoodProperties;
-		m_LargeFoodProperties = hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game, "LargeFoodProperties") as slFoodProperties;
+		m_FoodPropertiess = new slFoodProperties[(int)slFood.FoodType.Count];
+		for (int iFood = 0; iFood < m_FoodPropertiess.Length; iFood++)
+		{
+			m_FoodPropertiess[iFood] = hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game
+				, ((slFood.FoodType)iFood).ToString() + slConstants.FOOD_PROPERTIES_PREFAB_ENDWITHS) as slFoodProperties;
+		}
 
 		m_Quadtree = new hwmQuadtree<slFood>();
 		m_Quadtree.Initialize(CalculateQuadtreeDepth()
@@ -41,7 +45,18 @@ public class slFoodSystem
 		slQuadtreeGizmos.FoodQuadtree = m_Quadtree;
 #endif
 
-		m_Pool = new Pool(m_MaxFood);
+		m_FoodPool = new FoodPool();
+		m_FoodPool.Initialize(m_MaxFood);
+		if (slWorld.GetInstance().NeedPresentation())
+		{
+			m_FoodPresentationPools = new FoodPresentationPool[(int)slFood.FoodType.Count];
+			for (int iFood = 0; iFood < m_FoodPropertiess.Length; iFood++)
+			{
+				slFood.FoodType foodType = (slFood.FoodType)iFood;
+				m_FoodPresentationPools[iFood] = new FoodPresentationPool(foodType);
+				m_FoodPresentationPools[iFood].Initialize(foodType == slFood.FoodType.Normal ? m_MaxFood : 64);
+			}
+		}
 
 		m_CreateEvents = new Queue<CreateEvent>();
 
@@ -56,8 +71,17 @@ public class slFoodSystem
 		m_Quadtree.Dispose();
 		m_Quadtree = null;
 
-		m_Pool.Dispose();
-		m_Pool = null;
+		m_FoodPool.Dispose();
+		m_FoodPool = null;
+
+		if (m_FoodPresentationPools != null)
+		{
+			for (int iFood = 0; iFood < m_FoodPresentationPools.Length; iFood++)
+			{
+				m_FoodPresentationPools[iFood].Dispose();
+			}
+			m_FoodPresentationPools = null;
+		}
 
 		Object.Destroy(m_FoodRoot);
 	}
@@ -89,8 +113,15 @@ public class slFoodSystem
 
 	public void DestroyFood(slFood food)
 	{
+		slFoodPresentation foodPresentation = food.GetPresentation();
+		if (foodPresentation != null)
+		{
+			foodPresentation.transform.SetParent(m_FoodRoot.transform);
+			foodPresentation.gameObject.SetActive(false);
+			m_FoodPresentationPools[(int)foodPresentation.FoodType].Push(foodPresentation);
+		}
 		food.DeactiveFood();
-		m_Pool.Push(food);
+		m_FoodPool.Push(food);
 
 		m_FoodCount--;
 	}
@@ -110,7 +141,7 @@ public class slFoodSystem
 		}
 	}
 
-	public GameObject GetFoodRoot()
+	public Transform GetFoodRoot()
 	{
 		return m_FoodRoot;
 	}
@@ -134,17 +165,17 @@ public class slFoodSystem
 
 	private void CreateFood(slFood.FoodType foodType, Vector3 position, Color color)
 	{
-		slFood food = m_Pool.Pop();
-		switch (foodType)
+		slFoodProperties foodProperties = m_FoodPropertiess[(int)foodType];
+		slFood food = m_FoodPool.Pop();
+		slFoodPresentation foodPresentation = m_FoodPresentationPools != null ? m_FoodPresentationPools[(int)foodType].Pop() : null;
+		if (foodPresentation != null)
 		{
-			case slFood.FoodType.Normal:
-				food.ActiveFood(m_NormalFoodProperties, position, color);
-				break;
-			case slFood.FoodType.Large:
-				food.ActiveFood(m_LargeFoodProperties, position, color);
-				break;
+			foodPresentation.transform.SetParent(food.transform);
+			foodPresentation.transform.localPosition = Vector3.zero;
+			foodPresentation.gameObject.SetActive(true);
+			foodPresentation.SetColor(color);
 		}
-
+		food.ActiveFood(foodProperties, foodPresentation, position, color);
 		m_FoodCount++;
 	}
 
@@ -175,31 +206,34 @@ public class slFoodSystem
 		return depth;
 	}
 
-	public class Pool : hwmPool<slFood>
+	public class FoodPool : hwmPool<slFood>
 	{
-		public Pool(int initialSize = 4) : base(initialSize)
-		{
-		}
-
 		protected override slFood HandleCreateItem()
 		{
 			slFood food = (Object.Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game, "Food")) as GameObject).GetComponent<slFood>();
-			food.transform.SetParent(slWorld.GetInstance().GetFoodSystem().GetFoodRoot().transform);
-			food.Initialize();
+			food.transform.SetParent(slWorld.GetInstance().GetFoodSystem().GetFoodRoot());
+			food.gameObject.SetActive(false);
 			return food;
 		}
+	}
 
-		protected override void HandleDisposeItem(slFood item)
+	public class FoodPresentationPool : hwmPool<slFoodPresentation>
+	{
+		private slFood.FoodType m_FoodType;
+
+		public FoodPresentationPool(slFood.FoodType foodType)
 		{
-			item.Dispose();
+			m_FoodType = foodType;
 		}
 
-		protected override void HandlePopItem(ref slFood item)
+		protected override slFoodPresentation HandleCreateItem()
 		{
-		}
-
-		protected override void HandlePushItem(ref slFood item)
-		{
+			slFoodPresentation food = (Object.Instantiate(hwmSystem.GetInstance().GetAssetLoader()
+					.LoadAsset(hwmAssetLoader.AssetType.Game, m_FoodType.ToString() + slConstants.FOOD_PRESENTATION_PREFAB_ENDWITHS)) as GameObject)
+				.GetComponent<slFoodPresentation>();
+			food.transform.SetParent(slWorld.GetInstance().GetFoodSystem().GetFoodRoot());
+			food.gameObject.SetActive(false);
+			return food;
 		}
 	}
 

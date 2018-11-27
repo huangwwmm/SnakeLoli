@@ -2,28 +2,20 @@
 
 public class slFoodPresentation : MonoBehaviour 
 {
-	public SpriteRenderer NormalSprite;
-	public SpriteRenderer LargeSprite;
-	public SpriteRenderer LargeInSprite;
+	public slFood.FoodType FoodType;
+	public SpriteRenderer BackSprite;
+	public SpriteRenderer FrontSprite;
 
-	public void ChangeFoodType(slFoodProperties foodProperties, Color color)
+	public void SetColor(Color color)
 	{
-		switch (foodProperties.MyType)
+		switch (FoodType)
 		{
 			case slFood.FoodType.Normal:
-				NormalSprite.enabled = true;
-				LargeSprite.enabled = false;
-				LargeInSprite.enabled = false;
-
-				NormalSprite.color = color;
+				BackSprite.color = color;
 				break;
 			case slFood.FoodType.Large:
-				NormalSprite.enabled = false;
-				LargeSprite.enabled = true;
-				LargeInSprite.enabled = true;
-
-				LargeSprite.color = color;
-				LargeInSprite.color = new Color(color.r * 0.8f, color.g * 0.8f, color.b * 0.8f, color.a);
+				BackSprite.color = color;
+				FrontSprite.color = new Color(color.r * 0.8f, color.g * 0.8f, color.b * 0.8f, color.a);
 				break;
 		}
 	}

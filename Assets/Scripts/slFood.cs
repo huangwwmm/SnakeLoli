@@ -15,21 +15,7 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 	public hwmBounds2D QuadtreeNodeBounds { get; set; }
 	public hwmQuadtree<slFood>.Node OwnerQuadtreeNode { get; set; }
 
-	public void Initialize()
-	{
-		if (slWorld.GetInstance().NeedPresentation())
-		{
-			m_Presentation = (Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game, "FoodPresentation")) as GameObject).GetComponent<slFoodPresentation>();
-			m_Presentation.transform.SetParent(transform);
-		}
-	}
-
-	public void Dispose()
-	{
-		m_Presentation = null;
-	}
-
-	public void ActiveFood(slFoodProperties foodProperties, Vector3 position, Color color)
+	public void ActiveFood(slFoodProperties foodProperties, slFoodPresentation foodPresentation, Vector3 position, Color color)
 	{
 		m_State = State.Idle;
 
@@ -41,10 +27,7 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 		m_RemainLifeTime = hwmRandom.RandFloat(m_Properties.MinLifeTime, m_Properties.MaxLifeTime);
 		transform.localPosition = position;
 
-		if (m_Presentation)
-		{
-			m_Presentation.ChangeFoodType(foodProperties, color);
-		}
+		m_Presentation = foodPresentation;
 
 		OwnerQuadtree = slWorld.GetInstance().GetFoodSystem().GetQuadtree();
 		QuadtreeNodeBounds = new hwmBounds2D(transform.localPosition, new Vector2(m_Properties.SpriteRadius, m_Properties.SpriteRadius) * 2.0f);
@@ -58,7 +41,7 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 
 		Collider.enabled = false;
 		gameObject.SetActive(false);
-		gameObject.transform.position = slConstants.FOOD_DEACTIVE_POSITION;
+		gameObject.transform.localPosition = slConstants.FOOD_DEACTIVE_POSITION;
 
 		m_Properties = null;
 
@@ -118,8 +101,12 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 
 	public enum FoodType
 	{
-		Normal,
+		Normal = 0,
 		Large,
+		/// <summary>
+		/// must end
+		/// </summary>
+		Count,
 	}
 
 	public enum State
