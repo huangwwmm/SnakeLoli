@@ -7,7 +7,7 @@ public class slFoodSystem
 	private slFoodProperties m_NormalFoodProperties;
 	private slFoodProperties m_LargeFoodProperties;
 
-	private hwmQuadtree m_Quadtree;
+	private hwmQuadtree<slFood> m_Quadtree;
 	private Pool m_Pool;
 	private int m_MaxFood;
 	private int m_FoodCount;
@@ -31,7 +31,7 @@ public class slFoodSystem
 		m_NormalFoodProperties = hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game, "NormalFoodProperties") as slFoodProperties;
 		m_LargeFoodProperties = hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game, "LargeFoodProperties") as slFoodProperties;
 
-		m_Quadtree = new hwmQuadtree();
+		m_Quadtree = new hwmQuadtree<slFood>();
 		m_Quadtree.Initialize(slConstants.FOOD_QUADTREE_MAXDEPTH
 			, slConstants.FOOD_QUADTREE_MAXELEMENT_PERNODE
 			, slConstants.FOOD_QUADTREE_MAXELEMENT_PREPARENTNODE
@@ -79,7 +79,7 @@ public class slFoodSystem
 		}
 	}
 
-	public hwmQuadtree GetQuadtree()
+	public hwmQuadtree<slFood> GetQuadtree()
 	{
 		return m_Quadtree;
 	}

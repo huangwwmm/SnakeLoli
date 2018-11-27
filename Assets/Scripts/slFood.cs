@@ -1,16 +1,19 @@
 ﻿using UnityEngine;
 
-public class slFood : MonoBehaviour
+public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 {
 	public CircleCollider2D Collider;
 
 	private slFoodPresentation m_Presentation;
-	private hwmQuadtree.Element m_QuadtreeElement;
 	private slFoodProperties m_Properties;
 	private State m_State;
 	private Transform m_BeEatTransform;
 	private float m_BeEatAnimationRemainTime;
 	private float m_RemainLifeTime;
+
+	public hwmQuadtree<slFood> OwnerQuadtree { get; set; }
+	public hwmBounds2D QuadtreeNodeBounds { get; set; }
+	public hwmQuadtree<slFood>.Node OwnerQuadtreeNode { get; set; }
 
 	public void Initialize()
 	{
@@ -26,7 +29,7 @@ public class slFood : MonoBehaviour
 		m_Presentation = null;
 	}
 
-	public void ActiveFood(slFoodProperties foodProperties,Vector3 position, Color color)
+	public void ActiveFood(slFoodProperties foodProperties, Vector3 position, Color color)
 	{
 		m_State = State.Idle;
 
@@ -43,18 +46,15 @@ public class slFood : MonoBehaviour
 			m_Presentation.ChangeFoodType(foodProperties, color);
 		}
 
-		m_QuadtreeElement = new hwmQuadtree.Element(slWorld.GetInstance().GetFoodSystem().GetQuadtree());
-		m_QuadtreeElement.Bounds.extents = new Vector2(m_Properties.SpriteRadius, m_Properties.SpriteRadius);
-		UpdateQuadtreeElement();
+		OwnerQuadtree = slWorld.GetInstance().GetFoodSystem().GetQuadtree();
+		QuadtreeNodeBounds = new hwmBounds2D(transform.localPosition, new Vector2(m_Properties.SpriteRadius, m_Properties.SpriteRadius) * 2.0f);
+		OwnerQuadtree.UpdateElement(this);
 	}
 
 	public void DeactiveFood()
 	{
-		if (m_QuadtreeElement != null)
-		{
-			m_QuadtreeElement.RemoveElement();
-			m_QuadtreeElement = null;
-		}
+		OwnerQuadtree.RemoveElement(this);
+		OwnerQuadtree = null;
 
 		Collider.enabled = false;
 		gameObject.SetActive(false);
@@ -109,12 +109,6 @@ public class slFood : MonoBehaviour
 				slWorld.GetInstance().GetFoodSystem().DestroyFood(this);
 			}
 		}
-	}
-
-	private void UpdateQuadtreeElement()
-	{
-		m_QuadtreeElement.Bounds.center = transform.position;
-		m_QuadtreeElement.UpdateElement();
 	}
 
 	public enum FoodType

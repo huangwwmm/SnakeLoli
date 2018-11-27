@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public class hwmQuadtree
+public class hwmQuadtree<T> where T : hwmQuadtree<T>.IElement
 {
 	private Node m_Root;
 	private int m_MaxDepth;
@@ -52,21 +52,21 @@ public class hwmQuadtree
 		return rootNode.TryFindNode(ref foundNode, bounds);
 	}
 
-	public void UpdateElement(Element element)
+	public void UpdateElement(T element)
 	{
-		hwmDebug.Assert(element.Quadtree == this, "element.Quadtree == this");
+		hwmDebug.Assert(element.OwnerQuadtree == this, "element.Quadtree == this");
 
 		Node foundNode = null;
-		if (element._Owner != null)
+		if (element.OwnerQuadtreeNode != null)
 		{
-			Node elementOwner = element._Owner;
+			Node elementOwner = element.OwnerQuadtreeNode;
 			elementOwner.RemoveElement(element);
-			TryFindNode(ref foundNode, element.Bounds, elementOwner);
+			TryFindNode(ref foundNode, element.QuadtreeNodeBounds, elementOwner);
 		}
 
 		if (foundNode == null)
 		{
-			TryFindNode(ref foundNode, element.Bounds);
+			TryFindNode(ref foundNode, element.QuadtreeNodeBounds);
 		}
 		if (foundNode == null)
 		{
@@ -76,11 +76,19 @@ public class hwmQuadtree
 		foundNode.AddElement(element);
 	}
 
+	public void RemoveElement(T element)
+	{
+		if (element.OwnerQuadtreeNode != null)
+		{
+			element.OwnerQuadtreeNode.RemoveElement(element);
+		}
+	}
+
 	public class Node
 	{
 		private const int CHILDER_COUNT = 4;
 
-		private hwmQuadtree m_Owner;
+		private hwmQuadtree<T> m_Owner;
 		private Node m_Parent;
 		private Node[] m_Childers;
 
@@ -95,9 +103,9 @@ public class hwmQuadtree
 		/// </summary>
 		private bool m_IsLeaf;
 		private int m_Depth;
-		private hwmBetterList<Element> m_Elements;
+		private hwmBetterList<T> m_Elements;
 
-		public void Initialize(hwmQuadtree owner, Node parent, hwmBounds2D bounds)
+		public void Initialize(hwmQuadtree<T> owner, Node parent, hwmBounds2D bounds)
 		{
 			bool isRoot = parent == null;
 
@@ -110,7 +118,7 @@ public class hwmQuadtree
 
 			m_IsLeaf = true;
 			m_Depth = isRoot ? 1 : parent.m_Depth + 1;
-			m_Elements = new hwmBetterList<Element>();
+			m_Elements = new hwmBetterList<T>();
 		}
 
 		public void Dispose()
@@ -148,11 +156,11 @@ public class hwmQuadtree
 			}
 		}
 
-		public void AddElement(Element element)
+		public void AddElement(T element)
 		{
-			hwmDebug.Assert(element._Owner == null, "element._Owner == null");
+			hwmDebug.Assert(element.OwnerQuadtreeNode == null, "element._Owner == null");
 
-			element._Owner = this;
+			element.OwnerQuadtreeNode = this;
 			m_Elements.Add(element);
 
 			if (m_IsLeaf
@@ -163,12 +171,12 @@ public class hwmQuadtree
 			}
 		}
 
-		public void RemoveElement(Element element)
+		public void RemoveElement(T element)
 		{
-			hwmDebug.Assert(element._Owner == this, "element._Owner == this");
+			hwmDebug.Assert(element.OwnerQuadtreeNode == this, "element._Owner == this");
 
 			m_Elements.Remove(element);
-			element._Owner = null;
+			element.OwnerQuadtreeNode = null;
 
 			if (m_Parent != null)
 			{
@@ -188,7 +196,7 @@ public class hwmQuadtree
 			}
 		}
 
-		public hwmBetterList<Element> GetElements()
+		public hwmBetterList<T> GetElements()
 		{
 			return m_Elements;
 		}
@@ -206,14 +214,14 @@ public class hwmQuadtree
 				iterNode.Initialize(m_Owner, this, CalculateChilderBounds((ChilderIndex)iChild));
 			}
 
-			Element[] elements = m_Elements.ToArray();
+			T[] elements = m_Elements.ToArray();
 			m_Elements.Clear();
 			m_Elements.Capacity = 4;
 
 			for (int iElement = 0; iElement < elements.Length; iElement++)
 			{
-				Element iterElement = elements[iElement];
-				iterElement._Owner = null;
+				T iterElement = elements[iElement];
+				iterElement.OwnerQuadtreeNode = null;
 			}
 		}
 
@@ -222,12 +230,12 @@ public class hwmQuadtree
 			for (int iChilder = 0; iChilder < CHILDER_COUNT; iChilder++)
 			{
 				Node iterChilder = m_Childers[iChilder];
-				Element[] iterElements = iterChilder.m_Elements.ToArray();
+				T[] iterElements = iterChilder.m_Elements.ToArray();
 
 				for (int iElement = 0; iElement < iterElements.Length; iElement++)
 				{
-					Element iterElement = iterElements[iElement];
-					iterElement._Owner = null;
+					T iterElement = iterElements[iElement];
+					iterElement.OwnerQuadtreeNode = null;
 					AddElement(iterElement);
 				}
 
@@ -281,37 +289,10 @@ public class hwmQuadtree
 		}
 	}
 
-	public class Element
+	public interface IElement
 	{
-		public readonly hwmQuadtree Quadtree;
-		/// <summary>
-		/// your need call <see cref="UpdateElement"/> after change this value
-		/// Q: why not auto call
-		/// A: for performance
-		/// </summary>
-		public hwmBounds2D Bounds;
-
-		/// <summary>
-		/// only use in <see cref="hwmQuadtree"/>
-		/// </summary>
-		internal Node _Owner;
-
-		public Element(hwmQuadtree quadtree)
-		{
-			Quadtree = quadtree;
-		}
-
-		public void UpdateElement()
-		{
-			Quadtree.UpdateElement(this);
-		}
-
-		public void RemoveElement()
-		{
-			if (_Owner != null)
-			{
-				_Owner.RemoveElement(this);
-			}
-		}
+		hwmQuadtree<T> OwnerQuadtree { get; set; }
+		Node OwnerQuadtreeNode { get; set; }
+		hwmBounds2D QuadtreeNodeBounds { get; set; }
 	}
 }
