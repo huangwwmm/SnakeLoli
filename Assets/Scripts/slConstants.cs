@@ -51,6 +51,16 @@ public class slConstants
 	public const int UPDATE_RESPAWN_FRAME_INTERVAL = 3;
 	public const int UPDATE_ALL_AI_FRAME = 5;
 
+	public const string SKILL_PROPERTIES_PREFAB_ENDWITHS = "SkillProperties";
+
+	public readonly static hwmConstants.ButtonIndex[] SKILL_BUTTONINDEXS = new hwmConstants.ButtonIndex[] 
+	{
+		hwmConstants.ButtonIndex.Skill1,
+		hwmConstants.ButtonIndex.Skill2,
+		hwmConstants.ButtonIndex.Skill3,
+		hwmConstants.ButtonIndex.Skill4,
+	};
+
 	#region maybe package to aiSetting
 	public const float SNAKE_AIMOVEMENT_SAFEAREA_MAP_EDGE = 5;
 	public const float SNAKE_DETECT_DISTANCE = SNAKE_NODE_TO_NODE_DISTANCE * 10.0f;

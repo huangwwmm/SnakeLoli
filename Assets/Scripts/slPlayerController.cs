@@ -11,6 +11,13 @@ public class slPlayerController : slBaseController
 	/// </summary>
 	private hwmInput m_Input;
 
+	private slSkill[] m_Skills;
+
+	/// <summary>
+	/// UNDONE will move to player data
+	/// </summary>
+	private slSkill.SkillType[] m_UsedSkill = new slSkill.SkillType[] { slSkill.SkillType.SpeedUp };
+
 	public override bool IsPlayer()
 	{
 		return true;
@@ -45,14 +52,28 @@ public class slPlayerController : slBaseController
 		m_Input.GetButton(hwmConstants.ButtonIndex.Skill1).SetEnable(true);
 		m_Input.GetButton(hwmConstants.ButtonIndex.Skill2).SetEnable(true);
 
-		m_HUD.SetDisplayMoveVirtualJoystick(true);
-		m_HUD.SetSpeedUpButtonDisplap(true);
+		m_HUD.OnSetControllerSnake();
+
+		m_Skills = new slSkill[m_UsedSkill.Length];
+		for (int iSkill = 0; iSkill < m_Skills.Length; iSkill++)
+		{
+			slSkill.SkillType skillType = m_UsedSkill[iSkill];
+			m_Skills[iSkill] = m_HUD.PopSkill(skillType, iSkill);
+			m_Skills[iSkill].Active(m_Snake, slConstants.SKILL_BUTTONINDEXS[iSkill]);
+		}
 	}
 
 	protected override void HandleUnController()
 	{
-		m_HUD.SetSpeedUpButtonDisplap(false);
-		m_HUD.SetDisplayMoveVirtualJoystick(false);
+		for (int iSkill = 0; iSkill < m_Skills.Length; iSkill++)
+		{
+			slSkill iterSkill = m_Skills[iSkill];
+			iterSkill.Deactive();
+			m_HUD.PushSkill(iterSkill);
+		}
+		m_Skills = null;
+
+		m_HUD.OnUnControllerSnake();
 
 		m_Input.GetAxis(hwmConstants.AxisIndex.MoveX).SetEnable(false);
 		m_Input.GetAxis(hwmConstants.AxisIndex.MoveY).SetEnable(false);
@@ -83,15 +104,9 @@ public class slPlayerController : slBaseController
 			m_Snake.TargetMoveDirection = axis.normalized;
 		}
 
-		bool canSpeedUp = m_Snake.CanSpeedUp();
-		m_HUD.SetCanSpeedUp(canSpeedUp);
-		hwmInput.Button speedUpButton = m_Input.GetButton(hwmConstants.ButtonIndex.Skill1);
-		speedUpButton.SetEnable(canSpeedUp);
-		m_Snake.TryChangeSpeedState(speedUpButton.IsPress() ? slSnake.SpeedState.SpeedUp : slSnake.SpeedState.Normal);
-
-		if (m_Input.GetButton(hwmConstants.ButtonIndex.Skill2).GetState() == hwmInput.Button.State.Up)
+		for (int iSkill = 0; iSkill < m_Skills.Length; iSkill++)
 		{
-			m_Snake.TestSkill();
+			m_Skills[iSkill].DoUpdate();
 		}
 	}
 }

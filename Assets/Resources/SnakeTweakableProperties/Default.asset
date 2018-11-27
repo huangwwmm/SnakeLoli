@@ -14,7 +14,9 @@ MonoBehaviour:
   MaxTurnAngularSpeed: 360
   PowerToNode: 5
   NormalMoveNodeCount: 1
-  SpeedUpMoveNodeCount: 3
+  SpeedUpMoveNodeCount: 2
   SpeedUpCostPower: 5
   SpeedUpEnterRequiredNode: 10
   SpeedUpKeepRequiredNode: 5
+  GluttonyRadius: 24
+  GluttonyCD: 3

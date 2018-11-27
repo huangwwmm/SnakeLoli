@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class slSnake : hwmActor
@@ -6,6 +7,8 @@ public class slSnake : hwmActor
 	public Properties MyProperties;
 
 	public Vector2 TargetMoveDirection;
+
+	public Action<slSkill.EventArgs> OnSpeedUpMovement;
 
 	private Vector2 m_CurrentMoveDirection;
 
@@ -18,30 +21,56 @@ public class slSnake : hwmActor
 	private ClothesNode m_Clothes;
 	private hwmDeque<BodyNode> m_Bodys;
 	private SpeedState m_SpeedState;
+	private slSkill.EventArgs m_SkillEventArgs;
 
 	private int m_Power;
+
+	public int GetPower()
+	{
+		return m_Power;
+	}
+
+	public SpeedState GetSpeedState()
+	{
+		return m_SpeedState;
+	}
+
+	public void ChangeSpeedState(SpeedState speedState)
+	{
+		m_SpeedState = speedState;
+	}
 
 	public Vector3 GetHeadPosition()
 	{
 		return m_Head.Node.transform.localPosition;
 	}
 
-	public void DoUpdateMovement(int moveTimes, float deltaTime)
+	public slSnakeTweakableProperties GetTweakableProperties()
 	{
-		int bodyCountOffset = (m_Power / m_TweakableProperties.PowerToNode - 2)
+		return m_TweakableProperties;
+	}
+
+	public void DoUpdateMovement(float deltaTime)
+	{
+		int bodyCountOffset = (m_Power / m_TweakableProperties.NodeToPower - 2)
 			- m_Bodys.Count;
 
-		int moveNodeCountPreTime = 0;
+		int moveNodeCount = 0;
 		switch(m_SpeedState)
 		{
 			case SpeedState.Normal:
-				moveNodeCountPreTime = m_TweakableProperties.NormalMoveNodeCount;
+				moveNodeCount = m_TweakableProperties.NormalMoveNodeCount;
 				break;
 			case SpeedState.SpeedUp:
-				moveNodeCountPreTime = m_TweakableProperties.SpeedUpMoveNodeCount;
-				m_Power -= moveTimes * m_TweakableProperties.SpeedUpCostPower;
-				if (!CanKeepSpeedUp())
+				OnSpeedUpMovement(m_SkillEventArgs);
+				if (m_SkillEventArgs.CanKeepSkill)
 				{
+					moveNodeCount = (int)m_SkillEventArgs.Effect;
+					m_Power -= m_SkillEventArgs.CostPower;
+				}
+				else
+				{
+					moveNodeCount = m_TweakableProperties.NormalMoveNodeCount;
 					m_SpeedState = SpeedState.Normal;
 				}
 				break;
@@ -50,7 +79,6 @@ public class slSnake : hwmActor
 				break;
 		}
 
-		int moveNodeCount = moveNodeCountPreTime * moveTimes;
 		while (moveNodeCount-- > 0)
 		{
 			m_CurrentMoveDirection = hwmUtility.CircleLerp(m_CurrentMoveDirection, TargetMoveDirection, m_TweakableProperties.MaxTurnAngularSpeed * deltaTime);
@@ -108,23 +136,6 @@ public class slSnake : hwmActor
 	public slBaseController GetController()
 	{
 		return m_Controller;
-	}
-
-	public bool CanSpeedUp()
-	{
-		return m_SpeedState == SpeedState.Normal
-			? CanEnterSpeedUp()
-			: CanKeepSpeedUp();
-	}
-
-	public void TryChangeSpeedState(SpeedState speedState)
-	{
-		if (m_SpeedState == SpeedState.SpeedUp
-			&& !CanSpeedUp())
-		{
-			m_SpeedState = SpeedState.Normal;
-		}
-		m_SpeedState = speedState;
 	}
 
 	public void TestSkill()
@@ -194,7 +205,7 @@ public class slSnake : hwmActor
 			m_Presentation.gameObject.transform.SetParent(transform);
 		}
 
-		m_Power = initializeData.NodeCount * m_TweakableProperties.PowerToNode;
+		m_Power = initializeData.NodeCount * m_TweakableProperties.NodeToPower;
 
 		m_Head = CreateNode<HeadNode>("Head"
 			, m_Presentation != null ? m_Presentation.MyProperties.Head : null
@@ -237,6 +248,8 @@ public class slSnake : hwmActor
 		TargetMoveDirection = (initializeData.HeadRotation * Vector2.up).normalized;
 		m_CurrentMoveDirection = TargetMoveDirection;
 		m_SpeedState = SpeedState.Normal;
+
+		m_SkillEventArgs = new slSkill.EventArgs();
 	}
 
 	protected override void HandleDispose(object additionalData)
@@ -251,6 +264,8 @@ public class slSnake : hwmActor
 				slWorld.GetInstance().GetFoodSystem().AddCreateEvent(slFood.FoodType.Large, node.Node.transform.position, MyProperties.DeadFoodColor);
 			}
 		}
+
+		m_SkillEventArgs = null;
 
 		m_Controller.UnControllerSnake();
 		m_Controller = null;
@@ -351,16 +366,6 @@ public class slSnake : hwmActor
 		{
 			body.Sprite.sortingOrder = currentOrder--;
 		}
-	}
-
-	private bool CanEnterSpeedUp()
-	{
-		return m_Power > m_TweakableProperties.SpeedUpEnterRequiredNode * m_TweakableProperties.PowerToNode;
-	}
-
-	private bool CanKeepSpeedUp()
-	{
-		return m_Power > m_TweakableProperties.SpeedUpKeepRequiredNode * m_TweakableProperties.PowerToNode;
 	}
 
 	[System.Serializable]

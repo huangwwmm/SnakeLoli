@@ -1,22 +1,95 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Linq;
+using UnityEngine;
 
 public class slHUD : MonoBehaviour
 {
 	public hwmBaseInputVirtualJoystick MoveVirtualJoysitck;
-	public hwmInputButtonSimple SpeedUpButton;
 
-	public void SetCanSpeedUp(bool canSpeedUp)
-	{
-		SpeedUpButton.GetUIButton().interactable = canSpeedUp;
-	}
+	public Transform[] SkillAnchors;
+	public Transform SkillCacheRoot;
+
+	/// <summary>
+	/// sorted by skill type
+	/// </summary>
+	private slSkill[] m_AllSkill;
+	/// <summary>
+	/// sorted by anchor index
+	/// </summary>
+	private slSkill[] m_UsedSkills;
 
 	public void SetSpeedUpButtonDisplap(bool display)
 	{
-		SpeedUpButton.gameObject.SetActive(display);
+		//SpeedUpButton.gameObject.SetActive(display);
 	}
 
 	public void SetDisplayMoveVirtualJoystick(bool display)
 	{
 		MoveVirtualJoysitck.gameObject.SetActive(display);
+	}
+
+	public void OnSetControllerSnake()
+	{
+		SetDisplayMoveVirtualJoystick(true);
+		SetSpeedUpButtonDisplap(true);
+	}
+
+	public void OnUnControllerSnake()
+	{
+		SetSpeedUpButtonDisplap(false);
+		SetDisplayMoveVirtualJoystick(false);
+	}
+
+	public slSkill PopSkill(slSkill.SkillType skillType, int anchors)
+	{
+		hwmDebug.Assert(anchors >= 0 && anchors < SkillAnchors.Length, "anchors >= 0 && anchors < SkillAnchors.Length");
+
+		slSkill skill = m_AllSkill[(int)skillType];
+		hwmDebug.Assert(!m_UsedSkills.Contains(skill), "!m_UsedSkills.Contains(skill)");
+		m_UsedSkills[anchors] = skill;
+		skill.transform.SetParent(SkillAnchors[anchors]);
+		skill.transform.localPosition = Vector3.zero;
+
+		return skill;
+	}
+
+	public void PushSkill(slSkill skill)
+	{
+		bool containsSkill = false;
+		for (int iSkill = 0; iSkill < m_UsedSkills.Length; iSkill++)
+		{
+			if (m_UsedSkills[iSkill] == skill)
+			{
+				m_UsedSkills[iSkill] = null;
+				containsSkill = true;
+				break;
+			}
+		}
+
+		hwmDebug.Assert(containsSkill, "containsSkill");
+
+		skill.transform.SetParent(SkillCacheRoot);
+	}
+
+	protected void Awake()
+	{
+		hwmDebug.Assert(SkillAnchors.Length == 4, "SkillAnchors.Length == 4");
+		m_UsedSkills = new slSkill[4];
+
+		slSkill[] skills = SkillCacheRoot.GetComponentsInChildren<slSkill>();
+		SkillCacheRoot.gameObject.SetActive(false);
+		m_AllSkill = new slSkill[(int)slSkill.SkillType.Count];
+		hwmDebug.Assert(skills.Length == m_AllSkill.Length, "skills.Length == m_AllSkill.Length");
+		for (int iSkill = 0; iSkill < skills.Length; iSkill++)
+		{
+			slSkill iterSkill = skills[iSkill];
+			m_AllSkill[(int)iterSkill.MyType] = iterSkill;
+		}
+	}
+
+	protected void OnDestroy()
+	{
+		m_UsedSkills = null;
+		m_AllSkill = null;
 	}
 }

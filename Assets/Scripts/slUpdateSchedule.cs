@@ -44,7 +44,7 @@ public class slUpdateSchedule : MonoBehaviour
 			for (int iSnake = 0; iSnake < m_Snakes.Count; iSnake++)
 			{
 				SnakeUpdteScheduleParmeter snake = m_Snakes[iSnake];
-				snake.Owner.DoUpdateMovement(1, slConstants.UPDATE_SNAKE_MOVEMENT_TIEM_INTERVAL);
+				snake.Owner.DoUpdateMovement(slConstants.UPDATE_SNAKE_MOVEMENT_TIEM_INTERVAL);
 				snake.NeedUpdateAI = true;
 			}
 		}
