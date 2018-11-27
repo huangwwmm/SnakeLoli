@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
 
+[System.Serializable]
 public struct hwmBounds2D
 {
-	public Vector2 center { get; set; }
+	public Vector2 center;
 
-	public Vector2 extents { get; set; }
+	public Vector2 extents;
 
 	public Vector2 size
 	{
@@ -107,5 +108,13 @@ public struct hwmBounds2D
 			&& min.y <= point.y
 			&& max.x >= point.x
 			&& max.y >= point.y;
+	}
+
+	public bool Intersects(hwmBounds2D bounds)
+	{
+		return min.x <= bounds.max.x 
+			&& max.x >= bounds.min.x 
+			&& min.y <= bounds.max.y 
+			&& max.y >= bounds.min.y;
 	}
 }
