@@ -37,6 +37,9 @@ public class slFoodSystem
 			, slConstants.FOOD_QUADTREE_MINELEMENT_PREPARENTNODE
 			, slConstants.FOOD_QUADTREE_LOOSESCALE
 			, new hwmBounds2D(Vector2.zero, level.MapSize));
+#if UNITY_EDITOR
+		slQuadtreeGizmos.FoodQuadtree = m_Quadtree;
+#endif
 
 		m_Pool = new Pool(m_MaxFood);
 

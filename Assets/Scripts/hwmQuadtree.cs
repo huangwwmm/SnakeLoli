@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+using System;
 
 public class hwmQuadtree<T> where T : hwmQuadtree<T>.IElement
 {
@@ -224,6 +225,21 @@ public class hwmQuadtree<T> where T : hwmQuadtree<T>.IElement
 			return new Enumerator(this);
 		}
 
+		public Node GetParent()
+		{
+			return m_Parent;
+		}
+
+		public Node GetChilder(hwmQuadtreeChilderNodeIndex index)
+		{
+			return m_Childers[(int)index];
+		}
+
+		public bool IsLeaf()
+		{
+			return m_IsLeaf;
+		}
+
 		public int GetElementCountInSelfAndChilders()
 		{
 			if (m_IsLeaf)
@@ -261,7 +277,7 @@ public class hwmQuadtree<T> where T : hwmQuadtree<T>.IElement
 			{
 				Node iterNode = new Node();
 				m_Childers[iChild] = iterNode;
-				iterNode.Initialize(m_Owner, this, CalculateChilderBounds((ChilderIndex)iChild));
+				iterNode.Initialize(m_Owner, this, CalculateChilderBounds((hwmQuadtreeChilderNodeIndex)iChild));
 			}
 
 			T[] elements = m_Elements.ToArray();
@@ -299,25 +315,25 @@ public class hwmQuadtree<T> where T : hwmQuadtree<T>.IElement
 			m_Childers = null;
 		}
 
-		private hwmBounds2D CalculateChilderBounds(ChilderIndex index)
+		private hwmBounds2D CalculateChilderBounds(hwmQuadtreeChilderNodeIndex index)
 		{
 			Vector2 size = m_Bounds.extents;
 			Vector2 extents = size * 0.5f;
 			switch (index)
 			{
-				case ChilderIndex.LeftUp:
+				case hwmQuadtreeChilderNodeIndex.LeftUp:
 					return new hwmBounds2D(new Vector2(m_Bounds.center.x - extents.x
 							, m_Bounds.center.y + extents.y)
 						, size);
-				case ChilderIndex.RightUp:
+				case hwmQuadtreeChilderNodeIndex.RightUp:
 					return new hwmBounds2D(new Vector2(m_Bounds.center.x + extents.x
 							, m_Bounds.center.y + extents.y)
 						, size);
-				case ChilderIndex.LeftDown:
+				case hwmQuadtreeChilderNodeIndex.LeftDown:
 					return new hwmBounds2D(new Vector2(m_Bounds.center.x - extents.x
 							, m_Bounds.center.y - extents.y)
 						, size);
-				case ChilderIndex.RightDown:
+				case hwmQuadtreeChilderNodeIndex.RightDown:
 					return new hwmBounds2D(new Vector2(m_Bounds.center.x + extents.x
 							, m_Bounds.center.y - extents.y)
 						, size);
@@ -330,20 +346,6 @@ public class hwmQuadtree<T> where T : hwmQuadtree<T>.IElement
 		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return new Enumerator(this);
-		}
-
-		/// <summary>
-		/// ----------
-		/// |  0  1  |
-		/// |  2  3  |
-		/// ----------
-		/// </summary>
-		public enum ChilderIndex
-		{
-			LeftUp = 0,
-			RightUp = 1,
-			LeftDown = 2,
-			RightDown = 3,
 		}
 
 		public struct Enumerator : IEnumerator<T>, IEnumerator
@@ -423,4 +425,19 @@ public class hwmQuadtree<T> where T : hwmQuadtree<T>.IElement
 		Node OwnerQuadtreeNode { get; set; }
 		hwmBounds2D QuadtreeNodeBounds { get; set; }
 	}
+}
+
+
+/// <summary>
+/// ----------
+/// |  0  1  |
+/// |  2  3  |
+/// ----------
+/// </summary>
+public enum hwmQuadtreeChilderNodeIndex
+{
+	LeftUp = 0,
+	RightUp = 1,
+	LeftDown = 2,
+	RightDown = 3,
 }
