@@ -22,6 +22,8 @@ public class slSnake : hwmActor
 	private hwmDeque<BodyNode> m_Bodys;
 	private SpeedState m_SpeedState;
 	private slSkill.EventArgs m_SkillEventArgs;
+	private int m_EnableDamageLayers;
+	private bool m_CanEatFood;
 
 	private int m_Power;
 
@@ -138,7 +140,7 @@ public class slSnake : hwmActor
 		return m_Controller;
 	}
 
-	public void UseGluttonySkill(float radius)
+	public void Gluttony(float radius)
 	{
 		hwmQuadtree<slFood> quadtree = slWorld.GetInstance().GetFoodSystem().GetQuadtree();
 		List<hwmQuadtree<slFood>.Node> nodes = new List<hwmQuadtree<slFood>.Node>();
@@ -159,6 +161,28 @@ public class slSnake : hwmActor
 					}
 				}
 			}
+		}
+	}
+
+	public bool CanEatFood()
+	{
+		return m_CanEatFood;
+	}
+
+	public void EnableEatFood(bool enable)
+	{
+		m_CanEatFood = enable;
+	}
+
+	public void EnableDamageLayer(int layer, bool enable)
+	{
+		if (enable)
+		{
+			m_EnableDamageLayers |= 1 << layer;
+		}
+		else
+		{
+			m_EnableDamageLayers &= ~(1 << layer);
 		}
 	}
 
@@ -221,6 +245,9 @@ public class slSnake : hwmActor
 		TargetMoveDirection = (initializeData.HeadRotation * Vector2.up).normalized;
 		m_CurrentMoveDirection = TargetMoveDirection;
 		m_SpeedState = SpeedState.Normal;
+
+		m_EnableDamageLayers = int.MaxValue;
+		m_CanEatFood = true;
 
 		m_SkillEventArgs = new slSkill.EventArgs();
 	}
@@ -319,11 +346,15 @@ public class slSnake : hwmActor
 			case (int)slConstants.Layer.Wall:
 			case (int)slConstants.Layer.Snake:
 			case (int)slConstants.Layer.SnakeHead:
-				DisposeAdditionalData disposeAdditionalData = new DisposeAdditionalData();
-				disposeAdditionalData.MyDeadType = collider.gameObject.layer == (int)slConstants.Layer.Wall
-					? DeadType.HitWall
-					: DeadType.HitSnake;
-				hwmWorld.GetInstance().DestroyActor(this, disposeAdditionalData);
+				int colliderLayer = collider.gameObject.layer;
+				if (((1 << colliderLayer) & m_EnableDamageLayers) != 0)
+				{
+					DisposeAdditionalData disposeAdditionalData = new DisposeAdditionalData();
+					disposeAdditionalData.MyDeadType = collider.gameObject.layer == (int)slConstants.Layer.Wall
+						? DeadType.HitWall
+						: DeadType.HitSnake;
+					hwmWorld.GetInstance().DestroyActor(this, disposeAdditionalData);
+				}			
 				break;
 			case (int)slConstants.Layer.Food:
 				slFood food = collider.gameObject.GetComponent<slFood>();
@@ -343,7 +374,10 @@ public class slSnake : hwmActor
 
 	private void EatFood(slFood food)
 	{
-		m_Power += food.BeEat(m_Head.Node.transform);
+		if (m_CanEatFood)
+		{ 
+			m_Power += food.BeEat(m_Head.Node.transform);
+		}
 	}
 
 	[System.Serializable]

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class slGluttonySkill : slSkill 
+public class slGluttonySkill : slSkill
 {
 	public Properties MyProperties;
 	public Text CDText;
@@ -12,21 +12,23 @@ public class slGluttonySkill : slSkill
 	{
 		base.Active(snake, buttonIndex);
 
-		m_CD = MyProperties.FirstCD;
+		m_CD = MyProperties.CD;
 	}
 
 	public override void DoUpdate()
 	{
 		m_CD -= Time.deltaTime;
-		bool canUse = m_CD <= 0;
+		bool canUse = m_CD <= 0 && m_Snake.CanEatFood();
 		m_InputButton.GetUIButton().interactable = canUse;
 		hwmInput.Button skillInput = hwmSystem.GetInstance().GetInput().GetButton(m_ButtonIndex);
 		skillInput.SetEnable(canUse);
-		CDText.text = canUse ? "" : Mathf.CeilToInt(m_CD).ToString();
+		CDText.text = canUse || m_CD < 0
+			? ""
+			: Mathf.CeilToInt(m_CD).ToString();
 
 		if (skillInput.GetState() == hwmInput.Button.State.Up)
 		{
-			m_Snake.UseGluttonySkill(MyProperties.Radius);
+			m_Snake.Gluttony(MyProperties.Radius);
 			m_CD = MyProperties.CD;
 		}
 	}
@@ -34,7 +36,6 @@ public class slGluttonySkill : slSkill
 	[System.Serializable]
 	public class Properties
 	{
-		public float FirstCD;
 		public float CD;
 		public int Radius;
 	}

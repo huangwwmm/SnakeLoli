@@ -66,8 +66,8 @@ public class slHUD : MonoBehaviour
 
 	protected void Awake()
 	{
-		hwmDebug.Assert(SkillAnchors.Length == 4, "SkillAnchors.Length == 4");
-		m_UsedSkills = new slSkill[4];
+		hwmDebug.Assert(SkillAnchors.Length == slConstants.SKILL_BUTTONINDEXS.Length, "SkillAnchors.Length == slConstants.SKILL_BUTTONINDEXS.Length");
+		m_UsedSkills = new slSkill[slConstants.SKILL_BUTTONINDEXS.Length];
 
 		slSkill[] skills = SkillCacheRoot.GetComponentsInChildren<slSkill>();
 		SkillCacheRoot.gameObject.SetActive(false);

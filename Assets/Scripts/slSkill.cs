@@ -34,6 +34,7 @@ public class slSkill : MonoBehaviour
 	{
 		SpeedUp = 0,
 		Gluttony,
+		Stealth,
 		Count,
 	}
 
