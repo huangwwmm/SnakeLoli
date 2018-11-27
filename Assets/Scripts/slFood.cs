@@ -38,7 +38,7 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 
 		m_Properties = foodProperties;
 		Collider.radius = m_Properties.BeEatRadius;
-		m_RemainLifeTime = m_Properties.LifeTime;
+		m_RemainLifeTime = hwmRandom.RandFloat(m_Properties.MinLifeTime, m_Properties.MaxLifeTime);
 		transform.localPosition = position;
 
 		if (m_Presentation)

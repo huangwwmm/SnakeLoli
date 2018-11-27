@@ -9,7 +9,7 @@ public class slConstants
 
 	public const float WALL_THICK = 10.0f;
 
-	public const int FOOD_QUADTREE_MAXDEPTH = 5;
+	public const int FOOD_QUADTREE_MAXDEPTH_BOUNDESIZE = 20;
 	public const int FOOD_QUADTREE_MAXELEMENT_PERNODE = 100;
 	public const int FOOD_QUADTREE_MAXELEMENT_PREPARENTNODE = 20;
 	public const float FOOD_QUADTREE_LOOSESCALE = 1.2f;
