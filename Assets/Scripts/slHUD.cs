@@ -18,11 +18,6 @@ public class slHUD : MonoBehaviour
 	/// </summary>
 	private slSkill[] m_UsedSkills;
 
-	public void SetSpeedUpButtonDisplap(bool display)
-	{
-		//SpeedUpButton.gameObject.SetActive(display);
-	}
-
 	public void SetDisplayMoveVirtualJoystick(bool display)
 	{
 		MoveVirtualJoysitck.gameObject.SetActive(display);
@@ -31,12 +26,10 @@ public class slHUD : MonoBehaviour
 	public void OnSetControllerSnake()
 	{
 		SetDisplayMoveVirtualJoystick(true);
-		SetSpeedUpButtonDisplap(true);
 	}
 
 	public void OnUnControllerSnake()
 	{
-		SetSpeedUpButtonDisplap(false);
 		SetDisplayMoveVirtualJoystick(false);
 	}
 
@@ -47,7 +40,7 @@ public class slHUD : MonoBehaviour
 		slSkill skill = m_AllSkill[(int)skillType];
 		hwmDebug.Assert(!m_UsedSkills.Contains(skill), "!m_UsedSkills.Contains(skill)");
 		m_UsedSkills[anchors] = skill;
-		skill.transform.SetParent(SkillAnchors[anchors]);
+		skill.transform.SetParent(SkillAnchors[anchors], false);
 		skill.transform.localPosition = Vector3.zero;
 
 		return skill;

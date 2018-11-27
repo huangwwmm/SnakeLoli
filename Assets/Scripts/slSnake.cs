@@ -138,55 +138,28 @@ public class slSnake : hwmActor
 		return m_Controller;
 	}
 
-	public void TestSkill()
-	{		
-		long time1 = 0, time2 = 0;
-		List<slFood> foods1 = new List<slFood>();
-		List<slFood> foods2 = new List<slFood>();
-		System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-		float radius = 50.0f;
-
+	public void UseGluttonySkill(float radius)
+	{
+		hwmQuadtree<slFood> quadtree = slWorld.GetInstance().GetFoodSystem().GetQuadtree();
+		List<hwmQuadtree<slFood>.Node> nodes = new List<hwmQuadtree<slFood>.Node>();
+		quadtree.GetRootNode().GetAllNode(ref nodes);
+		hwmBounds2D bounds = new hwmBounds2D(m_Head.Node.transform.localPosition, new Vector2(radius * 2.0f, radius * 2.0f));
+		for (int iNode = 0; iNode < nodes.Count; iNode++)
 		{
-			stopwatch.Reset();
-			stopwatch.Start();
-			RaycastHit2D[] hits = Physics2D.CircleCastAll(m_Head.Node.transform.localPosition, radius, Vector2.zero, Mathf.Infinity, 1 << (int)slConstants.Layer.Food);
-			for (int iHit = 0; iHit < hits.Length; iHit++)
+			hwmQuadtree<slFood>.Node iterNode = nodes[iNode];
+			if (iterNode.GetLooseBounds().Intersects(bounds))
 			{
-				slFood food = hits[iHit].collider.gameObject.GetComponent<slFood>();
-				foods2.Add(food);
-			}
-			stopwatch.Stop();
-			time2 = stopwatch.ElapsedTicks;
-		}
-
-		{
-			stopwatch.Reset();
-			stopwatch.Start();
-			hwmQuadtree<slFood> quadtree = slWorld.GetInstance().GetFoodSystem().GetQuadtree();
-			List<hwmQuadtree<slFood>.Node> nodes = new List<hwmQuadtree<slFood>.Node>();
-			quadtree.GetRootNode().GetAllNode(ref nodes);
-			hwmBounds2D bounds = new hwmBounds2D(m_Head.Node.transform.localPosition, new Vector2(radius * 2.0f, radius*2.0f));
-			for (int iNode = 0; iNode < nodes.Count; iNode++)
-			{
-				hwmQuadtree<slFood>.Node iterNode = nodes[iNode];
-				if (iterNode.GetLooseBounds().Intersects(bounds))
+				hwmBetterList<slFood> foods = nodes[iNode].GetElements();
+				for (int iElement = 0; iElement < foods.Count; iElement++)
 				{
-					hwmBetterList<slFood> foods = nodes[iNode].GetElements();
-					for (int iElement = 0; iElement < foods.Count; iElement++)
+					slFood iterFood = foods[iElement];
+					if ((iterFood.transform.localPosition - m_Head.Node.transform.localPosition).sqrMagnitude <= radius * radius)
 					{
-						slFood iterFood = foods[iElement];
-						if ((iterFood.transform.localPosition - m_Head.Node.transform.localPosition).sqrMagnitude <= radius * radius)
-						{
-							foods1.Add(iterFood);
-						}
+						EatFood(iterFood);
 					}
 				}
 			}
-			stopwatch.Stop();
-			time1 = stopwatch.ElapsedTicks;
 		}
-		
-		Debug.LogError(string.Format("{0} - {1} - {2} - {3} - {4}", foods1.Count, foods2.Count, time1 < time2, time1, time2));
 	}
 
 	protected override void HandleInitialize(object additionalData)
@@ -354,7 +327,7 @@ public class slSnake : hwmActor
 				break;
 			case (int)slConstants.Layer.Food:
 				slFood food = collider.gameObject.GetComponent<slFood>();
-				m_Power += food.BeEat(m_Head.Node.transform);
+				EatFood(food);
 				break;
 		}
 	}
@@ -366,6 +339,11 @@ public class slSnake : hwmActor
 		{
 			body.Sprite.sortingOrder = currentOrder--;
 		}
+	}
+
+	private void EatFood(slFood food)
+	{
+		m_Power += food.BeEat(m_Head.Node.transform);
 	}
 
 	[System.Serializable]
@@ -428,4 +406,57 @@ public class slSnake : hwmActor
 		Normal,
 		SpeedUp,
 	}
+
+	#region Debug And Test
+	public void TestSkill()
+	{
+		long time1 = 0, time2 = 0;
+		List<slFood> foods1 = new List<slFood>();
+		List<slFood> foods2 = new List<slFood>();
+		System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+		float radius = 50.0f;
+
+		{
+			stopwatch.Reset();
+			stopwatch.Start();
+			RaycastHit2D[] hits = Physics2D.CircleCastAll(m_Head.Node.transform.localPosition, radius, Vector2.zero, Mathf.Infinity, 1 << (int)slConstants.Layer.Food);
+			for (int iHit = 0; iHit < hits.Length; iHit++)
+			{
+				slFood food = hits[iHit].collider.gameObject.GetComponent<slFood>();
+				foods2.Add(food);
+			}
+			stopwatch.Stop();
+			time2 = stopwatch.ElapsedTicks;
+		}
+
+		{
+			stopwatch.Reset();
+			stopwatch.Start();
+			hwmQuadtree<slFood> quadtree = slWorld.GetInstance().GetFoodSystem().GetQuadtree();
+			List<hwmQuadtree<slFood>.Node> nodes = new List<hwmQuadtree<slFood>.Node>();
+			quadtree.GetRootNode().GetAllNode(ref nodes);
+			hwmBounds2D bounds = new hwmBounds2D(m_Head.Node.transform.localPosition, new Vector2(radius * 2.0f, radius * 2.0f));
+			for (int iNode = 0; iNode < nodes.Count; iNode++)
+			{
+				hwmQuadtree<slFood>.Node iterNode = nodes[iNode];
+				if (iterNode.GetLooseBounds().Intersects(bounds))
+				{
+					hwmBetterList<slFood> foods = nodes[iNode].GetElements();
+					for (int iElement = 0; iElement < foods.Count; iElement++)
+					{
+						slFood iterFood = foods[iElement];
+						if ((iterFood.transform.localPosition - m_Head.Node.transform.localPosition).sqrMagnitude <= radius * radius)
+						{
+							foods1.Add(iterFood);
+						}
+					}
+				}
+			}
+			stopwatch.Stop();
+			time1 = stopwatch.ElapsedTicks;
+		}
+
+		Debug.LogError(string.Format("{0} - {1} - {2} - {3} - {4}", foods1.Count, foods2.Count, time1 < time2, time1, time2));
+	}
+	#endregion
 }

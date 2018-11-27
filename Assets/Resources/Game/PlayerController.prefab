@@ -614,6 +614,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MyType: 1
+  MyProperties:
+    FirstCD: 5
+    CD: 10
+    Radius: 24
   CDText: {fileID: 114540367878235582}
 --- !u!114 &114847590494831182
 MonoBehaviour:
@@ -631,7 +635,7 @@ MonoBehaviour:
     CostPower: 5
     EnterRequiredNode: 10
     KeepRequiredNode: 5
-    MoveNodeCount: 3
+    MoveNodeCount: 2
 --- !u!114 &114934518537740382
 MonoBehaviour:
   m_ObjectHideFlags: 1

@@ -16,7 +16,7 @@ public class slPlayerController : slBaseController
 	/// <summary>
 	/// UNDONE will move to player data
 	/// </summary>
-	private slSkill.SkillType[] m_UsedSkill = new slSkill.SkillType[] { slSkill.SkillType.SpeedUp };
+	private slSkill.SkillType[] m_UsedSkill = new slSkill.SkillType[] { slSkill.SkillType.SpeedUp, slSkill.SkillType.Gluttony };
 
 	public override bool IsPlayer()
 	{

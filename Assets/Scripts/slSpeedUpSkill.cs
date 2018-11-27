@@ -21,14 +21,14 @@ public class slSpeedUpSkill : slSkill
 
 	public override void DoUpdate()
 	{
-		bool canSpeedUp = CanSpeedUp();
+		bool canUse = CanSpeedUp();
 
-		m_InputButton.GetUIButton().interactable = canSpeedUp;
+		m_InputButton.GetUIButton().interactable = canUse;
 
-		hwmInput.Button speedUpButton = hwmSystem.GetInstance().GetInput().GetButton(m_ButtonIndex);
-		speedUpButton.SetEnable(canSpeedUp);
+		hwmInput.Button skillInput = hwmSystem.GetInstance().GetInput().GetButton(m_ButtonIndex);
+		skillInput.SetEnable(canUse);
 
-		m_Snake.ChangeSpeedState(canSpeedUp && speedUpButton.IsPress()
+		m_Snake.ChangeSpeedState(canUse && skillInput.IsPress()
 			? slSnake.SpeedState.SpeedUp 
 			: slSnake.SpeedState.Normal); 
 	}
