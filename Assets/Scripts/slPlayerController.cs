@@ -38,8 +38,12 @@ public class slPlayerController : slBaseController
 		cameraPosition.y = snakeHaedPosition.y;
 		m_Camera.transform.localPosition = cameraPosition;
 
-		hwmSystem.GetInstance().GetInput().SetAllAxisEnable(true);
-		hwmSystem.GetInstance().GetInput().GetButton(hwmConstants.ButtonIndex.Skill1).SetEnable(true);
+		m_Input.JoystickCursor.SetAvailable(false);
+
+		m_Input.GetAxis(hwmConstants.AxisIndex.MoveX).SetEnable(true);
+		m_Input.GetAxis(hwmConstants.AxisIndex.MoveY).SetEnable(true);
+		m_Input.GetButton(hwmConstants.ButtonIndex.Skill1).SetEnable(true);
+		m_Input.GetButton(hwmConstants.ButtonIndex.Skill2).SetEnable(true);
 
 		m_HUD.SetDisplayMoveVirtualJoystick(true);
 		m_HUD.SetSpeedUpButtonDisplap(true);
@@ -50,8 +54,12 @@ public class slPlayerController : slBaseController
 		m_HUD.SetSpeedUpButtonDisplap(false);
 		m_HUD.SetDisplayMoveVirtualJoystick(false);
 
-		hwmSystem.GetInstance().GetInput().SetAllAxisEnable(false);
-		hwmSystem.GetInstance().GetInput().SetAllButtonEnable(false);
+		m_Input.GetAxis(hwmConstants.AxisIndex.MoveX).SetEnable(false);
+		m_Input.GetAxis(hwmConstants.AxisIndex.MoveY).SetEnable(false);
+		m_Input.GetButton(hwmConstants.ButtonIndex.Skill1).SetEnable(false);
+		m_Input.GetButton(hwmConstants.ButtonIndex.Skill2).SetEnable(false);
+
+		m_Input.JoystickCursor.SetAvailable(true);
 	}
 
 	protected void Update()
@@ -77,8 +85,13 @@ public class slPlayerController : slBaseController
 
 		bool canSpeedUp = m_Snake.CanSpeedUp();
 		m_HUD.SetCanSpeedUp(canSpeedUp);
-		hwmInput.Button speedUpButton = hwmSystem.GetInstance().GetInput().GetButton(hwmConstants.ButtonIndex.Skill1);
+		hwmInput.Button speedUpButton = m_Input.GetButton(hwmConstants.ButtonIndex.Skill1);
 		speedUpButton.SetEnable(canSpeedUp);
 		m_Snake.TryChangeSpeedState(speedUpButton.IsPress() ? slSnake.SpeedState.SpeedUp : slSnake.SpeedState.Normal);
+
+		if (m_Input.GetButton(hwmConstants.ButtonIndex.Skill2).GetState() == hwmInput.Button.State.Up)
+		{
+			m_Snake.TestSkill();
+		}
 	}
 }

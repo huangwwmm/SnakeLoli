@@ -252,7 +252,6 @@ public class hwmDeque<T> : IEnumerable, ICollection, IEnumerable<T>
 		public T[] Items;
 	}
 
-	[Serializable]
 	public struct Enumerator : IEnumerator<T>, IEnumerator
 	{
 		private hwmDeque<T> m_Deque;

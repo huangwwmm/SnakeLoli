@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class slSnake : hwmActor
 {
@@ -124,6 +125,45 @@ public class slSnake : hwmActor
 			m_SpeedState = SpeedState.Normal;
 		}
 		m_SpeedState = speedState;
+	}
+
+	public void TestSkill()
+	{
+		hwmQuadtree<slFood> quadtree = slWorld.GetInstance().GetFoodSystem().GetQuadtree();
+		hwmQuadtree<slFood>.Node targetNode = null;
+		if (!quadtree.TryFindNode(ref targetNode, new hwmBounds2D(m_Head.Node.transform.localPosition, new Vector2(50, 50))))
+		{
+			Debug.LogError("Not found");
+			targetNode = quadtree.GetRootNode();
+		}
+
+		float time2 = Time.realtimeSinceStartup;
+		RaycastHit2D[] hits = Physics2D.CircleCastAll(m_Head.Node.transform.localPosition, 25.0f, Vector2.zero, Mathf.Infinity, 1 << (int)slConstants.Layer.Food);
+		List<slFood> foods2 = new List<slFood>();
+		for (int iHit = 0; iHit < hits.Length; iHit++)
+		{
+			slFood food = hits[iHit].collider.gameObject.GetComponent<slFood>();
+			if ((food.transform.localPosition - m_Head.Node.transform.localPosition).sqrMagnitude <= 25.0f * 25.0f)
+			{
+				//food.BeEat(m_Head.Node.transform);
+				foods2.Add(food);
+			}
+		}
+		time2 = Time.realtimeSinceStartup - time2;
+
+		float time1 = Time.realtimeSinceStartup;
+		List<slFood> foods1 = new List<slFood>();
+		foreach (slFood food in targetNode)
+		{
+			if ((food.transform.localPosition - m_Head.Node.transform.localPosition).sqrMagnitude <= 25.0f * 25.0f)
+			{
+				//	//food.BeEat(m_Head.Node.transform);
+				foods1.Add(food);
+			}
+		}
+		time1 = Time.realtimeSinceStartup - time1;
+
+		Debug.LogError(string.Format("{0} - {1} - {2} - {3} - {4}", foods1.Count, foods2.Count, time1 < time2, time1, time2));
 	}
 
 	protected override void HandleInitialize(object additionalData)

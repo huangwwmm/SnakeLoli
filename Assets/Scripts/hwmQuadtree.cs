@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
 
 public class hwmQuadtree<T> where T : hwmQuadtree<T>.IElement
 {
@@ -49,6 +50,9 @@ public class hwmQuadtree<T> where T : hwmQuadtree<T>.IElement
 		{
 			rootNode = m_Root;
 		}
+		bounds.SetMinMax(new Vector2(Mathf.Max(bounds.min.x, m_Root.GetLooseBounds().min.x), Mathf.Max(bounds.min.y, m_Root.GetLooseBounds().min.y))
+			, new Vector2(Mathf.Min(bounds.max.y, m_Root.GetLooseBounds().max.x), Mathf.Min(bounds.max.y, m_Root.GetLooseBounds().max.y)));
+
 		return rootNode.TryFindNode(ref foundNode, bounds);
 	}
 
@@ -84,7 +88,12 @@ public class hwmQuadtree<T> where T : hwmQuadtree<T>.IElement
 		}
 	}
 
-	public class Node
+	public Node GetRootNode()
+	{
+		return m_Root;
+	}
+
+	public class Node:IEnumerable,  IEnumerable<T>
 	{
 		private const int CHILDER_COUNT = 4;
 
@@ -196,9 +205,19 @@ public class hwmQuadtree<T> where T : hwmQuadtree<T>.IElement
 			}
 		}
 
+		public hwmBounds2D GetLooseBounds()
+		{
+			return m_LooseBounds;
+		}
+
 		public hwmBetterList<T> GetElements()
 		{
 			return m_Elements;
+		}
+
+		public IEnumerator<T> GetEnumerator()
+		{
+			return new Enumerator(this);
 		}
 
 		private void SplitChilders()
@@ -274,6 +293,11 @@ public class hwmQuadtree<T> where T : hwmQuadtree<T>.IElement
 			}
 		}
 
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return new Enumerator(this);
+		}
+
 		/// <summary>
 		/// ----------
 		/// |  0  1  |
@@ -286,6 +310,75 @@ public class hwmQuadtree<T> where T : hwmQuadtree<T>.IElement
 			RightUp = 1,
 			LeftDown = 2,
 			RightDown = 3,
+		}
+
+		public struct Enumerator : IEnumerator<T>, IEnumerator
+		{
+			private Node m_Node;
+			private Node m_IterNode;
+			private int m_ChilderIndex;
+			private int m_ElementIndex;
+			private Stack<int> m_ChilderIndexs;
+
+			public T Current { get; private set; }
+
+			object IEnumerator.Current { get { return Current; } }
+
+			internal Enumerator(Node node)
+			{
+				m_Node = node;
+				m_IterNode = m_Node;
+				m_ChilderIndex = 0;
+				m_ElementIndex = 0;
+				m_ChilderIndexs = new Stack<int>();
+				Current = default(T);
+			}
+
+			public bool MoveNext()
+			{
+				if ((uint)m_ElementIndex < (uint)m_IterNode.m_Elements.Count)
+				{
+					Current = m_IterNode.m_Elements[m_ElementIndex++];
+					return true;
+				}
+				else if (!m_IterNode.m_IsLeaf
+					&& (uint)m_ChilderIndex < CHILDER_COUNT)
+				{
+					m_IterNode = m_IterNode.m_Childers[m_ChilderIndex++];
+					m_ChilderIndexs.Push(m_ChilderIndex);
+					m_ElementIndex = 0;
+					m_ChilderIndex = 0;
+					return MoveNext();
+				}
+				else if (m_ChilderIndexs.Count > 0)
+				{
+					m_IterNode = m_IterNode.m_Parent;
+					m_ChilderIndex = m_ChilderIndexs.Pop();
+					return MoveNext();
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			public void Dispose()
+			{
+				Current = default(T);
+				m_Node = null;
+				m_IterNode = null;
+				m_ChilderIndexs.Clear();
+				m_ChilderIndexs = null;
+			}
+
+			void IEnumerator.Reset()
+			{
+				Current = default(T);
+				m_IterNode = m_Node;
+				m_ChilderIndex = 0;
+				m_ElementIndex = 0;
+				m_ChilderIndexs.Clear();
+			}
 		}
 	}
 

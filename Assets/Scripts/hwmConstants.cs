@@ -18,7 +18,11 @@
 	/// </summary>
 	public enum ButtonIndex
 	{
-		Skill1 = 0,
+		Notset = -1,
+		Skill1,
+		Skill2,
+		Skill3,
+		Skill4,
 	}
 
 	/// <summary>
@@ -26,7 +30,8 @@
 	/// </summary>
 	public enum AxisIndex
 	{
-		MoveX = 0,
+		Notset = -1,
+		MoveX,
 		MoveY,
 	}
 

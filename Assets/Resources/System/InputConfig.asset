@@ -23,3 +23,5 @@ MonoBehaviour:
   Buttons:
   - Index: 0
     KeyCodes: 200000004a010000
+  - Index: 1
+    KeyCodes: 6a0000004c010000

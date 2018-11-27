@@ -15,4 +15,5 @@ MonoBehaviour:
   SpriteRadius: 0.3
   BeEatRadius: 2
   AddPower: 1
-  LifeTime: 10
+  MinLifeTime: 8
+  MaxLifeTime: 12

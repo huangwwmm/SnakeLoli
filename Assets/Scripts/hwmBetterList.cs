@@ -335,7 +335,6 @@ public class hwmBetterList<T> : IEnumerable, ICollection, IList, IEnumerable<T>,
 		Remove((T)item);
 	}
 
-	[Serializable]
 	public struct Enumerator : IEnumerator<T>, IEnumerator
 	{
 		private hwmBetterList<T> m_List;

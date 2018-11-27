@@ -81,6 +81,11 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 		}
 	}
 
+	public slFoodPresentation GetPresentation()
+	{
+		return m_Presentation;
+	}
+
 	protected void Update()
 	{
 		if (m_State == State.BeEat)

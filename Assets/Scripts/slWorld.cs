@@ -54,10 +54,6 @@ public class slWorld : hwmWorld
 	{
 		m_GameMode = base.m_GameMode as slGameMode_Free;
 
-		hwmSystem.GetInstance().GetInput().JoystickCursor.SetAvailable(false);
-		hwmSystem.GetInstance().GetInput().SetAllAxisEnable(false);
-		hwmSystem.GetInstance().GetInput().SetAllButtonEnable(false);
-
 		m_PlayerController = (Object.Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game, "PlayerController")) as GameObject)
 			.GetComponent<slPlayerController>();
 		m_PlayerController.Initialize();
@@ -88,8 +84,5 @@ public class slWorld : hwmWorld
 		yield return null;
 
 		m_PlayerController.Dispose();
-
-		hwmSystem.GetInstance().GetInput().SetAllAxisEnable(false);
-		hwmSystem.GetInstance().GetInput().JoystickCursor.SetAvailable(true);
 	}
 }
