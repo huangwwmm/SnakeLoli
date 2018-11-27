@@ -68,7 +68,7 @@ public class slWorld : hwmWorld
 		m_Map.Initialize(GetLevel().MapSize);
 		yield return null;
 
-		m_FoodSystem = (Object.Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game, "FoodSystem")) as GameObject).GetComponent<slFoodSystem>();
+		m_FoodSystem = new slFoodSystem();
 		m_FoodSystem.Initialize(GetLevel());
 
 		m_UpdateSchedule = gameObject.AddComponent<slUpdateSchedule>();
@@ -80,7 +80,6 @@ public class slWorld : hwmWorld
 		m_UpdateSchedule = null;
 
 		m_FoodSystem.Dispose();
-		Destroy(m_FoodSystem);
 		m_FoodSystem = null;
 
 		m_Map.Dispose();

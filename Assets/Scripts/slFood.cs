@@ -6,7 +6,7 @@ public class slFood : MonoBehaviour
 
 	private slFoodPresentation m_Presentation;
 	private hwmQuadtree.Element m_QuadtreeElement;
-	private FoodProperties m_Properties;
+	private slFoodProperties m_Properties;
 	private State m_State;
 	private Transform m_BeEatTransform;
 	private float m_BeEatAnimationRemainTime;
@@ -26,14 +26,26 @@ public class slFood : MonoBehaviour
 		m_Presentation = null;
 	}
 
-	public void ActiveFood()
+	public void ActiveFood(slFoodProperties foodProperties,Vector3 position, Color color)
 	{
 		m_State = State.Idle;
 
 		gameObject.SetActive(true);
 		Collider.enabled = true;
 
+		m_Properties = foodProperties;
+		Collider.radius = m_Properties.BeEatRadius;
+		m_RemainLifeTime = m_Properties.LifeTime;
+		transform.localPosition = position;
+
+		if (m_Presentation)
+		{
+			m_Presentation.ChangeFoodType(foodProperties, color);
+		}
+
 		m_QuadtreeElement = new hwmQuadtree.Element(slWorld.GetInstance().GetFoodSystem().GetQuadtree());
+		m_QuadtreeElement.Bounds.extents = new Vector2(m_Properties.SpriteRadius, m_Properties.SpriteRadius);
+		UpdateQuadtreeElement();
 	}
 
 	public void DeactiveFood()
@@ -51,25 +63,6 @@ public class slFood : MonoBehaviour
 		m_Properties = null;
 
 		m_State = State.Notset;
-	}
-
-	public void ChangeFoodType(FoodProperties foodProperties, Color color)
-	{
-		m_Properties = foodProperties;
-		Collider.radius = m_Properties.BeEatRadius;
-		m_QuadtreeElement.Bounds.extents = new Vector2(m_Properties.SpriteRadius, m_Properties.SpriteRadius);
-		m_RemainLifeTime = m_Properties.LifeTime;
-
-		if (m_Presentation)
-		{
-			m_Presentation.ChangeFoodType(foodProperties, color);
-		}
-	}
-
-	public void UpdateQuadtreeElement()
-	{
-		m_QuadtreeElement.Bounds.center = transform.position;
-		m_QuadtreeElement.UpdateElement();
 	}
 
 	public int BeEat(Transform beEatTransform)
@@ -118,6 +111,12 @@ public class slFood : MonoBehaviour
 		}
 	}
 
+	private void UpdateQuadtreeElement()
+	{
+		m_QuadtreeElement.Bounds.center = transform.position;
+		m_QuadtreeElement.UpdateElement();
+	}
+
 	public enum FoodType
 	{
 		Normal,
@@ -129,15 +128,5 @@ public class slFood : MonoBehaviour
 		Notset,
 		Idle,
 		BeEat
-	}
-
-	[System.Serializable]
-	public class FoodProperties
-	{
-		public FoodType MyType;
-		public float SpriteRadius;
-		public float BeEatRadius;
-		public int AddPower;
-		public float LifeTime;
 	}
 }

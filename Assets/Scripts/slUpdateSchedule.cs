@@ -28,6 +28,11 @@ public class slUpdateSchedule : MonoBehaviour
 
 	protected void FixedUpdate()
 	{
+		if (hwmWorld.GetInstance().GetGameState().GetMatchState() != hwmMatchState.InProgress)
+		{
+			return;
+		}
+
 		bool currentUpdateSnakeMovement = false;
 
 		// update snake movement
@@ -76,6 +81,9 @@ public class slUpdateSchedule : MonoBehaviour
 				m_UpdateRespawnPlayerFrame -= slConstants.UPDATE_RESPAWN_FRAME_INTERVAL;
 				slWorld.GetInstance().GetGameMode().DoUpdateRespawnPlayer();
 			}
+
+			// update food system
+			slWorld.GetInstance().GetFoodSystem().DoUpdate();
 		}
 	}
 

@@ -6,7 +6,7 @@ public class slFoodPresentation : MonoBehaviour
 	public SpriteRenderer LargeSprite;
 	public SpriteRenderer LargeInSprite;
 
-	public void ChangeFoodType(slFood.FoodProperties foodProperties, Color color)
+	public void ChangeFoodType(slFoodProperties foodProperties, Color color)
 	{
 		switch (foodProperties.MyType)
 		{
