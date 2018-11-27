@@ -32,6 +32,11 @@ public class slSnake : hwmActor
 		return m_Power;
 	}
 
+	public void CostPower(int power)
+	{
+		m_Power -= power;
+	}
+
 	public SpeedState GetSpeedState()
 	{
 		return m_SpeedState;

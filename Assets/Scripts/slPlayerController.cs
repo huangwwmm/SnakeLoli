@@ -4,7 +4,7 @@ public class slPlayerController : slBaseController
 {
 	public float CameraSmoothTime;
 
-	private Camera m_Camera;
+	private slCamera m_Camera;
 	private slHUD m_HUD;
 	/// <summary>
 	/// cache for update call
@@ -20,8 +20,14 @@ public class slPlayerController : slBaseController
 	{
 		slSkill.SkillType.SpeedUp,
 		slSkill.SkillType.Gluttony,
-		slSkill.SkillType.Stealth
+		slSkill.SkillType.Stealth,
+		slSkill.SkillType.Radar
 	};
+
+	public slCamera GetCamera()
+	{
+		return m_Camera;
+	}
 
 	public override bool IsPlayer()
 	{
@@ -30,7 +36,7 @@ public class slPlayerController : slBaseController
 
 	protected override void HandleInitialize()
 	{
-		m_Camera = transform.Find("Camera").GetComponent<Camera>();
+		m_Camera = transform.Find("Camera").GetComponent<slCamera>();
 		m_HUD = transform.Find("HUD").GetComponent<slHUD>();
 		m_Input = hwmSystem.GetInstance().GetInput();
 	}
