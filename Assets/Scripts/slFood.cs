@@ -8,7 +8,7 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 	private slFoodProperties m_Properties;
 	private State m_State;
 	private Transform m_BeEatTransform;
-	private float m_BeEatAnimationRemainTime;
+	private float m_BeEatRemainTime;
 	private float m_RemainLifeTime;
 
 	public hwmQuadtree<slFood> OwnerQuadtree { get; set; }
@@ -72,7 +72,7 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 			m_State = State.BeEat;
 			Collider.enabled = false;
 			m_BeEatTransform = beEatTransform;
-			m_BeEatAnimationRemainTime = Vector3.Distance(m_BeEatTransform.localPosition, transform.localPosition) / slConstants.FOOD_BEEAT_MOVE_SPEED;
+			m_BeEatRemainTime = slConstants.FOOD_BEEAT_MOVE_TIME;
 			return m_Properties.AddPower;
 		}
 		else
@@ -92,11 +92,11 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 		{
 			if (m_BeEatTransform != null)
 			{
-				Vector3 moveToPosition = Vector3.MoveTowards(transform.localPosition, m_BeEatTransform.localPosition, slConstants.FOOD_BEEAT_MOVE_SPEED * Time.deltaTime);
-				transform.localPosition = moveToPosition;
-				m_BeEatAnimationRemainTime -= Time.deltaTime;
-				if (m_BeEatAnimationRemainTime <= 0
-					|| (moveToPosition - m_BeEatTransform.localPosition).sqrMagnitude < 0.1f)
+				Vector3 meToTarget = m_BeEatTransform.localPosition - transform.localPosition;
+				transform.localPosition = transform.localPosition + meToTarget * (Time.deltaTime / m_BeEatRemainTime);
+
+				m_BeEatRemainTime -= Time.deltaTime;
+				if (m_BeEatRemainTime <= 0)
 				{
 					slWorld.GetInstance().GetFoodSystem().DestroyFood(this);
 				}
