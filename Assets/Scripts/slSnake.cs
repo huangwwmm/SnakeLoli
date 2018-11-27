@@ -129,39 +129,71 @@ public class slSnake : hwmActor
 
 	public void TestSkill()
 	{
-		hwmQuadtree<slFood> quadtree = slWorld.GetInstance().GetFoodSystem().GetQuadtree();
-		hwmQuadtree<slFood>.Node targetNode = null;
-		if (!quadtree.TryFindNode(ref targetNode, new hwmBounds2D(m_Head.Node.transform.localPosition, new Vector2(50, 50))))
-		{
-			Debug.LogError("Not found");
-			targetNode = quadtree.GetRootNode();
-		}
-
-		float time2 = Time.realtimeSinceStartup;
-		RaycastHit2D[] hits = Physics2D.CircleCastAll(m_Head.Node.transform.localPosition, 25.0f, Vector2.zero, Mathf.Infinity, 1 << (int)slConstants.Layer.Food);
-		List<slFood> foods2 = new List<slFood>();
-		for (int iHit = 0; iHit < hits.Length; iHit++)
-		{
-			slFood food = hits[iHit].collider.gameObject.GetComponent<slFood>();
-			if ((food.transform.localPosition - m_Head.Node.transform.localPosition).sqrMagnitude <= 25.0f * 25.0f)
-			{
-				//food.BeEat(m_Head.Node.transform);
-				foods2.Add(food);
-			}
-		}
-		time2 = Time.realtimeSinceStartup - time2;
-
-		float time1 = Time.realtimeSinceStartup;
+		long time1 = 0, time2 = 0;
 		List<slFood> foods1 = new List<slFood>();
-		foreach (slFood food in targetNode)
+		List<slFood> foods2 = new List<slFood>();
+		System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+
+		//{
+		//	stopwatch.Reset();
+		//	stopwatch.Start();
+		//	hwmQuadtree<slFood> quadtree = slWorld.GetInstance().GetFoodSystem().GetQuadtree();
+		//	hwmQuadtree<slFood>.Node targetNode = null;
+		//	if (quadtree.TryFindNode(ref targetNode, new hwmBounds2D(m_Head.Node.transform.localPosition, new Vector2(50, 50))))
+		//	{
+		//		foreach (slFood food in targetNode)
+		//		{
+		//			if ((food.transform.localPosition - m_Head.Node.transform.localPosition).sqrMagnitude <= 25.0f * 25.0f)
+		//			{
+		//				//	//food.BeEat(m_Head.Node.transform);
+		//				foods1.Add(food);
+		//			}
+		//		}
+		//	}
+
+		//	stopwatch.Stop();
+		//	time1 = stopwatch.ElapsedTicks;
+		//}
+
 		{
-			if ((food.transform.localPosition - m_Head.Node.transform.localPosition).sqrMagnitude <= 25.0f * 25.0f)
+			
+			hwmQuadtree<slFood> quadtree = slWorld.GetInstance().GetFoodSystem().GetQuadtree();
+			hwmQuadtree<slFood>.Node targetNode = null;
+			hwmBounds2D bounds = new hwmBounds2D(m_Head.Node.transform.localPosition, new Vector2(25, 25));
+			hwmBounds2D rootNodeBounds = quadtree.GetRootNode().GetBounds();
+			bounds.SetMinMax(new Vector2(Mathf.Max(bounds.min.x, rootNodeBounds.min.x)
+					, Mathf.Max(bounds.min.y, rootNodeBounds.min.y))
+				, new Vector2(Mathf.Min(bounds.max.x, rootNodeBounds.max.x)
+					, Mathf.Min(bounds.max.y, rootNodeBounds.max.y)));
+			if (quadtree.TryFindContains(ref targetNode, bounds))
 			{
-				//	//food.BeEat(m_Head.Node.transform);
-				foods1.Add(food);
+				stopwatch.Reset();
+				stopwatch.Start();
+				foreach (slFood food in targetNode)
+				{
+					foods1.Add(food);
+				}
+				stopwatch.Stop();
+				time1 = stopwatch.ElapsedTicks;
 			}
 		}
-		time1 = Time.realtimeSinceStartup - time1;
+
+		{
+			stopwatch.Reset();
+			stopwatch.Start();
+			RaycastHit2D[] hits = Physics2D.CircleCastAll(m_Head.Node.transform.localPosition, 25.0f, Vector2.zero, Mathf.Infinity, 1 << (int)slConstants.Layer.Food);
+			for (int iHit = 0; iHit < hits.Length; iHit++)
+			{
+				slFood food = hits[iHit].collider.gameObject.GetComponent<slFood>();
+				if ((food.transform.localPosition - m_Head.Node.transform.localPosition).sqrMagnitude <= 25.0f * 25.0f)
+				{
+					//food.BeEat(m_Head.Node.transform);
+					foods2.Add(food);
+				}
+			}
+			stopwatch.Stop();
+			time2 = stopwatch.ElapsedTicks;
+		}
 
 		Debug.LogError(string.Format("{0} - {1} - {2} - {3} - {4}", foods1.Count, foods2.Count, time1 < time2, time1, time2));
 	}

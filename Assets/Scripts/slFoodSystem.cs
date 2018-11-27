@@ -31,11 +31,10 @@ public class slFoodSystem
 		m_NormalFoodProperties = hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game, "NormalFoodProperties") as slFoodProperties;
 		m_LargeFoodProperties = hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game, "LargeFoodProperties") as slFoodProperties;
 
-		//FODD_QUADTREE_MAXDEPTH_BOUNDESIZE
 		m_Quadtree = new hwmQuadtree<slFood>();
 		m_Quadtree.Initialize(CalculateQuadtreeDepth()
 			, slConstants.FOOD_QUADTREE_MAXELEMENT_PERNODE
-			, slConstants.FOOD_QUADTREE_MAXELEMENT_PREPARENTNODE
+			, slConstants.FOOD_QUADTREE_MINELEMENT_PREPARENTNODE
 			, slConstants.FOOD_QUADTREE_LOOSESCALE
 			, new hwmBounds2D(Vector2.zero, level.MapSize));
 
@@ -125,6 +124,11 @@ public class slFoodSystem
 		}
 	}
 
+	public int GetFoodCount()
+	{
+		return m_FoodCount;
+	}
+
 	private void CreateFood(slFood.FoodType foodType, Vector3 position, Color color)
 	{
 		slFood food = m_Pool.Pop();
@@ -163,6 +167,7 @@ public class slFoodSystem
 			}
 			width *= 0.5f;
 			height *= 0.5f;
+			depth++;
 		}
 		return depth;
 	}

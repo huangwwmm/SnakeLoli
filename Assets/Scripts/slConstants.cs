@@ -11,7 +11,7 @@ public class slConstants
 
 	public const int FOOD_QUADTREE_MAXDEPTH_BOUNDESIZE = 20;
 	public const int FOOD_QUADTREE_MAXELEMENT_PERNODE = 100;
-	public const int FOOD_QUADTREE_MAXELEMENT_PREPARENTNODE = 10;
+	public const int FOOD_QUADTREE_MINELEMENT_PREPARENTNODE = 10;
 	public const float FOOD_QUADTREE_LOOSESCALE = 1.2f;
 
 	public static readonly Vector3 FOOD_DEACTIVE_POSITION = new Vector3(10000, 10000, 0);

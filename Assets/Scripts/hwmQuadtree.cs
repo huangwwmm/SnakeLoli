@@ -44,16 +44,14 @@ public class hwmQuadtree<T> where T : hwmQuadtree<T>.IElement
 		m_Root = null;
 	}
 
-	public bool TryFindNode(ref Node foundNode, hwmBounds2D bounds, Node rootNode = null)
+	public bool TryFindContains(ref Node foundNode, hwmBounds2D bounds, Node rootNode = null)
 	{
 		if (rootNode == null)
 		{
 			rootNode = m_Root;
 		}
-		bounds.SetMinMax(new Vector2(Mathf.Max(bounds.min.x, m_Root.GetLooseBounds().min.x), Mathf.Max(bounds.min.y, m_Root.GetLooseBounds().min.y))
-			, new Vector2(Mathf.Min(bounds.max.y, m_Root.GetLooseBounds().max.x), Mathf.Min(bounds.max.y, m_Root.GetLooseBounds().max.y)));
 
-		return rootNode.TryFindNode(ref foundNode, bounds);
+		return rootNode.TryFindContains(ref foundNode, bounds);
 	}
 
 	public void UpdateElement(T element)
@@ -65,12 +63,12 @@ public class hwmQuadtree<T> where T : hwmQuadtree<T>.IElement
 		{
 			Node elementOwner = element.OwnerQuadtreeNode;
 			elementOwner.RemoveElement(element);
-			TryFindNode(ref foundNode, element.QuadtreeNodeBounds, elementOwner);
+			TryFindContains(ref foundNode, element.QuadtreeNodeBounds, elementOwner);
 		}
 
 		if (foundNode == null)
 		{
-			TryFindNode(ref foundNode, element.QuadtreeNodeBounds);
+			TryFindContains(ref foundNode, element.QuadtreeNodeBounds);
 		}
 		if (foundNode == null)
 		{
@@ -93,7 +91,7 @@ public class hwmQuadtree<T> where T : hwmQuadtree<T>.IElement
 		return m_Root;
 	}
 
-	public class Node:IEnumerable,  IEnumerable<T>
+	public class Node : IEnumerable, IEnumerable<T>
 	{
 		private const int CHILDER_COUNT = 4;
 
@@ -138,26 +136,22 @@ public class hwmQuadtree<T> where T : hwmQuadtree<T>.IElement
 			m_Parent = null;
 		}
 
-		public bool TryFindNode(ref Node foundNode, hwmBounds2D bounds)
+		public bool TryFindContains(ref Node foundNode, hwmBounds2D bounds)
 		{
 			if (m_LooseBounds.Contains(bounds))
 			{
-				if (m_IsLeaf)
-				{
-					foundNode = this;
-					return true;
-				}
-				else
+				if (!m_IsLeaf)
 				{
 					for (int iChilder = 0; iChilder < CHILDER_COUNT; iChilder++)
 					{
-						if (m_Childers[iChilder].TryFindNode(ref foundNode, bounds))
+						if (m_Childers[iChilder].TryFindContains(ref foundNode, bounds))
 						{
 							return true;
 						}
 					}
-					return false;
 				}
+				foundNode = this;
+				return true;
 			}
 			else
 			{
@@ -205,6 +199,16 @@ public class hwmQuadtree<T> where T : hwmQuadtree<T>.IElement
 			}
 		}
 
+		public int GetDepth()
+		{
+			return m_Depth;
+		}
+
+		public hwmBounds2D GetBounds()
+		{
+			return m_Bounds;
+		}
+
 		public hwmBounds2D GetLooseBounds()
 		{
 			return m_LooseBounds;
@@ -218,6 +222,33 @@ public class hwmQuadtree<T> where T : hwmQuadtree<T>.IElement
 		public IEnumerator<T> GetEnumerator()
 		{
 			return new Enumerator(this);
+		}
+
+		public int GetElementCountInSelfAndChilders()
+		{
+			if (m_IsLeaf)
+			{
+				return m_Elements.Count;
+			}
+			else
+			{
+				return m_Elements.Count + m_Childers[0].GetElementCountInSelfAndChilders()
+					+ m_Childers[1].GetElementCountInSelfAndChilders()
+					+ m_Childers[2].GetElementCountInSelfAndChilders()
+					+ m_Childers[3].GetElementCountInSelfAndChilders();
+			}
+		}
+
+		public void GetAllNode(ref List<Node> allNode)
+		{
+			allNode.Add(this);
+			if (!m_IsLeaf)
+			{
+				m_Childers[0].GetAllNode(ref allNode);
+				m_Childers[1].GetAllNode(ref allNode);
+				m_Childers[2].GetAllNode(ref allNode);
+				m_Childers[3].GetAllNode(ref allNode);
+			}
 		}
 
 		private void SplitChilders()
@@ -241,6 +272,9 @@ public class hwmQuadtree<T> where T : hwmQuadtree<T>.IElement
 			{
 				T iterElement = elements[iElement];
 				iterElement.OwnerQuadtreeNode = null;
+				Node newNode = null;
+				hwmDebug.Assert(TryFindContains(ref newNode, iterElement.QuadtreeNodeBounds), "TryFindNode(ref newNode, iterElement.QuadtreeNodeBounds)");
+				newNode.AddElement(iterElement);
 			}
 		}
 
@@ -336,13 +370,13 @@ public class hwmQuadtree<T> where T : hwmQuadtree<T>.IElement
 
 			public bool MoveNext()
 			{
-				if ((uint)m_ElementIndex < (uint)m_IterNode.m_Elements.Count)
+				if (m_ElementIndex < m_IterNode.m_Elements.Count)
 				{
 					Current = m_IterNode.m_Elements[m_ElementIndex++];
 					return true;
 				}
 				else if (!m_IterNode.m_IsLeaf
-					&& (uint)m_ChilderIndex < CHILDER_COUNT)
+					&& m_ChilderIndex < CHILDER_COUNT)
 				{
 					m_IterNode = m_IterNode.m_Childers[m_ChilderIndex++];
 					m_ChilderIndexs.Push(m_ChilderIndex);
@@ -354,6 +388,7 @@ public class hwmQuadtree<T> where T : hwmQuadtree<T>.IElement
 				{
 					m_IterNode = m_IterNode.m_Parent;
 					m_ChilderIndex = m_ChilderIndexs.Pop();
+					m_ElementIndex = int.MaxValue;
 					return MoveNext();
 				}
 				else
