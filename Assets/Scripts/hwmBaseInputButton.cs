@@ -17,10 +17,7 @@ public class hwmBaseInputButton : MonoBehaviour
 	public void DisableButton()
 	{
 		hwmDebug.Assert(m_Index != hwmConstants.ButtonIndex.Notset, "m_Index != hwmConstants.ButtonIndex.Notset");
-		//if (hwmSystem.GetInstance() != null) // system equal null when game application abort
-		//{
 		hwmSystem.GetInstance().GetInput().GetButton(m_Index).OnGetValueFromUI -= OnGetButton;
-		//}
 		m_Index = hwmConstants.ButtonIndex.Notset;
 	}
 

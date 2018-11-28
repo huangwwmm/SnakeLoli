@@ -17,11 +17,17 @@ public class hwmSystem : MonoBehaviour
 	private hwmAssetLoader m_AssetLoader;
 	private hwmLevel m_WaitingToPlayLevel;
 	private float m_RealtimeSinceStartup;
+	private hwmICodePerformanceStatistics m_CodePerformanceStatistics;
 
 	#region get/set function
 	public static hwmSystem GetInstance()
 	{
 		return ms_Instance;
+	}
+
+	public hwmICodePerformanceStatistics GetCodePerformanceStatistics()
+	{
+		return m_CodePerformanceStatistics;
 	}
 
 	public hwmInput GetInput()
@@ -96,6 +102,9 @@ public class hwmSystem : MonoBehaviour
 
 			m_AssetLoader = null;
 
+			m_CodePerformanceStatistics.Dispose();
+			m_CodePerformanceStatistics = null;
+
 			ms_Instance = null;
 		}
 	}
@@ -109,6 +118,16 @@ public class hwmSystem : MonoBehaviour
 
 	private IEnumerator Initialize_Co()
 	{
+		if (SystemInitializer.EnableCodePerformanceStatistics)
+		{
+			m_CodePerformanceStatistics = new hwmCodePerformanceStatistics();
+		}
+		else
+		{
+			m_CodePerformanceStatistics = new hwmEmptyCodePerformanceStatistics();
+		}
+		m_CodePerformanceStatistics.Initialize();
+
 		m_LogRecord = new hwmLogRecord();
 #if UNITY_EDITOR
 		m_LogRecord.Initialize(byte.MaxValue, true);
@@ -137,7 +156,7 @@ public class hwmSystem : MonoBehaviour
 		}
 		Debug.Log(configLogString.ToString());
 		yield return null;
-		
+
 		m_Input = InstantiatePrefabAndSetParentThisTransform<hwmInput>(m_AssetLoader.LoadAsset(hwmAssetLoader.AssetType.System, SystemInitializer.InputAssetName));
 		yield return null;
 
@@ -166,4 +185,5 @@ public class hwmSystemInitializer
 	public string InputAssetName;
 	public string SceneFSMAssetName;
 	public string LocalizationAssetName;
+	public bool EnableCodePerformanceStatistics;
 }
