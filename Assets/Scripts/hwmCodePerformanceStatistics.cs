@@ -54,7 +54,7 @@ public class hwmCodePerformanceStatistics : hwmICodePerformanceStatistics
 			long[] milliseconds = new long[historys.Count];
 			long[] ticks = new long[historys.Count];
 			historyStrs.Clear();
-			for (int iHistory = 0; iHistory < historys.Count; iHistory++)
+			for (int iHistory = Mathf.Max(0, historys.Count - hwmCodePerformanceStatisticsItem.MAX_RECORD_HISTORY_COUNT); iHistory < historys.Count; iHistory++)
 			{
 				hwmCodePerformanceStatisticsItem.History iterHistory = historys[iHistory];
 				milliseconds[iHistory] = iterHistory._Milliseconds;
@@ -236,6 +236,8 @@ public class hwmEmptyCodePerformanceStatistics : hwmICodePerformanceStatistics
 
 public class hwmCodePerformanceStatisticsItem
 {
+	public const int MAX_RECORD_HISTORY_COUNT = 8192;
+
 	internal string _Name;
 	internal Stopwatch _Stopwatch;
 	internal List<History> _Historys;
