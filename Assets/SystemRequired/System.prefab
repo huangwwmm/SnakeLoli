@@ -56,3 +56,4 @@ MonoBehaviour:
     InputAssetName: Input
     SceneFSMAssetName: SceneFSM
     LocalizationAssetName: Localization
+    EnableCodePerformanceStatistics: 1

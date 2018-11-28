@@ -9,16 +9,22 @@ public class slUpdateSchedule : MonoBehaviour
 	private int m_UpdateRespawnPlayerFrame = 0;
 	private int m_LastUpdateAISnakeIndex = -1;
 
+	private hwmCodePerformanceStatisticsItem m_CodePerformanceAIItem;
+
 	protected void Awake()
 	{
 		m_Snakes = new List<SnakeUpdteScheduleParmeter>();
 
 		hwmObserver.OnActorCreate += OnActorCreate;
 		hwmObserver.OnActorDestroy += OnActorDestroy;
+
+		m_CodePerformanceAIItem = hwmSystem.GetInstance().GetCodePerformanceStatistics().LoadOrCreateItem("Snake_DoAIUpdate");
 	}
 
 	protected void OnDestroy()
 	{
+		m_CodePerformanceAIItem = null;
+
 		hwmObserver.OnActorCreate -= OnActorCreate;
 		hwmObserver.OnActorDestroy -= OnActorDestroy;
 
@@ -68,7 +74,9 @@ public class slUpdateSchedule : MonoBehaviour
 						&& snake.Owner.GetController().IsAI())
 					{
 						snake.NeedUpdateAI = false;
+						hwmSystem.GetInstance().GetCodePerformanceStatistics().Start(m_CodePerformanceAIItem);
 						(snake.Owner.GetController() as slAIController).DoAIUpdate();
+						hwmSystem.GetInstance().GetCodePerformanceStatistics().Finish(m_CodePerformanceAIItem);
 						m_LastUpdateAISnakeIndex = currentAIIndex;
 						needUpdateAICount--;
 					}
