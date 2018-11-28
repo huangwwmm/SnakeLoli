@@ -61,7 +61,7 @@ public class slHUD : MonoBehaviour
 
 		hwmDebug.Assert(containsSkill, "containsSkill");
 
-		skill.transform.SetParent(SkillCacheRoot);
+		skill.transform.SetParent(SkillCacheRoot, false);
 	}
 
 	protected void Awake()
