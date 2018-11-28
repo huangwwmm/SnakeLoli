@@ -87,7 +87,7 @@ public class hwmLocalization
 			}
 			else if (string.IsNullOrEmpty(iterText))
 			{
-				Debug.LogError(string.Format("Row 5 Column 6 of the localization.csv is empty", iRow + 1, targetColumn + 1));
+				Debug.LogError(string.Format("Row {0} Column {1} of the localization.csv is empty", iRow + 1, targetColumn + 1));
 			}
 
 			if (m_Localization.ContainsKey(iterKey))

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 /// <summary>
 /// unordered, fast
 /// </summary>
-public class hwmBetterList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, ICollection<T>, IList<T>
+public sealed class hwmBetterList<T> : IEnumerable, ICollection, IList, IEnumerable<T>, ICollection<T>, IList<T>
 {
 	private const int DEFAULT_CAPACITY = 4;
 	/// <summary>

@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class hwmDeque<T> : IEnumerable, ICollection, IEnumerable<T>
+public sealed class hwmDeque<T> : IEnumerable, ICollection, IEnumerable<T>
 {
 	private const int DEFAULT_BLOCKSIZE = 8;
 	private const int NOTSET_BLOCK_ITEMINDEX = -1;
