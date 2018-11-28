@@ -86,9 +86,10 @@ public class slSnake : hwmActor
 				break;
 		}
 
-		int bodyCountOffset = Mathf.Max(0,
-			Mathf.FloorToInt(m_Power / m_TweakableProperties.NodeToPower - 2) // magic number: must have 2 node(head and chlothes)
-				- m_Bodys.Count);
+		int bodyCountOffset = Mathf.Max(Mathf.FloorToInt(m_Power / m_TweakableProperties.NodeToPower - 2) // magic number: must have 2 node(head and chlothes)
+				- m_Bodys.Count
+			, -m_Bodys.Count);
+
 		while (moveNodeCount-- > 0)
 		{
 			m_CurrentMoveDirection = hwmUtility.CircleLerp(m_CurrentMoveDirection, TargetMoveDirection, m_TweakableProperties.MaxTurnAngularSpeed * deltaTime);
