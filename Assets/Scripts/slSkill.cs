@@ -13,14 +13,12 @@ public class slSkill : MonoBehaviour
 		m_Snake = snake;
 		m_ButtonIndex = buttonIndex;
 
-		m_InputButton = gameObject.AddComponent<hwmInputButtonSimple>();
-		m_InputButton.Index = buttonIndex;
+		m_InputButton.EnableButton(m_ButtonIndex);
 	}
 
 	public virtual void Deactive()
 	{
-		Destroy(m_InputButton);
-		m_InputButton = null;
+		m_InputButton.DisableButton();
 
 		m_Snake = null;
 	}
@@ -28,6 +26,16 @@ public class slSkill : MonoBehaviour
 	public virtual void DoUpdate()
 	{
 
+	}
+
+	protected void Awake()
+	{
+		m_InputButton = gameObject.AddComponent<hwmInputButtonSimple>();
+	}
+
+	protected void OnDestroy()
+	{
+		m_InputButton = null;
 	}
 
 	public enum SkillType

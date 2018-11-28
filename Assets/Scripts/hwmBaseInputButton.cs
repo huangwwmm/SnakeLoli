@@ -3,21 +3,25 @@ using UnityEngine;
 
 public class hwmBaseInputButton : MonoBehaviour
 {
-	public hwmConstants.ButtonIndex Index;
+	private hwmConstants.ButtonIndex m_Index = hwmConstants.ButtonIndex.Notset;
 
 	protected bool m_Press;
 
-	protected void OnEnable()
+	public void EnableButton(hwmConstants.ButtonIndex index)
 	{
-		hwmSystem.GetInstance().GetInput().GetButton(Index).OnGetValueFromUI += OnGetButton;
+		hwmDebug.Assert(m_Index == hwmConstants.ButtonIndex.Notset, "m_Index == hwmConstants.ButtonIndex.Notset");
+		hwmSystem.GetInstance().GetInput().GetButton(index).OnGetValueFromUI += OnGetButton;
+		m_Index = index;
 	}
 
-	protected void OnDisable()
+	public void DisableButton()
 	{
-		if (hwmSystem.GetInstance() != null) // system equal null when game application abort
-		{
-			hwmSystem.GetInstance().GetInput().GetButton(Index).OnGetValueFromUI -= OnGetButton;
-		}
+		hwmDebug.Assert(m_Index != hwmConstants.ButtonIndex.Notset, "m_Index != hwmConstants.ButtonIndex.Notset");
+		//if (hwmSystem.GetInstance() != null) // system equal null when game application abort
+		//{
+		hwmSystem.GetInstance().GetInput().GetButton(m_Index).OnGetValueFromUI -= OnGetButton;
+		//}
+		m_Index = hwmConstants.ButtonIndex.Notset;
 	}
 
 	private void OnGetButton(hwmInput.UIEventArgs args)

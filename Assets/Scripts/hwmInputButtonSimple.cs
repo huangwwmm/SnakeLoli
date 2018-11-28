@@ -38,9 +38,8 @@ public class hwmInputButtonSimple : hwmBaseInputButton, IPointerDownHandler, IPo
 		return m_UIButton;
 	}
 
-	protected new void OnEnable()
+	protected void OnEnable()
 	{
-		base.OnEnable();
 		m_IsDown = false;
 	}
 
