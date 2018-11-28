@@ -1017,7 +1017,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MyType: 1
   MyProperties:
-    CD: 10
+    CD: 3
     Radius: 24
   CDText: {fileID: 114191421081323760}
 --- !u!114 &114569482645415668
@@ -1279,7 +1279,7 @@ MonoBehaviour:
   MyProperties:
     CD: 5
     Duration: 10
-    Power: -100
+    Power: -3
   CDText: {fileID: 114603459487615988}
 --- !u!114 &114928038014731192
 MonoBehaviour:

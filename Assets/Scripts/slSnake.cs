@@ -151,26 +151,26 @@ public class slSnake : hwmActor
 
 	public void Gluttony(float radius)
 	{
-		hwmQuadtree<slFood> quadtree = slWorld.GetInstance().GetFoodSystem().GetQuadtree();
-		List<hwmQuadtree<slFood>.Node> nodes = new List<hwmQuadtree<slFood>.Node>();
-		quadtree.GetRootNode().GetAllNode(ref nodes);
-		hwmBounds2D bounds = new hwmBounds2D(m_Head.Node.transform.localPosition, new Vector2(radius * 2.0f, radius * 2.0f));
-		for (int iNode = 0; iNode < nodes.Count; iNode++)
+		Vector2 headPosition = m_Head.Node.transform.localPosition;
+		hwmQuadtree<slFood>.BoundsEnumerator enumerator = new hwmQuadtree<slFood>.BoundsEnumerator(slWorld.GetInstance().GetFoodSystem().GetQuadtree().GetRootNode()
+			, new hwmBounds2D(headPosition, new Vector2(radius * 2.0f, radius * 2.0f)));
+		while (enumerator.MoveNext())
 		{
-			hwmQuadtree<slFood>.Node iterNode = nodes[iNode];
-			if (iterNode.GetLooseBounds().Intersects(bounds))
+			hwmQuadtree<slFood>.Node iterNode = enumerator.Current;
+			hwmBetterList<slFood> foods = iterNode.GetElements();
+			bool inCircleInside = iterNode.GetLooseBounds().InCircleInside(headPosition, radius);
+			for (int iFood = 0; iFood < foods.Count; iFood++)
 			{
-				hwmBetterList<slFood> foods = nodes[iNode].GetElements();
-				for (int iElement = 0; iElement < foods.Count; iElement++)
+				slFood iterFood = foods[iFood];
+				if (inCircleInside
+					|| ((Vector2)iterFood.transform.localPosition - headPosition).sqrMagnitude <= radius * radius)
 				{
-					slFood iterFood = foods[iElement];
-					if ((iterFood.transform.localPosition - m_Head.Node.transform.localPosition).sqrMagnitude <= radius * radius)
-					{
-						EatFood(iterFood);
-					}
+					EatFood(iterFood);
 				}
 			}
 		}
+
+		Debug.Break();
 	}
 
 	public bool CanEatFood()
@@ -460,56 +460,52 @@ public class slSnake : hwmActor
 		SpeedUp,
 	}
 
-	#region Debug And Test
-	public void TestSkill()
+	#region Debug&Test
+	private void QuadtreeVsPhysics2D()
 	{
-		long time1 = 0, time2 = 0;
-		List<slFood> foods1 = new List<slFood>();
-		List<slFood> foods2 = new List<slFood>();
-		System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-		float radius = 50.0f;
+		float radius = 25.0f;
+		{
+			hwmPerformanceStatisticsItem performanceItem = hwmSystem.GetInstance().GetPerformanceStatistics().LoadOrCreateItem("Gluttony_Quadtree", true);
+			hwmSystem.GetInstance().GetPerformanceStatistics().Start(performanceItem);
+
+			int count = 0;
+
+			Vector2 headPosition = m_Head.Node.transform.localPosition;
+			hwmQuadtree<slFood>.BoundsEnumerator enumerator = new hwmQuadtree<slFood>.BoundsEnumerator(slWorld.GetInstance().GetFoodSystem().GetQuadtree().GetRootNode()
+				, new hwmBounds2D(headPosition, new Vector2(radius * 2.0f, radius * 2.0f)));
+			while (enumerator.MoveNext())
+			{
+				hwmQuadtree<slFood>.Node iterNode = enumerator.Current;
+				hwmBetterList<slFood> foods = iterNode.GetElements();
+				bool inCircleInside = iterNode.GetLooseBounds().InCircleInside(headPosition, radius);
+				for (int iFood = 0; iFood < foods.Count; iFood++)
+				{
+					slFood iterFood = foods[iFood];
+					if (inCircleInside
+						|| ((Vector2)iterFood.transform.localPosition - headPosition).sqrMagnitude <= radius * radius)
+					{
+						count++;
+					}
+				}
+			}
+
+			hwmSystem.GetInstance().GetPerformanceStatistics().Finish(performanceItem);
+		}
 
 		{
-			stopwatch.Reset();
-			stopwatch.Start();
+			hwmPerformanceStatisticsItem performanceItem = hwmSystem.GetInstance().GetPerformanceStatistics().LoadOrCreateItem("Gluttony_Physics2D", true);
+			hwmSystem.GetInstance().GetPerformanceStatistics().Start(performanceItem);
+
+			int count = 0;
 			RaycastHit2D[] hits = Physics2D.CircleCastAll(m_Head.Node.transform.localPosition, radius, Vector2.zero, Mathf.Infinity, 1 << (int)slConstants.Layer.Food);
 			for (int iHit = 0; iHit < hits.Length; iHit++)
 			{
 				slFood food = hits[iHit].collider.gameObject.GetComponent<slFood>();
-				foods2.Add(food);
+				count++;
 			}
-			stopwatch.Stop();
-			time2 = stopwatch.ElapsedTicks;
-		}
 
-		{
-			stopwatch.Reset();
-			stopwatch.Start();
-			hwmQuadtree<slFood> quadtree = slWorld.GetInstance().GetFoodSystem().GetQuadtree();
-			List<hwmQuadtree<slFood>.Node> nodes = new List<hwmQuadtree<slFood>.Node>();
-			quadtree.GetRootNode().GetAllNode(ref nodes);
-			hwmBounds2D bounds = new hwmBounds2D(m_Head.Node.transform.localPosition, new Vector2(radius * 2.0f, radius * 2.0f));
-			for (int iNode = 0; iNode < nodes.Count; iNode++)
-			{
-				hwmQuadtree<slFood>.Node iterNode = nodes[iNode];
-				if (iterNode.GetLooseBounds().Intersects(bounds))
-				{
-					hwmBetterList<slFood> foods = nodes[iNode].GetElements();
-					for (int iElement = 0; iElement < foods.Count; iElement++)
-					{
-						slFood iterFood = foods[iElement];
-						if ((iterFood.transform.localPosition - m_Head.Node.transform.localPosition).sqrMagnitude <= radius * radius)
-						{
-							foods1.Add(iterFood);
-						}
-					}
-				}
-			}
-			stopwatch.Stop();
-			time1 = stopwatch.ElapsedTicks;
+			hwmSystem.GetInstance().GetPerformanceStatistics().Finish(performanceItem);
 		}
-
-		Debug.LogError(string.Format("{0} - {1} - {2} - {3} - {4}", foods1.Count, foods2.Count, time1 < time2, time1, time2));
 	}
-	#endregion
+	#endregion End Debug&Test
 }

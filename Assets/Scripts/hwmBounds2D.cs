@@ -130,4 +130,11 @@ public struct hwmBounds2D
 			&& myMin.y <= otherMax.y 
 			&& myMax.y >= otherMin.y;
 	}
+
+	public bool InCircleInside(Vector2 center, float radius)
+	{
+		float radiusSqr = radius * radius;
+		return (min - center).sqrMagnitude < radiusSqr
+			&& (max - center).sqrMagnitude < radiusSqr;
+	}
 }

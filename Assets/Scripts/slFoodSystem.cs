@@ -39,7 +39,7 @@ public class slFoodSystem
 		m_Quadtree.Initialize(CalculateQuadtreeDepth()
 			, slConstants.FOOD_QUADTREE_MAXELEMENT_PERNODE
 			, slConstants.FOOD_QUADTREE_MINELEMENT_PREPARENTNODE
-			, slConstants.FOOD_QUADTREE_LOOSESCALE
+			, new Vector2(slConstants.FOOD_QUADTREE_LOOSESIZE, slConstants.FOOD_QUADTREE_LOOSESIZE)
 			, new hwmBounds2D(Vector2.zero, level.MapSize));
 #if UNITY_EDITOR
 		slQuadtreeGizmos.FoodQuadtree = m_Quadtree;
@@ -140,6 +140,23 @@ public class slFoodSystem
 			{
 				yield return null;
 			}
+		}
+
+		// Test quadtree
+		{
+			//List<hwmQuadtree<slFood>.IElement> foods = new List<hwmQuadtree<slFood>.IElement>();
+			//foreach (var food in m_Quadtree.GetRootNode())
+			//{
+			//	if (foods.Contains(food))
+			//	{
+			//		Debug.Break();
+			//	}
+			//	else
+			//	{
+			//		foods.Add(food);
+			//	}
+			//}
+			//Debug.LogError(m_FoodCount + " " + foods.Count);
 		}
 	}
 
