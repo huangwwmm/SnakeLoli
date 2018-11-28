@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class slStealthSkill : slSkill
+public class slSkillRemainsFoodContamination : slSkill
 {
 	public Properties MyProperties;
 	public Text CDText;
@@ -26,7 +26,8 @@ public class slStealthSkill : slSkill
 			m_SkillRemainTime -= Time.deltaTime;
 			if (m_SkillRemainTime < 0)
 			{
-				EnableStealth(false);
+				m_Snake.EnableRemainsFoodContamination(false, 0);
+				m_EnableSkill = false;
 				m_CD = MyProperties.CD;
 				CDText.color = Color.white;
 			}
@@ -52,17 +53,10 @@ public class slStealthSkill : slSkill
 				m_InputButton.GetUIButton().interactable = false;
 				skillInput.SetEnable(false);
 				CDText.color = Color.red;
-				EnableStealth(true);
+				m_EnableSkill = true;
+				m_Snake.EnableRemainsFoodContamination(true, MyProperties.Power);
 			}
 		}
-	}
-
-	private void EnableStealth(bool enable)
-	{
-		m_EnableSkill = enable;
-		m_Snake.EnableEatFood(!enable);
-		m_Snake.EnableDamageLayer((int)slConstants.Layer.Snake, !enable);
-		m_Snake.EnableDamageLayer((int)slConstants.Layer.SnakeHead, !enable);
 	}
 
 	[System.Serializable]
@@ -70,5 +64,6 @@ public class slStealthSkill : slSkill
 	{
 		public float CD;
 		public float Duration;
+		public float Power;
 	}
 }

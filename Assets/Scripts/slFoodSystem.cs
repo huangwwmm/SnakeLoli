@@ -46,7 +46,7 @@ public class slFoodSystem
 #endif
 
 		m_FoodPool = new FoodPool();
-		m_FoodPool.Initialize(m_MaxFood);
+		m_FoodPool.Initialize(Mathf.CeilToInt(m_MaxFood * slConstants.FOOD_POOL_INITIALIZE_MULTIPLY));
 		if (slWorld.GetInstance().NeedPresentation())
 		{
 			m_FoodPresentationPools = new FoodPresentationPool[(int)slFood.FoodType.Count];
@@ -54,7 +54,7 @@ public class slFoodSystem
 			{
 				slFood.FoodType foodType = (slFood.FoodType)iFood;
 				m_FoodPresentationPools[iFood] = new FoodPresentationPool(foodType);
-				m_FoodPresentationPools[iFood].Initialize(foodType == slFood.FoodType.Normal ? m_MaxFood : 64);
+				m_FoodPresentationPools[iFood].Initialize(0);
 			}
 		}
 

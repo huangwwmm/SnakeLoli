@@ -36,6 +36,7 @@ public class slSkill : MonoBehaviour
 		Gluttony,
 		Stealth,
 		Radar,
+		RemainsFoodContamination,
 		Count,
 	}
 

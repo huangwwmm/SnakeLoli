@@ -106,6 +106,7 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 	{
 		Normal = 0,
 		Remains,
+		Contamination,
 		/// <summary>
 		/// must end
 		/// </summary>

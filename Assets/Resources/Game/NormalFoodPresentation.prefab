@@ -52,6 +52,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 115b0e048cc16a347b4a2cfc72a73c45, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  FoodType: 0
   BackSprite: {fileID: 212210694786229238}
   FrontSprite: {fileID: 0}
 --- !u!212 &212210694786229238
@@ -83,9 +84,9 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 829751265
-  m_SortingLayer: 2
-  m_SortingOrder: -32768
+  m_SortingLayerID: -902761463
+  m_SortingLayer: 1
+  m_SortingOrder: 32000
   m_Sprite: {fileID: 21300000, guid: 275a1549836f9754181cf83b7e4c0ac3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0

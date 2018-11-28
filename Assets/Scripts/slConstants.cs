@@ -23,12 +23,12 @@ public class slConstants
 	public const float FOOD_BEEAT_MOVE_TIME = 0.36f;
 	public const int FOOD_SYSTEM_MAXCREATE_PREFRAME = 20;
 	public const float NORMAL_FOOD_POWER = 1;
+	public const float FOOD_POOL_INITIALIZE_MULTIPLY = 1.2f;
 
 	public const int SNAKE_SPRITERENDERER_MAX_ORDERINLAYER = 32760;
 	public const int SNAKE_SPRITERENDERER_MIN_ORDERINLAYER = -32767;
 
 	public static readonly int SORTINGLAYER_MAP = SortingLayer.NameToID("Map");
-	public static readonly int SORTINGLAYER_FOOD = SortingLayer.NameToID("Food");
 	public static readonly int SORTINGLAYER_SNAKE = SortingLayer.NameToID("Snake");
 
 	public const int SNAKE_INITIALIZEZ_NODE_MINCOUNT = 5;
@@ -60,6 +60,8 @@ public class slConstants
 		hwmConstants.ButtonIndex.Skill2,
 		hwmConstants.ButtonIndex.Skill3,
 		hwmConstants.ButtonIndex.Skill4,
+		hwmConstants.ButtonIndex.Skill5,
+		hwmConstants.ButtonIndex.Skill6,
 	};
 
 	#region maybe package to aiSetting

@@ -29,3 +29,7 @@ MonoBehaviour:
     KeyCodes: 6b0000004d010000
   - Index: 3
     KeyCodes: 6c0000004b010000
+  - Index: 4
+    KeyCodes: 710000004e010000
+  - Index: 5
+    KeyCodes: 650000004f010000

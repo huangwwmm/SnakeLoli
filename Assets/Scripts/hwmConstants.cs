@@ -23,6 +23,8 @@
 		Skill2,
 		Skill3,
 		Skill4,
+		Skill5,
+		Skill6,
 	}
 
 	/// <summary>

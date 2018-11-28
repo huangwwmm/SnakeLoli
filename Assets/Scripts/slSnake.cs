@@ -27,6 +27,9 @@ public class slSnake : hwmActor
 
 	private float m_Power;
 
+	private bool m_IsReaminsFoodContamination;
+	private float m_RemainsFoodContaminationPower;
+
 	public float GetPower()
 	{
 		return m_Power;
@@ -83,8 +86,9 @@ public class slSnake : hwmActor
 				break;
 		}
 
-		int bodyCountOffset = Mathf.FloorToInt(m_Power / m_TweakableProperties.NodeToPower - 2) // magic number: must have 2 node(head and chlothes)
-			- m_Bodys.Count;
+		int bodyCountOffset = Mathf.Max(0,
+			Mathf.FloorToInt(m_Power / m_TweakableProperties.NodeToPower - 2) // magic number: must have 2 node(head and chlothes)
+				- m_Bodys.Count);
 		while (moveNodeCount-- > 0)
 		{
 			m_CurrentMoveDirection = hwmUtility.CircleLerp(m_CurrentMoveDirection, TargetMoveDirection, m_TweakableProperties.MaxTurnAngularSpeed * deltaTime);
@@ -190,6 +194,12 @@ public class slSnake : hwmActor
 		}
 	}
 
+	public void EnableRemainsFoodContamination(bool enable, float foodPower)
+	{
+		m_IsReaminsFoodContamination = enable;
+		m_RemainsFoodContaminationPower = foodPower;
+	}
+
 	protected override void HandleInitialize(object additionalData)
 	{
 		InitializeAdditionalData initializeData = additionalData as InitializeAdditionalData;
@@ -254,18 +264,22 @@ public class slSnake : hwmActor
 		m_CanEatFood = true;
 
 		m_SkillEventArgs = new slSkill.EventArgs();
+
+		m_IsReaminsFoodContamination = false;
 	}
 
 	protected override void HandleDispose(object additionalData)
 	{
 		DisposeAdditionalData disposeAdditionalData = additionalData as DisposeAdditionalData;
+		slFood.FoodType foodType = m_IsReaminsFoodContamination ? slFood.FoodType.Contamination : slFood.FoodType.Remains;
+		float power = m_IsReaminsFoodContamination ? m_RemainsFoodContaminationPower : m_TweakableProperties.RemainsFoodPower;
 		if (disposeAdditionalData.MyDeadType != DeadType.FinishGame)
 		{
-			slWorld.GetInstance().GetFoodSystem().AddCreateEvent(slFood.FoodType.Remains, m_Head.Node.transform.position, MyProperties.DeadFoodColor, m_TweakableProperties.RemainsFoodPower);
-			slWorld.GetInstance().GetFoodSystem().AddCreateEvent(slFood.FoodType.Remains, m_Clothes.Node.transform.position, MyProperties.DeadFoodColor, m_TweakableProperties.RemainsFoodPower);
+			slWorld.GetInstance().GetFoodSystem().AddCreateEvent(foodType, m_Head.Node.transform.position, MyProperties.DeadFoodColor, power);
+			slWorld.GetInstance().GetFoodSystem().AddCreateEvent(foodType, m_Clothes.Node.transform.position, MyProperties.DeadFoodColor, power);
 			foreach (BodyNode node in m_Bodys)
 			{
-				slWorld.GetInstance().GetFoodSystem().AddCreateEvent(slFood.FoodType.Remains, node.Node.transform.position, MyProperties.DeadFoodColor, m_TweakableProperties.RemainsFoodPower);
+				slWorld.GetInstance().GetFoodSystem().AddCreateEvent(foodType, node.Node.transform.position, MyProperties.DeadFoodColor, power);
 			}
 		}
 

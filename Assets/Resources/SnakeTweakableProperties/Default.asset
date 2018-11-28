@@ -14,3 +14,4 @@ MonoBehaviour:
   MaxTurnAngularSpeed: 360
   NodeToPower: 5
   NormalMoveNodeCount: 1
+  RemainsFoodPower: 3

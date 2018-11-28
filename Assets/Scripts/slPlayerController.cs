@@ -21,7 +21,8 @@ public class slPlayerController : slBaseController
 		slSkill.SkillType.SpeedUp,
 		slSkill.SkillType.Gluttony,
 		slSkill.SkillType.Stealth,
-		slSkill.SkillType.Radar
+		slSkill.SkillType.Radar,
+		slSkill.SkillType.RemainsFoodContamination
 	};
 
 	public slCamera GetCamera()
