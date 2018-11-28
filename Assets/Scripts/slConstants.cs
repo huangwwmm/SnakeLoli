@@ -22,6 +22,7 @@ public class slConstants
 
 	public const float FOOD_BEEAT_MOVE_TIME = 0.36f;
 	public const int FOOD_SYSTEM_MAXCREATE_PREFRAME = 20;
+	public const float NORMAL_FOOD_POWER = 1;
 
 	public const int SNAKE_SPRITERENDERER_MAX_ORDERINLAYER = 32760;
 	public const int SNAKE_SPRITERENDERER_MIN_ORDERINLAYER = -32767;

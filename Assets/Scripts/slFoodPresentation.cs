@@ -13,7 +13,7 @@ public class slFoodPresentation : MonoBehaviour
 			case slFood.FoodType.Normal:
 				BackSprite.color = color;
 				break;
-			case slFood.FoodType.Large:
+			case slFood.FoodType.Remains:
 				BackSprite.color = color;
 				FrontSprite.color = new Color(color.r * 0.8f, color.g * 0.8f, color.b * 0.8f, color.a);
 				break;

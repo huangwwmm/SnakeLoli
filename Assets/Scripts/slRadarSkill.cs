@@ -5,7 +5,6 @@ public class slRadarSkill : slSkill
 	public Properties MyProperties;
 
 	private bool m_IsRaderState;
-	private float m_WaitCostPower;
 
 	public override void DoUpdate()
 	{
@@ -17,13 +16,7 @@ public class slRadarSkill : slSkill
 			if (canUse
 				&& skillInput.GetState() != hwmInput.Button.State.Up)
 			{
-				m_WaitCostPower += Time.deltaTime * MyProperties.CostPower;
-				if (m_WaitCostPower > 1.0f)
-				{
-					int costPower = Mathf.FloorToInt(m_WaitCostPower);
-					m_Snake.CostPower(costPower);
-					m_WaitCostPower -= costPower;
-				}
+				m_Snake.CostPower(Time.deltaTime * MyProperties.CostPower);
 			}
 			else
 			{
@@ -41,7 +34,6 @@ public class slRadarSkill : slSkill
 			{
 				slWorld.GetInstance().GetPlayerController().GetCamera().EnableRadarState(true, MyProperties.CameraSizeProperties);
 				m_IsRaderState = true;
-				m_WaitCostPower = 0;
 			}
 		}
 	}

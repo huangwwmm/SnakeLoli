@@ -25,14 +25,14 @@ public class slSnake : hwmActor
 	private int m_EnableDamageLayers;
 	private bool m_CanEatFood;
 
-	private int m_Power;
+	private float m_Power;
 
-	public int GetPower()
+	public float GetPower()
 	{
 		return m_Power;
 	}
 
-	public void CostPower(int power)
+	public void CostPower(float power)
 	{
 		m_Power -= power;
 	}
@@ -59,9 +59,6 @@ public class slSnake : hwmActor
 
 	public void DoUpdateMovement(float deltaTime)
 	{
-		int bodyCountOffset = (m_Power / m_TweakableProperties.NodeToPower - 2)
-			- m_Bodys.Count;
-
 		int moveNodeCount = 0;
 		switch(m_SpeedState)
 		{
@@ -86,6 +83,8 @@ public class slSnake : hwmActor
 				break;
 		}
 
+		int bodyCountOffset = Mathf.FloorToInt(m_Power / m_TweakableProperties.NodeToPower - 2) // magic number: must have 2 node(head and chlothes)
+			- m_Bodys.Count;
 		while (moveNodeCount-- > 0)
 		{
 			m_CurrentMoveDirection = hwmUtility.CircleLerp(m_CurrentMoveDirection, TargetMoveDirection, m_TweakableProperties.MaxTurnAngularSpeed * deltaTime);
@@ -262,11 +261,11 @@ public class slSnake : hwmActor
 		DisposeAdditionalData disposeAdditionalData = additionalData as DisposeAdditionalData;
 		if (disposeAdditionalData.MyDeadType != DeadType.FinishGame)
 		{
-			slWorld.GetInstance().GetFoodSystem().AddCreateEvent(slFood.FoodType.Large, m_Head.Node.transform.position, MyProperties.DeadFoodColor);
-			slWorld.GetInstance().GetFoodSystem().AddCreateEvent(slFood.FoodType.Large, m_Clothes.Node.transform.position, MyProperties.DeadFoodColor);
+			slWorld.GetInstance().GetFoodSystem().AddCreateEvent(slFood.FoodType.Remains, m_Head.Node.transform.position, MyProperties.DeadFoodColor, m_TweakableProperties.RemainsFoodPower);
+			slWorld.GetInstance().GetFoodSystem().AddCreateEvent(slFood.FoodType.Remains, m_Clothes.Node.transform.position, MyProperties.DeadFoodColor, m_TweakableProperties.RemainsFoodPower);
 			foreach (BodyNode node in m_Bodys)
 			{
-				slWorld.GetInstance().GetFoodSystem().AddCreateEvent(slFood.FoodType.Large, node.Node.transform.position, MyProperties.DeadFoodColor);
+				slWorld.GetInstance().GetFoodSystem().AddCreateEvent(slFood.FoodType.Remains, node.Node.transform.position, MyProperties.DeadFoodColor, m_TweakableProperties.RemainsFoodPower);
 			}
 		}
 

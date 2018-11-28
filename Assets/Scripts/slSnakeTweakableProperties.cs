@@ -4,6 +4,7 @@
 public class slSnakeTweakableProperties : ScriptableObject 
 {
 	public float MaxTurnAngularSpeed;
-	public int NodeToPower;
-	public int NormalMoveNodeCount;	
+	public float NodeToPower;
+	public int NormalMoveNodeCount;
+	public float RemainsFoodPower;
 }

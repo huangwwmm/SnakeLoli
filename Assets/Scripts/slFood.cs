@@ -10,12 +10,13 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 	private Transform m_BeEatTransform;
 	private float m_BeEatRemainTime;
 	private float m_RemainLifeTime;
+	private float m_Power = 1;
 
 	public hwmQuadtree<slFood> OwnerQuadtree { get; set; }
 	public hwmBounds2D QuadtreeNodeBounds { get; set; }
 	public hwmQuadtree<slFood>.Node OwnerQuadtreeNode { get; set; }
 
-	public void ActiveFood(slFoodProperties foodProperties, slFoodPresentation foodPresentation, Vector3 position, Color color)
+	public void ActiveFood(slFoodProperties foodProperties, slFoodPresentation foodPresentation, Vector3 position, Color color, float power)
 	{
 		m_State = State.Idle;
 
@@ -32,6 +33,8 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 		OwnerQuadtree = slWorld.GetInstance().GetFoodSystem().GetQuadtree();
 		QuadtreeNodeBounds = new hwmBounds2D(transform.localPosition, new Vector2(m_Properties.SpriteRadius, m_Properties.SpriteRadius) * 2.0f);
 		OwnerQuadtree.UpdateElement(this);
+
+		m_Power = power;
 	}
 
 	public void DeactiveFood()
@@ -48,7 +51,7 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 		m_State = State.Notset;
 	}
 
-	public int BeEat(Transform beEatTransform)
+	public float BeEat(Transform beEatTransform)
 	{
 		if (m_State == State.Idle)
 		{
@@ -56,7 +59,7 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 			Collider.enabled = false;
 			m_BeEatTransform = beEatTransform;
 			m_BeEatRemainTime = slConstants.FOOD_BEEAT_MOVE_TIME;
-			return m_Properties.AddPower;
+			return m_Power;
 		}
 		else
 		{
@@ -102,7 +105,7 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 	public enum FoodType
 	{
 		Normal = 0,
-		Large,
+		Remains,
 		/// <summary>
 		/// must end
 		/// </summary>

@@ -42,7 +42,7 @@ public class slSkill : MonoBehaviour
 	public class EventArgs
 	{
 		public bool CanKeepSkill;
-		public int CostPower;
+		public float CostPower;
 		public float Effect;
 	}
 }

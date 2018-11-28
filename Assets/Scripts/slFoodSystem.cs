@@ -93,7 +93,7 @@ public class slFoodSystem
 		while (createEventCount-- > 0)
 		{
 			CreateEvent createEvent = m_CreateEvents.Dequeue();
-			CreateFood(createEvent.FoodType, createEvent.Position, createEvent.Color);
+			CreateFood(createEvent.FoodType, createEvent.Position, createEvent.Color, createEvent.Power);
 		}
 		canCreateFoodCount -= createEventCount;
 
@@ -102,7 +102,8 @@ public class slFoodSystem
 		{
 			CreateFood(slFood.FoodType.Normal
 				, hwmRandom.RandVector2(m_FoodMinPosition, m_FoodMaxPosition)
-				, hwmRandom.RandColorRGB());
+				, hwmRandom.RandColorRGB()
+				, slConstants.NORMAL_FOOD_POWER);
 		}
 	}
 
@@ -132,7 +133,8 @@ public class slFoodSystem
 		{
 			CreateFood(slFood.FoodType.Normal
 				, hwmRandom.RandVector2(m_FoodMinPosition, m_FoodMaxPosition)
-				, hwmRandom.RandColorRGB());
+				, hwmRandom.RandColorRGB()
+				, slConstants.NORMAL_FOOD_POWER);
 
 			if (iFood % 1000 == 0)
 			{
@@ -146,7 +148,7 @@ public class slFoodSystem
 		return m_FoodRoot;
 	}
 
-	public void AddCreateEvent(slFood.FoodType foodType, Vector3 position, Color color)
+	public void AddCreateEvent(slFood.FoodType foodType, Vector3 position, Color color, float power)
 	{
 		if (CanCreateFoodAt(position))
 		{
@@ -154,6 +156,7 @@ public class slFoodSystem
 			createEvent.FoodType = foodType;
 			createEvent.Position = position;
 			createEvent.Color = color;
+			createEvent.Power = power;
 			m_CreateEvents.Enqueue(createEvent);
 		}
 	}
@@ -163,7 +166,7 @@ public class slFoodSystem
 		return m_FoodCount;
 	}
 
-	private void CreateFood(slFood.FoodType foodType, Vector3 position, Color color)
+	private void CreateFood(slFood.FoodType foodType, Vector3 position, Color color, float power)
 	{
 		slFoodProperties foodProperties = m_FoodPropertiess[(int)foodType];
 		slFood food = m_FoodPool.Pop();
@@ -175,7 +178,7 @@ public class slFoodSystem
 			foodPresentation.gameObject.SetActive(true);
 			foodPresentation.SetColor(color);
 		}
-		food.ActiveFood(foodProperties, foodPresentation, position, color);
+		food.ActiveFood(foodProperties, foodPresentation, position, color, power);
 		m_FoodCount++;
 	}
 
@@ -242,5 +245,6 @@ public class slFoodSystem
 		public Vector3 Position;
 		public Color Color;
 		public slFood.FoodType FoodType;
+		public float Power;
 	}
 }
