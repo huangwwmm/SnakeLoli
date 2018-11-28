@@ -96,25 +96,38 @@ public struct hwmBounds2D
 
 	public bool Contains(hwmBounds2D bounds)
 	{
-		return min.x <= bounds.min.x
-			&& min.y <= bounds.min.y
-			&& max.x >= bounds.max.x
-			&& max.y >= bounds.max.y;
+		Vector2 myMin = min;
+		Vector2 myMax = max;
+		Vector2 otherMin = bounds.min;
+		Vector2 otherMax = bounds.max;
+
+		return myMin.x <= otherMin.x
+			&& myMin.y <= otherMin.y
+			&& myMax.x >= otherMax.x
+			&& myMax.y >= otherMax.y;
 	}
 
 	public bool Contains(Vector2 point)
 	{
-		return min.x <= point.x
-			&& min.y <= point.y
-			&& max.x >= point.x
-			&& max.y >= point.y;
+		Vector2 myMin = min;
+		Vector2 myMax = max;
+
+		return myMin.x <= point.x
+			&& myMin.y <= point.y
+			&& myMax.x >= point.x
+			&& myMax.y >= point.y;
 	}
 
 	public bool Intersects(hwmBounds2D bounds)
 	{
-		return min.x <= bounds.max.x 
-			&& max.x >= bounds.min.x 
-			&& min.y <= bounds.max.y 
-			&& max.y >= bounds.min.y;
+		Vector2 myMin = min;
+		Vector2 myMax = max;
+		Vector2 otherMin = bounds.min;
+		Vector2 otherMax = bounds.max;
+
+		return myMin.x <= otherMax.x 
+			&& myMax.x >= otherMin.x 
+			&& myMin.y <= otherMax.y 
+			&& myMax.y >= otherMin.y;
 	}
 }
