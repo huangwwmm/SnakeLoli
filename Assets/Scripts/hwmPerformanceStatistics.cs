@@ -4,28 +4,28 @@ using UnityEngine;
 using System.IO;
 using System.Text;
 
-public interface hwmICodePerformanceStatistics
+public interface hwmIPerformanceStatistics
 {
 	void Initialize();
 	void Dispose();
-	hwmCodePerformanceStatisticsItem LoadOrCreateItem(string itemName, bool ignoreHistoryOnLoad = false);
-	hwmCodePerformanceStatisticsItem Start(string itemName);
-	void Start(hwmCodePerformanceStatisticsItem item);
-	hwmCodePerformanceStatisticsItem Finish(string itemName);
-	void Finish(hwmCodePerformanceStatisticsItem item);
-	hwmCodePerformanceStatisticsItem ClearHistory(string itemName);
-	void ClearHistory(hwmCodePerformanceStatisticsItem item);
+	hwmPerformanceStatisticsItem LoadOrCreateItem(string itemName, bool ignoreHistoryOnLoad = false);
+	hwmPerformanceStatisticsItem Start(string itemName);
+	void Start(hwmPerformanceStatisticsItem item);
+	hwmPerformanceStatisticsItem Finish(string itemName);
+	void Finish(hwmPerformanceStatisticsItem item);
+	hwmPerformanceStatisticsItem ClearHistory(string itemName);
+	void ClearHistory(hwmPerformanceStatisticsItem item);
 }
 
-public class hwmCodePerformanceStatistics : hwmICodePerformanceStatistics
+public class hwmPerformanceStatistics : hwmIPerformanceStatistics
 {
 	private string m_RecordDirectory;
-	private Dictionary<string, hwmCodePerformanceStatisticsItem> m_Items;
+	private Dictionary<string, hwmPerformanceStatisticsItem> m_Items;
 
 	public void Initialize()
 	{
 #if UNITY_EDITOR || UNITY_STANDALONE
-		m_RecordDirectory = Application.dataPath + "/../Temp/CodePerformanceStatistics/";
+		m_RecordDirectory = Application.dataPath + "/../Temp/PerformanceStatistics/";
 #elif UNITY_ANDROID
 		m_RecordDirectory = Application.persistentDataPath + "/LogRecord/";
 #endif
@@ -34,15 +34,15 @@ public class hwmCodePerformanceStatistics : hwmICodePerformanceStatistics
 			Directory.CreateDirectory(m_RecordDirectory);
 		}
 
-		m_Items = new Dictionary<string, hwmCodePerformanceStatisticsItem>();
+		m_Items = new Dictionary<string, hwmPerformanceStatisticsItem>();
 	}
 
 	public void Dispose()
 	{
 		List<string> historyStrs = new List<string>();
 		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.AppendLine("CodePerformanceStatistics:");
-		foreach (KeyValuePair<string, hwmCodePerformanceStatisticsItem> item in m_Items)
+		stringBuilder.AppendLine("PerformanceStatistics:");
+		foreach (KeyValuePair<string, hwmPerformanceStatisticsItem> item in m_Items)
 		{
 			string itemFilePath = m_RecordDirectory + item.Value._Name + ".txt";
 			if (File.Exists(itemFilePath))
@@ -50,16 +50,16 @@ public class hwmCodePerformanceStatistics : hwmICodePerformanceStatistics
 				File.Delete(itemFilePath);
 			}
 
-			List<hwmCodePerformanceStatisticsItem.History> historys = item.Value._Historys;
+			List<hwmPerformanceStatisticsItem.History> historys = item.Value._Historys;
 			long[] milliseconds = new long[historys.Count];
 			long[] ticks = new long[historys.Count];
 			historyStrs.Clear();
-			for (int iHistory = Mathf.Max(0, historys.Count - hwmCodePerformanceStatisticsItem.MAX_RECORD_HISTORY_COUNT); iHistory < historys.Count; iHistory++)
+			for (int iHistory = Mathf.Max(0, historys.Count - hwmPerformanceStatisticsItem.MAX_RECORD_HISTORY_COUNT); iHistory < historys.Count; iHistory++)
 			{
-				hwmCodePerformanceStatisticsItem.History iterHistory = historys[iHistory];
+				hwmPerformanceStatisticsItem.History iterHistory = historys[iHistory];
 				milliseconds[iHistory] = iterHistory._Milliseconds;
 				ticks[iHistory] = iterHistory._Ticks;
-				historyStrs.Add(hwmCodePerformanceStatisticsItem.SerializeHistory(iterHistory));
+				historyStrs.Add(hwmPerformanceStatisticsItem.SerializeHistory(iterHistory));
 			}
 			File.WriteAllLines(itemFilePath, historyStrs.ToArray());
 
@@ -82,16 +82,16 @@ public class hwmCodePerformanceStatistics : hwmICodePerformanceStatistics
 		UnityEngine.Debug.Log(stringBuilder.ToString());
 	}
 
-	public hwmCodePerformanceStatisticsItem LoadOrCreateItem(string itemName, bool ignoreHistoryOnLoad = false)
+	public hwmPerformanceStatisticsItem LoadOrCreateItem(string itemName, bool ignoreHistoryOnLoad = false)
 	{
-		hwmCodePerformanceStatisticsItem item;
+		hwmPerformanceStatisticsItem item;
 		if (!m_Items.TryGetValue(itemName, out item))
 		{
-			item = new hwmCodePerformanceStatisticsItem();
+			item = new hwmPerformanceStatisticsItem();
 			item._Name = itemName;
 			item._Stopwatch = new Stopwatch();
 			item._Stopwatch.Reset();
-			item._Historys = new List<hwmCodePerformanceStatisticsItem.History>();
+			item._Historys = new List<hwmPerformanceStatisticsItem.History>();
 
 			if (!ignoreHistoryOnLoad)
 			{
@@ -102,8 +102,8 @@ public class hwmCodePerformanceStatistics : hwmICodePerformanceStatistics
 					for (int iHistory = 0; iHistory < historyLines.Length; iHistory++)
 					{
 						string iterLine = historyLines[iHistory];
-						hwmCodePerformanceStatisticsItem.History history;
-						if (hwmCodePerformanceStatisticsItem.TryDeserializeHistory(iterLine, out history))
+						hwmPerformanceStatisticsItem.History history;
+						if (hwmPerformanceStatisticsItem.TryDeserializeHistory(iterLine, out history))
 						{
 							item._Historys.Add(history);
 						}
@@ -116,43 +116,43 @@ public class hwmCodePerformanceStatistics : hwmICodePerformanceStatistics
 		return item;
 	}
 
-	public hwmCodePerformanceStatisticsItem Start(string itemName)
+	public hwmPerformanceStatisticsItem Start(string itemName)
 	{
-		hwmCodePerformanceStatisticsItem item = LoadOrCreateItem(itemName);
+		hwmPerformanceStatisticsItem item = LoadOrCreateItem(itemName);
 		Start(item);
 		return item;
 	}
 
-	public void Start(hwmCodePerformanceStatisticsItem item)
+	public void Start(hwmPerformanceStatisticsItem item)
 	{
 		item._Stopwatch.Reset();
 		item._Stopwatch.Start();
 	}
 
-	public hwmCodePerformanceStatisticsItem Finish(string itemName)
+	public hwmPerformanceStatisticsItem Finish(string itemName)
 	{
-		hwmCodePerformanceStatisticsItem item = LoadOrCreateItem(itemName);
+		hwmPerformanceStatisticsItem item = LoadOrCreateItem(itemName);
 		Finish(item);
 		return item;
 	}
 
-	public void Finish(hwmCodePerformanceStatisticsItem item)
+	public void Finish(hwmPerformanceStatisticsItem item)
 	{
 		item._Stopwatch.Stop();
-		hwmCodePerformanceStatisticsItem.History history = new hwmCodePerformanceStatisticsItem.History();
+		hwmPerformanceStatisticsItem.History history = new hwmPerformanceStatisticsItem.History();
 		history._Milliseconds = item._Stopwatch.ElapsedMilliseconds;
 		history._Ticks = item._Stopwatch.ElapsedTicks;
 		item._Historys.Add(history);
 	}
 
-	public hwmCodePerformanceStatisticsItem ClearHistory(string itemName)
+	public hwmPerformanceStatisticsItem ClearHistory(string itemName)
 	{
-		hwmCodePerformanceStatisticsItem item = LoadOrCreateItem(itemName);
+		hwmPerformanceStatisticsItem item = LoadOrCreateItem(itemName);
 		ClearHistory(item);
 		return item;
 	}
 
-	public void ClearHistory(hwmCodePerformanceStatisticsItem item)
+	public void ClearHistory(hwmPerformanceStatisticsItem item)
 	{
 		item._Historys.Clear();
 	}
@@ -191,14 +191,14 @@ public class hwmCodePerformanceStatistics : hwmICodePerformanceStatistics
 	}
 }
 
-public class hwmEmptyCodePerformanceStatistics : hwmICodePerformanceStatistics
+public class hwmEmptyPerformanceStatistics : hwmIPerformanceStatistics
 {
-	public hwmCodePerformanceStatisticsItem ClearHistory(string itemName)
+	public hwmPerformanceStatisticsItem ClearHistory(string itemName)
 	{
 		return null;
 	}
 
-	public void ClearHistory(hwmCodePerformanceStatisticsItem item)
+	public void ClearHistory(hwmPerformanceStatisticsItem item)
 	{
 	}
 
@@ -206,12 +206,12 @@ public class hwmEmptyCodePerformanceStatistics : hwmICodePerformanceStatistics
 	{
 	}
 
-	public hwmCodePerformanceStatisticsItem Finish(string itemName)
+	public hwmPerformanceStatisticsItem Finish(string itemName)
 	{
 		return null;
 	}
 
-	public void Finish(hwmCodePerformanceStatisticsItem item)
+	public void Finish(hwmPerformanceStatisticsItem item)
 	{
 	}
 
@@ -219,22 +219,22 @@ public class hwmEmptyCodePerformanceStatistics : hwmICodePerformanceStatistics
 	{
 	}
 
-	public hwmCodePerformanceStatisticsItem LoadOrCreateItem(string itemName, bool ignoreHistoryOnLoad = false)
+	public hwmPerformanceStatisticsItem LoadOrCreateItem(string itemName, bool ignoreHistoryOnLoad = false)
 	{
 		return null;
 	}
 
-	public hwmCodePerformanceStatisticsItem Start(string itemName)
+	public hwmPerformanceStatisticsItem Start(string itemName)
 	{
 		return null;
 	}
 
-	public void Start(hwmCodePerformanceStatisticsItem item)
+	public void Start(hwmPerformanceStatisticsItem item)
 	{
 	}
 }
 
-public class hwmCodePerformanceStatisticsItem
+public class hwmPerformanceStatisticsItem
 {
 	public const int MAX_RECORD_HISTORY_COUNT = 8192;
 
