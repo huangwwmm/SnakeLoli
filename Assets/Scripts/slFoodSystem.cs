@@ -17,7 +17,10 @@ public class slFoodSystem
 
 	private Transform m_FoodRoot;
 
+	private Dictionary<int, slFood> m_Foods;
 	private Queue<CreateEvent> m_CreateEvents;
+	private hwmBetterList<slFood> m_DestroyEvents;
+	private int m_LastFoodIndex = 0;
 
 	public void Initialize(slLevel level)
 	{
@@ -59,12 +62,17 @@ public class slFoodSystem
 		}
 
 		m_CreateEvents = new Queue<CreateEvent>();
-
+		m_Foods = new Dictionary<int, slFood>();
+		m_DestroyEvents = new hwmBetterList<slFood>();
 		m_FoodCount = 0;
 	}
 
 	public void Dispose()
 	{
+		m_Foods.Clear();
+		m_Foods = null;
+		m_CreateEvents.Clear();
+		m_CreateEvents = null;
 		m_CreateEvents.Clear();
 		m_CreateEvents = null;
 
@@ -86,7 +94,7 @@ public class slFoodSystem
 		Object.Destroy(m_FoodRoot);
 	}
 
-	public void DoUpdate()
+	public void DoUpdate(float deltaTime)
 	{
 		int canCreateFoodCount = slConstants.FOOD_SYSTEM_MAXCREATE_PREFRAME;
 		int createEventCount = Mathf.Min(m_CreateEvents.Count, canCreateFoodCount);
@@ -106,6 +114,18 @@ public class slFoodSystem
 				, slConstants.NORMAL_FOOD_POWER);
 		}
 
+		foreach (slFood iterFood in m_Foods.Values)
+		{
+			iterFood.DoUpdate(deltaTime);
+		}
+
+		for (int iFood = 0; iFood < m_DestroyEvents.Count; iFood++)
+		{
+			slFood food = m_DestroyEvents[iFood];
+			DestroyFood(food);
+		}
+		m_DestroyEvents.Clear();
+
 		m_Quadtree.MergeAndSplitAllNode();
 	}
 
@@ -114,19 +134,9 @@ public class slFoodSystem
 		return m_Quadtree;
 	}
 
-	public void DestroyFood(slFood food)
+	public void AddDestroyFoodEvent(slFood food)
 	{
-		slFoodPresentation foodPresentation = food.GetPresentation();
-		if (foodPresentation != null)
-		{
-			foodPresentation.transform.SetParent(m_FoodRoot.transform);
-			foodPresentation.gameObject.SetActive(false);
-			m_FoodPresentationPools[(int)foodPresentation.FoodType].Push(foodPresentation);
-		}
-		food.DeactiveFood();
-		m_FoodPool.Push(food);
-
-		m_FoodCount--;
+		m_DestroyEvents.Add(food);
 	}
 
 	public IEnumerator EnterMap_Co()
@@ -138,8 +148,9 @@ public class slFoodSystem
 				, hwmRandom.RandColorRGB()
 				, slConstants.NORMAL_FOOD_POWER);
 
-			if (iFood % 1000 == 0)
+			if (iFood % slConstants.FOOD_CREATECOUNT_PREFRAME_WHEN_ENDTERMAP == 0)
 			{
+				Debug.Log("entermap created food count " + m_FoodCount);
 				yield return null;
 			}
 		}
@@ -173,6 +184,7 @@ public class slFoodSystem
 	{
 		slFoodProperties foodProperties = m_FoodPropertiess[(int)foodType];
 		slFood food = m_FoodPool.Pop();
+		m_Foods.Add(++m_LastFoodIndex, food);
 		slFoodPresentation foodPresentation = m_FoodPresentationPools != null ? m_FoodPresentationPools[(int)foodType].Pop() : null;
 		if (foodPresentation != null)
 		{
@@ -181,8 +193,24 @@ public class slFoodSystem
 			foodPresentation.gameObject.SetActive(true);
 			foodPresentation.SetColor(color);
 		}
-		food.ActiveFood(foodProperties, foodPresentation, position, color, power);
+		food.ActiveFood(m_LastFoodIndex, foodProperties, foodPresentation, position, color, power);
 		m_FoodCount++;
+	}
+
+	private void DestroyFood(slFood food)
+	{
+		slFoodPresentation foodPresentation = food.GetPresentation();
+		if (foodPresentation != null)
+		{
+			foodPresentation.transform.SetParent(m_FoodRoot.transform);
+			foodPresentation.gameObject.SetActive(false);
+			m_FoodPresentationPools[(int)foodPresentation.FoodType].Push(foodPresentation);
+		}
+		m_Foods.Remove(food.GetIndex());
+		food.DeactiveFood();
+		m_FoodPool.Push(food);
+
+		m_FoodCount--;
 	}
 
 	private bool CanCreateFoodAt(Vector2 position)

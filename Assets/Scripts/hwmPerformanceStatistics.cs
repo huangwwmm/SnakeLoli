@@ -57,7 +57,6 @@ public class hwmPerformanceStatistics : hwmIPerformanceStatistics
 			for (int iHistory = Mathf.Max(0, historys.Count - hwmPerformanceStatisticsItem.MAX_RECORD_HISTORY_COUNT); iHistory < historys.Count; iHistory++)
 			{
 				hwmPerformanceStatisticsItem.History iterHistory = historys[iHistory];
-				milliseconds[iHistory] = iterHistory._Milliseconds;
 				ticks[iHistory] = iterHistory._Ticks;
 				historyStrs.Add(hwmPerformanceStatisticsItem.SerializeHistory(iterHistory));
 			}
@@ -140,7 +139,6 @@ public class hwmPerformanceStatistics : hwmIPerformanceStatistics
 	{
 		item._Stopwatch.Stop();
 		hwmPerformanceStatisticsItem.History history = new hwmPerformanceStatisticsItem.History();
-		history._Milliseconds = item._Stopwatch.ElapsedMilliseconds;
 		history._Ticks = item._Stopwatch.ElapsedTicks;
 		item._Historys.Add(history);
 	}
@@ -244,21 +242,16 @@ public class hwmPerformanceStatisticsItem
 
 	public static string SerializeHistory(History history)
 	{
-		return string.Format("{0},{1}", history._Milliseconds, history._Ticks);
+		return history._Ticks.ToString();
 	}
 
 	public static bool TryDeserializeHistory(string str, out History history)
 	{
-		int index = str.IndexOf(',');
-		history = new History();
-		return index > 0 && index < str.Length - 1
-			&& long.TryParse(str.Substring(0, index), out history._Milliseconds)
-			&& long.TryParse(str.Substring(index + 1), out history._Ticks);
+		return long.TryParse(str, out history._Ticks);
 	}
 
 	public struct History
 	{
-		internal long _Milliseconds;
 		internal long _Ticks;
 	}
 }

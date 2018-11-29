@@ -18,6 +18,7 @@ public class hwmSystem : MonoBehaviour
 	private hwmLevel m_WaitingToPlayLevel;
 	private float m_RealtimeSinceStartup;
 	private hwmIPerformanceStatistics m_PerformanceStatistics;
+	private hwmDebugView m_DebugView;
 
 	#region get/set function
 	public static hwmSystem GetInstance()
@@ -94,6 +95,8 @@ public class hwmSystem : MonoBehaviour
 			DestroyImmediate(m_Input);
 			m_Input = null;
 
+			m_DebugView = null;
+
 			m_Config.Dispose();
 			m_Config = null;
 
@@ -157,6 +160,12 @@ public class hwmSystem : MonoBehaviour
 		Debug.Log(configLogString.ToString());
 		yield return null;
 
+		bool enableDebugView;
+		if (m_Config.TryGetBoolValue("Enable_DebugView", out enableDebugView) && enableDebugView)
+		{
+			m_DebugView = InstantiatePrefabAndSetParentThisTransform<hwmDebugView>(m_AssetLoader.LoadAsset(hwmAssetLoader.AssetType.System, SystemInitializer.DebugViewAssetName));
+		}
+
 		m_Input = InstantiatePrefabAndSetParentThisTransform<hwmInput>(m_AssetLoader.LoadAsset(hwmAssetLoader.AssetType.System, SystemInitializer.InputAssetName));
 		yield return null;
 
@@ -186,4 +195,5 @@ public class hwmSystemInitializer
 	public string SceneFSMAssetName;
 	public string LocalizationAssetName;
 	public bool EnablePerformanceStatistics;
+	public string DebugViewAssetName;
 }

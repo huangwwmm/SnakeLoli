@@ -24,6 +24,7 @@ public class slConstants
 	public const int FOOD_SYSTEM_MAXCREATE_PREFRAME = 20;
 	public const float NORMAL_FOOD_POWER = 1;
 	public const float FOOD_POOL_INITIALIZE_MULTIPLY = 1.2f;
+	public const int FOOD_CREATECOUNT_PREFRAME_WHEN_ENDTERMAP = 10000;
 
 	public const int SNAKE_SPRITERENDERER_MAX_ORDERINLAYER = 32760;
 	public const int SNAKE_SPRITERENDERER_MIN_ORDERINLAYER = -32767;
@@ -39,8 +40,6 @@ public class slConstants
 	public const string SNAKE_PRESENTATION_PREfAB_NAME_STARTWITHS = "SnakePresentation_";
 
 	public const float SNAKE_SPAWN_SAFEAREA_MAP_EDGE = 10;
-	public static readonly Vector2 SNAKE_SPAWN_SAFEAREA_SIZE = new Vector2(6, 12);
-	public const float SNAKE_SPAWN_SAFEAREA_YAXIS_OFFSET = -1.6f;
 	public const float SNAKE_NODE_TO_NODE_DISTANCE = 0.9f;
 
 	public const float SNAKE_PREDICT_SIZE_X = 2.4f;
@@ -50,9 +49,6 @@ public class slConstants
 
 	public const float UPDATE_SNAKE_MOVEMENT_TIEM_INTERVAL = 0.1f;
 	public const int UPDATE_RESPAWN_FRAME_INTERVAL = 3;
-	public const int UPDATE_ALL_SNAKE_FRAME = 5;
-
-	public const string SKILL_PROPERTIES_PREFAB_ENDWITHS = "SkillProperties";
 
 	public readonly static hwmConstants.ButtonIndex[] SKILL_BUTTONINDEXS = new hwmConstants.ButtonIndex[] 
 	{

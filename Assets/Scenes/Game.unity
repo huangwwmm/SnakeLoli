@@ -147,6 +147,11 @@ Prefab:
       propertyPath: m_RootOrder
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 114995038713341984, guid: 5531cbdce31478b4f9763f6a972ee954,
+        type: 2}
+      propertyPath: SystemInitializer.DebugViewAssetName
+      value: DebugView
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 5531cbdce31478b4f9763f6a972ee954, type: 2}
   m_IsPrefabParent: 0

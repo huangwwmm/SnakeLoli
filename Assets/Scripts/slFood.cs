@@ -9,13 +9,15 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 	private float m_BeEatRemainTime;
 	private float m_RemainLifeTime;
 	private float m_Power = 1;
+	private int m_Index;
 
 	public hwmQuadtree<slFood> OwnerQuadtree { get; set; }
 	public hwmBounds2D QuadtreeNodeBounds { get; set; }
 	public hwmQuadtree<slFood>.Node OwnerQuadtreeNode { get; set; }
 
-	public void ActiveFood(slFoodProperties foodProperties, slFoodPresentation foodPresentation, Vector3 position, Color color, float power)
+	public void ActiveFood(int index, slFoodProperties foodProperties, slFoodPresentation foodPresentation, Vector3 position, Color color, float power)
 	{
+		m_Index = index;
 		m_State = State.Idle;
 
 		gameObject.SetActive(true);
@@ -71,34 +73,39 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 		return m_Presentation;
 	}
 
-	protected void Update()
+	public void DoUpdate(float deltaTime)
 	{
 		if (m_State == State.BeEat)
 		{
 			if (m_BeEatTransform != null)
 			{
 				Vector3 meToTarget = m_BeEatTransform.localPosition - transform.localPosition;
-				transform.localPosition = transform.localPosition + meToTarget * (Time.deltaTime / m_BeEatRemainTime);
+				transform.localPosition = transform.localPosition + meToTarget * (deltaTime / m_BeEatRemainTime);
 
-				m_BeEatRemainTime -= Time.deltaTime;
+				m_BeEatRemainTime -= deltaTime;
 				if (m_BeEatRemainTime <= 0)
 				{
-					slWorld.GetInstance().GetFoodSystem().DestroyFood(this);
+					slWorld.GetInstance().GetFoodSystem().AddDestroyFoodEvent(this);
 				}
 			}
 			else
 			{
-				slWorld.GetInstance().GetFoodSystem().DestroyFood(this);
+				slWorld.GetInstance().GetFoodSystem().AddDestroyFoodEvent(this);
 			}
 		}
 		else if (m_State == State.Idle)
 		{
-			m_RemainLifeTime -= Time.deltaTime;
+			m_RemainLifeTime -= deltaTime;
 			if (m_RemainLifeTime < 0)
 			{
-				slWorld.GetInstance().GetFoodSystem().DestroyFood(this);
+				slWorld.GetInstance().GetFoodSystem().AddDestroyFoodEvent(this);
 			}
 		}
+	}
+
+	public int GetIndex()
+	{
+		return m_Index;
 	}
 
 	public enum FoodType
