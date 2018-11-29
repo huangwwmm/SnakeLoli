@@ -136,7 +136,7 @@ public class slQuadtreeGizmosWindow : EditorWindow
 			hwmQuadtree<T>.Node displayNode = GetDisplayNode();
 			EditorGUILayout.LabelField("Depth:", displayNode.GetDepth().ToString());
 			EditorGUILayout.LabelField("Element Count:", displayNode.GetElements().Count.ToString());
-			EditorGUILayout.LabelField("Element Count In Self&Childers :", displayNode.GetElementCountInSelfAndChilders().ToString());
+			EditorGUILayout.LabelField("Element Count In Self&Childers :", displayNode.GetAllElementCount().ToString());
 
 			EditorGUILayout.Space();
 			if (m_Current.GetParent() == null

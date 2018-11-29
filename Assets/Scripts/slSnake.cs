@@ -170,7 +170,7 @@ public class slSnake : hwmActor
 			}
 		}
 
-		Debug.Break();
+		//Debug.Break();
 	}
 
 	public bool CanEatFood()

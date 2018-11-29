@@ -5,6 +5,8 @@ using System;
 
 public class hwmQuadtree<T> : IEnumerable, IEnumerable<hwmQuadtree<T>.Node> where T : hwmQuadtree<T>.IElement
 {
+	public bool AutoMergeAndSplitNode;
+
 	private Node m_Root;
 	private int m_MaxDepth;
 	/// <summary>
@@ -34,6 +36,7 @@ public class hwmQuadtree<T> : IEnumerable, IEnumerable<hwmQuadtree<T>.Node> wher
 		m_MaxElementPerNode = maxElementPerNode;
 		m_MinElementPreParentNode = minElementPreParentNode;
 		m_LooseSize = looseSize;
+		AutoMergeAndSplitNode = true;
 
 		m_Root = new Node();
 		m_Root.Initialize(this, null, worldBounds, hwmQuadtreeChilderNodeIndex.Root);
@@ -90,6 +93,12 @@ public class hwmQuadtree<T> : IEnumerable, IEnumerable<hwmQuadtree<T>.Node> wher
 	public Node GetRootNode()
 	{
 		return m_Root;
+	}
+
+	public void MergeAndSplitAllNode()
+	{
+		m_Root.MergeAllNode();
+		m_Root.SplitAllNode();
 	}
 
 	public IEnumerator<Node> GetEnumerator()
@@ -179,11 +188,9 @@ public class hwmQuadtree<T> : IEnumerable, IEnumerable<hwmQuadtree<T>.Node> wher
 			element.OwnerQuadtreeNode = this;
 			m_Elements.Add(element);
 
-			if (m_IsLeaf
-				&& m_Depth < m_Owner.m_MaxDepth
-				&& m_Elements.Count > m_Owner.m_MaxElementPerNode)
+			if (m_Owner.AutoMergeAndSplitNode)
 			{
-				SplitChilders();
+				TrySplitChilders();
 			}
 		}
 
@@ -194,21 +201,9 @@ public class hwmQuadtree<T> : IEnumerable, IEnumerable<hwmQuadtree<T>.Node> wher
 			m_Elements.Remove(element);
 			element.OwnerQuadtreeNode = null;
 
-			if (m_Parent != null)
+			if (m_Owner.AutoMergeAndSplitNode)
 			{
-				Node[] parentChilders = m_Parent.m_Childers;
-				if (parentChilders[0].m_IsLeaf
-					&& parentChilders[1].m_IsLeaf
-					&& parentChilders[2].m_IsLeaf
-					&& parentChilders[3].m_IsLeaf
-					&& (parentChilders[0].m_Elements.Count
-						+ parentChilders[1].m_Elements.Count
-						+ parentChilders[2].m_Elements.Count
-						+ parentChilders[3].m_Elements.Count
-						+ m_Parent.m_Elements.Count) < m_Owner.m_MinElementPreParentNode)
-				{
-					m_Parent.MergeChilders();
-				}
+				m_Parent.TryMergeChilders();
 			}
 		}
 
@@ -262,7 +257,7 @@ public class hwmQuadtree<T> : IEnumerable, IEnumerable<hwmQuadtree<T>.Node> wher
 			return m_IsLeaf;
 		}
 
-		public int GetElementCountInSelfAndChilders()
+		public int GetAllElementCount()
 		{
 			if (m_IsLeaf)
 			{
@@ -270,10 +265,10 @@ public class hwmQuadtree<T> : IEnumerable, IEnumerable<hwmQuadtree<T>.Node> wher
 			}
 			else
 			{
-				return m_Elements.Count + m_Childers[0].GetElementCountInSelfAndChilders()
-					+ m_Childers[1].GetElementCountInSelfAndChilders()
-					+ m_Childers[2].GetElementCountInSelfAndChilders()
-					+ m_Childers[3].GetElementCountInSelfAndChilders();
+				return m_Elements.Count + m_Childers[0].GetAllElementCount()
+					+ m_Childers[1].GetAllElementCount()
+					+ m_Childers[2].GetAllElementCount()
+					+ m_Childers[3].GetAllElementCount();
 			}
 		}
 
@@ -289,53 +284,106 @@ public class hwmQuadtree<T> : IEnumerable, IEnumerable<hwmQuadtree<T>.Node> wher
 			}
 		}
 
-		private void SplitChilders()
+		public bool TrySplitChilders()
 		{
-			hwmDebug.Assert(m_IsLeaf, "m_IsLeaf");
-			m_IsLeaf = false;
-
-			m_Childers = new Node[CHILDER_COUNT];
-			for (int iChild = 0; iChild < CHILDER_COUNT; iChild++)
+			if (m_IsLeaf
+				&& m_Depth < m_Owner.m_MaxDepth
+				&& m_Elements.Count > m_Owner.m_MaxElementPerNode)
 			{
-				Node iterNode = new Node();
-				m_Childers[iChild] = iterNode;
-				hwmQuadtreeChilderNodeIndex index = (hwmQuadtreeChilderNodeIndex)iChild;
-				iterNode.Initialize(m_Owner, this, CalculateChilderBounds(index), index);
+				m_IsLeaf = false;
+
+				m_Childers = new Node[CHILDER_COUNT];
+				for (int iChild = 0; iChild < CHILDER_COUNT; iChild++)
+				{
+					Node iterNode = new Node();
+					m_Childers[iChild] = iterNode;
+					hwmQuadtreeChilderNodeIndex index = (hwmQuadtreeChilderNodeIndex)iChild;
+					iterNode.Initialize(m_Owner, this, CalculateChilderBounds(index), index);
+				}
+
+				T[] elements = m_Elements.ToArray();
+				m_Elements.Clear();
+				m_Elements.Capacity = 4;
+
+				for (int iElement = 0; iElement < elements.Length; iElement++)
+				{
+					T iterElement = elements[iElement];
+					iterElement.OwnerQuadtreeNode = null;
+					Node newNode = null;
+					hwmDebug.Assert(TryFindContains(ref newNode, iterElement.QuadtreeNodeBounds), "TryFindNode(ref newNode, iterElement.QuadtreeNodeBounds)");
+					newNode.AddElement(iterElement);
+				}
+
+				return true;
 			}
-
-			T[] elements = m_Elements.ToArray();
-			m_Elements.Clear();
-			m_Elements.Capacity = 4;
-
-			for (int iElement = 0; iElement < elements.Length; iElement++)
+			else
 			{
-				T iterElement = elements[iElement];
-				iterElement.OwnerQuadtreeNode = null;
-				Node newNode = null;
-				hwmDebug.Assert(TryFindContains(ref newNode, iterElement.QuadtreeNodeBounds), "TryFindNode(ref newNode, iterElement.QuadtreeNodeBounds)");
-				newNode.AddElement(iterElement);
+				return false;
 			}
 		}
 
-		private void MergeChilders()
+		public bool TryMergeChilders()
 		{
-			for (int iChilder = 0; iChilder < CHILDER_COUNT; iChilder++)
+			if (!m_IsLeaf
+				&& m_Childers[0].m_IsLeaf
+				&& m_Childers[1].m_IsLeaf
+				&& m_Childers[2].m_IsLeaf
+				&& m_Childers[3].m_IsLeaf
+				&& (m_Childers[0].m_Elements.Count
+					+ m_Childers[1].m_Elements.Count
+					+ m_Childers[2].m_Elements.Count
+					+ m_Childers[3].m_Elements.Count
+					+ m_Elements.Count) < m_Owner.m_MinElementPreParentNode)
 			{
-				Node iterChilder = m_Childers[iChilder];
-				T[] iterElements = iterChilder.m_Elements.ToArray();
-
-				for (int iElement = 0; iElement < iterElements.Length; iElement++)
+				for (int iChilder = 0; iChilder < CHILDER_COUNT; iChilder++)
 				{
-					T iterElement = iterElements[iElement];
-					iterElement.OwnerQuadtreeNode = null;
-					AddElement(iterElement);
+					Node iterChilder = m_Childers[iChilder];
+					T[] iterElements = iterChilder.m_Elements.ToArray();
+
+					for (int iElement = 0; iElement < iterElements.Length; iElement++)
+					{
+						T iterElement = iterElements[iElement];
+						iterElement.OwnerQuadtreeNode = null;
+						AddElement(iterElement);
+					}
+
+					iterChilder.Dispose();
 				}
 
-				iterChilder.Dispose();
+				m_IsLeaf = true;
+				m_Childers = null;
+				return true;
 			}
+			else
+			{
+				return false;
+			}
+		}
 
-			m_IsLeaf = true;
-			m_Childers = null;
+		public void MergeAllNode()
+		{
+			if (!m_IsLeaf)
+			{
+				m_Childers[0].MergeAllNode();
+				m_Childers[1].MergeAllNode();
+				m_Childers[2].MergeAllNode();
+				m_Childers[3].MergeAllNode();
+
+				TryMergeChilders();
+			}
+		}
+
+		public void SplitAllNode()
+		{
+			TrySplitChilders();
+
+			if (!m_IsLeaf)
+			{
+				m_Childers[0].SplitAllNode();
+				m_Childers[1].SplitAllNode();
+				m_Childers[2].SplitAllNode();
+				m_Childers[3].SplitAllNode();
+			}
 		}
 
 		private hwmBounds2D CalculateChilderBounds(hwmQuadtreeChilderNodeIndex index)

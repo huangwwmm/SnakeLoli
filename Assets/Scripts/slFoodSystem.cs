@@ -105,6 +105,8 @@ public class slFoodSystem
 				, hwmRandom.RandColorRGB()
 				, slConstants.NORMAL_FOOD_POWER);
 		}
+
+		m_Quadtree.MergeAndSplitAllNode();
 	}
 
 	public hwmQuadtree<slFood> GetQuadtree()
@@ -141,23 +143,7 @@ public class slFoodSystem
 				yield return null;
 			}
 		}
-
-		// Test quadtree
-		{
-			//List<hwmQuadtree<slFood>.IElement> foods = new List<hwmQuadtree<slFood>.IElement>();
-			//foreach (var food in m_Quadtree.GetRootNode())
-			//{
-			//	if (foods.Contains(food))
-			//	{
-			//		Debug.Break();
-			//	}
-			//	else
-			//	{
-			//		foods.Add(food);
-			//	}
-			//}
-			//Debug.LogError(m_FoodCount + " " + foods.Count);
-		}
+		m_Quadtree.AutoMergeAndSplitNode = false;
 	}
 
 	public Transform GetFoodRoot()
