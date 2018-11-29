@@ -60,7 +60,8 @@ public class slWorld : hwmWorld
 
 		m_Level = base.m_Level as slLevel;
 
-		m_Map = (Object.Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game, "Map")) as GameObject).GetComponent<slMap>();
+		GameObject mapGameObject = new GameObject("Map");
+		m_Map = mapGameObject.AddComponent<slMap>();
 		m_Map.Initialize(GetLevel().MapSize);
 		yield return null;
 

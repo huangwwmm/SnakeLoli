@@ -17,8 +17,8 @@ public class slConstants
 	public static readonly Vector3 FOOD_DEACTIVE_POSITION = new Vector3(10000, 10000, 0);
 	public const float FOOD_MAP_EDGE = 0.5f;
 
-	public const string FOOD_PRESENTATION_PREFAB_ENDWITHS = "FoodPresentation";
-	public const string FOOD_PROPERTIES_PREFAB_ENDWITHS = "FoodProperties";
+	public const string FOOD_PRESENTATION_PREFAB_STARTWITHS = "FoodPresentation_";
+	public const string FOOD_PROPERTIES_PREFAB_STARTWITHS = "FoodProperties_";
 
 	public const float FOOD_BEEAT_MOVE_TIME = 0.36f;
 	public const int FOOD_SYSTEM_MAXCREATE_PREFRAME = 20;
@@ -35,8 +35,9 @@ public class slConstants
 	public const int SNAKE_INITIALIZEZ_NODE_MINCOUNT = 5;
 
 	public static readonly Vector3 SNAKE_BODYNODE_CREATE_POSITION = new Vector3(10000, 10000, 0);
-
-	public const string SNAKE_PREfAB_NAME_STARTWITHS = "Snake_";
+	
+	public const string SNAKE_TWEAKABLE_PROPERTIES_PREfAB_NAME_STARTWITHS = "SnakeTweakableProperties_";
+	public const string SNAKE_PROPERTIES_PREfAB_NAME_STARTWITHS = "SnakeProperties_";
 	public const string SNAKE_PRESENTATION_PREfAB_NAME_STARTWITHS = "SnakePresentation_";
 
 	public const float SNAKE_SPAWN_SAFEAREA_MAP_EDGE = 10;

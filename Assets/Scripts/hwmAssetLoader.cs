@@ -24,8 +24,6 @@ public class hwmAssetLoader
 		System,
 		Game,
 		UIRoot,
-		Level,
-		Actor,
-		SnakeTweakableProperties
+		Level
 	}
 }

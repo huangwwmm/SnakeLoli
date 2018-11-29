@@ -66,13 +66,12 @@ public class hwmWorld : MonoBehaviour
 		return m_Level;
 	}
 
-	public hwmActor CreateActor(string name,int guid, string prefabName, Vector3 position, Quaternion rotation, object additionalData = null)
+	public T CreateActor<T>(int guid, Vector3 position, Quaternion rotation, object additionalData = null) where T : hwmActor
 	{
-		GameObject actorPrefab = hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Actor, prefabName) as GameObject;
-
-		GameObject actorGameObject = UnityEngine.Object.Instantiate(actorPrefab, position, rotation) as GameObject;
-		actorGameObject.name = name;
-		hwmActor actor = actorGameObject.GetComponent(typeof(hwmActor)) as hwmActor;
+		GameObject actorGameObject = new GameObject(string.Format("{0}_{1}", typeof(T).Name, guid.ToString()));
+		actorGameObject.transform.position = position;
+		actorGameObject.transform.rotation = rotation;
+		T actor = actorGameObject.AddComponent<T>();
 		actor.Initialize(hwmConstants.NetRole.Authority, guid, additionalData);
 		return actor;
 	}

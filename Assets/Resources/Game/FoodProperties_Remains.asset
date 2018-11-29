@@ -8,11 +8,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7646d9267c45b0348801684c03276c36, type: 3}
-  m_Name: Default
+  m_Script: {fileID: 11500000, guid: 3d6262ff2d3ae8245b0a44996d93607a, type: 3}
+  m_Name: FoodProperties_Remains
   m_EditorClassIdentifier: 
-  MaxTurnAngularSpeed: 360
-  NodeToPower: 5
-  NormalMoveNodeCount: 1
-  RemainsFoodPower: 3
-  EatFoodRadius: 3
+  Radius: 0.3
+  MinLifeTime: 8
+  MaxLifeTime: 12

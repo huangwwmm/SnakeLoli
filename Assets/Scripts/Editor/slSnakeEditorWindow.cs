@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class slSnakeEditorWindow : EditorWindow
 {
-	private const string SNAKE_PREFAB_PATH = "Assets/Resources/Actor/";
+	private const string SNAKE_PREFAB_PATH = "Assets/Resources/Game/";
 	private const string SNAKE_EDITOR_PREfAB_NAME_STARTWITHS = "SnakeEditor_";
 
 	private EditorState m_EditorState;
@@ -151,17 +151,13 @@ public class slSnakeEditorWindow : EditorWindow
 		PrefabUtility.ReplacePrefab(m_SnakeEditor.gameObject, PrefabUtility.GetPrefabParent(m_SnakeEditor.gameObject), ReplacePrefabOptions.ConnectToPrefab);
 		string snakeName = m_SnakeEditor.gameObject.name.Remove(0, SNAKE_EDITOR_PREfAB_NAME_STARTWITHS.Length);
 
-		string snakePrefabPath = string.Format("{0}{1}{2}.prefab", SNAKE_PREFAB_PATH, slConstants.SNAKE_PREfAB_NAME_STARTWITHS, snakeName);
-		GameObject snakeGameObject = new GameObject(slConstants.SNAKE_PREfAB_NAME_STARTWITHS + snakeName);
-		slSnake snake = snakeGameObject.AddComponent<slSnake>();
-		snake.MyProperties = new slSnake.Properties();
-		snake.MyProperties.SnakeName = snakeName;
-		snake.MyProperties.HeadColliderRadius = m_SnakeEditor.Head.GetComponent<CircleCollider2D>().radius;
-		snake.MyProperties.ClothesColliderRadius = m_SnakeEditor.Clothes.GetComponent<CircleCollider2D>().radius;
-		snake.MyProperties.BodyColliderRadius = m_SnakeEditor.Body1.GetComponent<CircleCollider2D>().radius;
-		snake.MyProperties.DeadFoodColor = m_SnakeEditor.DeadFoodColor;
-		PrefabUtility.CreatePrefab(snakePrefabPath, snakeGameObject);
-		DestroyImmediate(snakeGameObject);
+		string snakePrefabPath = string.Format("{0}{1}{2}.prefab", SNAKE_PREFAB_PATH, slConstants.SNAKE_PROPERTIES_PREfAB_NAME_STARTWITHS, snakeName);
+		slSnakeProperties snakeProperties = CreateInstance<slSnakeProperties>();
+		snakeProperties.HeadColliderRadius = m_SnakeEditor.Head.GetComponent<CircleCollider2D>().radius;
+		snakeProperties.ClothesColliderRadius = m_SnakeEditor.Clothes.GetComponent<CircleCollider2D>().radius;
+		snakeProperties.BodyColliderRadius = m_SnakeEditor.Body1.GetComponent<CircleCollider2D>().radius;
+		snakeProperties.DeadFoodColor = m_SnakeEditor.DeadFoodColor;
+		AssetDatabase.CreateAsset(snakeProperties, snakePrefabPath);
 
 		string snakePresentationPrefabPath = string.Format("{0}{1}{2}.prefab", SNAKE_PREFAB_PATH, slConstants.SNAKE_PRESENTATION_PREfAB_NAME_STARTWITHS, snakeName);
 		GameObject snakePresentationGameObject = new GameObject(slConstants.SNAKE_PRESENTATION_PREfAB_NAME_STARTWITHS + snakeName);

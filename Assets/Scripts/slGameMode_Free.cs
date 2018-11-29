@@ -84,12 +84,11 @@ public class slGameMode_Free : hwmGameMode
 		initializeAdditionalData.IsBot = playerState.IsBot;
 		initializeAdditionalData.TweakableProperties = slConstants.DEFAULT_SNAKE_TWEAKABLE_PROPERTIES;
 		initializeAdditionalData.NodeCount = playerState.CreateNodeCount;
-		playerState.ControllerSnake = slWorld.GetInstance().CreateActor("Snake_" + playerState.PlayerID.ToString()
-			, playerState.PlayerID
-			, "Snake_" + playerState.SnakeName
+		initializeAdditionalData.SnakeName = playerState.SnakeName;
+		playerState.ControllerSnake = slWorld.GetInstance().CreateActor<slSnake>(playerState.PlayerID
 			, Vector3.zero
 			, Quaternion.identity
-			, initializeAdditionalData) as slSnake;
+			, initializeAdditionalData);
 	}
 
 	private void CalculateSpawnPoint(slPlayerState_Free playerState, out Vector3 position, out Quaternion rotation)

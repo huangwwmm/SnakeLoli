@@ -35,7 +35,7 @@ public class slFoodSystem
 		for (int iFood = 0; iFood < m_FoodPropertiess.Length; iFood++)
 		{
 			m_FoodPropertiess[iFood] = hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game
-				, ((slFood.FoodType)iFood).ToString() + slConstants.FOOD_PROPERTIES_PREFAB_ENDWITHS) as slFoodProperties;
+				, slConstants.FOOD_PROPERTIES_PREFAB_STARTWITHS + ((slFood.FoodType)iFood).ToString()) as slFoodProperties;
 		}
 
 		m_Quadtree = new hwmQuadtree<slFood>();
@@ -252,9 +252,11 @@ public class slFoodSystem
 	{
 		protected override slFood HandleCreateItem()
 		{
-			slFood food = (Object.Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game, "Food")) as GameObject).GetComponent<slFood>();
-			food.transform.SetParent(slWorld.GetInstance().GetFoodSystem().GetFoodRoot(), false);
-			food.gameObject.SetActive(false);
+			GameObject go = new GameObject("food");
+			go.transform.SetParent(slWorld.GetInstance().GetFoodSystem().GetFoodRoot(), false);
+			go.SetActive(false);
+
+			slFood food = go.AddComponent<slFood>();
 			return food;
 		}
 	}
@@ -271,7 +273,7 @@ public class slFoodSystem
 		protected override slFoodPresentation HandleCreateItem()
 		{
 			slFoodPresentation food = (Object.Instantiate(hwmSystem.GetInstance().GetAssetLoader()
-					.LoadAsset(hwmAssetLoader.AssetType.Game, m_FoodType.ToString() + slConstants.FOOD_PRESENTATION_PREFAB_ENDWITHS)) as GameObject)
+					.LoadAsset(hwmAssetLoader.AssetType.Game, slConstants.FOOD_PRESENTATION_PREFAB_STARTWITHS + m_FoodType.ToString())) as GameObject)
 				.GetComponent<slFoodPresentation>();
 			food.transform.SetParent(slWorld.GetInstance().GetFoodSystem().GetFoodRoot(), false);
 			food.gameObject.SetActive(false);

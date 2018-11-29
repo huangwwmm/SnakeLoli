@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class slSnake : hwmActor
 {
-	public Properties MyProperties;
-
 	public Vector2 TargetMoveDirection;
 
 	public Action<slSkill.EventArgs> OnSpeedUpMovement;
@@ -14,6 +12,7 @@ public class slSnake : hwmActor
 
 	private slSnakePresentation m_Presentation;
 	private slSnakeTweakableProperties m_TweakableProperties;
+	private slSnakeProperties m_Properties;
 
 	private slBaseController m_Controller;
 
@@ -58,6 +57,11 @@ public class slSnake : hwmActor
 	public slSnakeTweakableProperties GetTweakableProperties()
 	{
 		return m_TweakableProperties;
+	}
+
+	public slSnakeProperties GetProperties()
+	{
+		return m_Properties;
 	}
 
 	public void DoUpdateMovement(float deltaTime)
@@ -116,7 +120,7 @@ public class slSnake : hwmActor
 					bodyCountOffset--;
 					newFrontNode = CreateNode<BodyNode>("Body"
 						, m_Presentation != null ? m_Presentation.MyProperties.Body : null
-						, MyProperties.BodyColliderRadius
+						, m_Properties.BodyColliderRadius
 						, slConstants.SNAKE_BODYNODE_CREATE_POSITION
 						, Quaternion.identity);
 				}
@@ -211,13 +215,16 @@ public class slSnake : hwmActor
 		InitializeAdditionalData initializeData = additionalData as InitializeAdditionalData;
 		hwmDebug.Assert(initializeData.NodeCount >= slConstants.SNAKE_INITIALIZEZ_NODE_MINCOUNT, "initializeData.NodeCount >= slConstants.SNAKE_INITIALIZEZ_NODE_MINCOUNT");
 
-		m_TweakableProperties = Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.SnakeTweakableProperties
-					, initializeData.TweakableProperties)) as slSnakeTweakableProperties;
+		m_TweakableProperties = Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game
+					, slConstants.SNAKE_TWEAKABLE_PROPERTIES_PREfAB_NAME_STARTWITHS + initializeData.TweakableProperties)) as slSnakeTweakableProperties;
+
+		m_Properties = Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game
+					, slConstants.SNAKE_PROPERTIES_PREfAB_NAME_STARTWITHS + initializeData.SnakeName)) as slSnakeProperties;
 
 		if (slWorld.GetInstance().NeedPresentation())
 		{
-			m_Presentation = (Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Actor
-					, "SnakePresentation_" + MyProperties.SnakeName)) as GameObject)
+			m_Presentation = (Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game
+					, slConstants.SNAKE_PRESENTATION_PREfAB_NAME_STARTWITHS + initializeData.SnakeName)) as GameObject)
 				.GetComponent<slSnakePresentation>();
 			m_Presentation.gameObject.transform.SetParent(transform, false);
 		}
@@ -226,13 +233,13 @@ public class slSnake : hwmActor
 
 		m_Head = CreateNode<HeadNode>("Head"
 			, m_Presentation != null ? m_Presentation.MyProperties.Head : null
-			, MyProperties.HeadColliderRadius
+			, m_Properties.HeadColliderRadius
 			, initializeData.HeadPosition
 			, initializeData.HeadRotation);
 
 		m_Clothes = CreateNode<ClothesNode>("Clothes"
 			, m_Presentation != null ? m_Presentation.MyProperties.Clothes : null
-			, MyProperties.ClothesColliderRadius
+			, m_Properties.ClothesColliderRadius
 			, initializeData.HeadPosition + initializeData.HeadRotation * new Vector3(0, -slConstants.SNAKE_NODE_TO_NODE_DISTANCE, 0)
 			, initializeData.HeadRotation);
 
@@ -243,7 +250,7 @@ public class slSnake : hwmActor
 		{
 			BodyNode node = CreateNode<BodyNode>("Body"
 				, m_Presentation != null ? m_Presentation.MyProperties.Body : null
-				, MyProperties.BodyColliderRadius
+				, m_Properties.BodyColliderRadius
 				, m_Clothes.Node.transform.position + bodyToClothesOffset + bodyToBodyOffset * (iNode - 3)
 				, initializeData.HeadRotation);
 			if (m_Presentation != null)
@@ -284,11 +291,11 @@ public class slSnake : hwmActor
 		float power = m_IsReaminsFoodContamination ? m_RemainsFoodContaminationPower : m_TweakableProperties.RemainsFoodPower;
 		if (disposeAdditionalData.MyDeadType != DeadType.FinishGame)
 		{
-			slWorld.GetInstance().GetFoodSystem().AddCreateEvent(foodType, m_Head.Node.transform.position, MyProperties.DeadFoodColor, power);
-			slWorld.GetInstance().GetFoodSystem().AddCreateEvent(foodType, m_Clothes.Node.transform.position, MyProperties.DeadFoodColor, power);
+			slWorld.GetInstance().GetFoodSystem().AddCreateEvent(foodType, m_Head.Node.transform.position, m_Properties.DeadFoodColor, power);
+			slWorld.GetInstance().GetFoodSystem().AddCreateEvent(foodType, m_Clothes.Node.transform.position, m_Properties.DeadFoodColor, power);
 			foreach (BodyNode node in m_Bodys)
 			{
-				slWorld.GetInstance().GetFoodSystem().AddCreateEvent(foodType, node.Node.transform.position, MyProperties.DeadFoodColor, power);
+				slWorld.GetInstance().GetFoodSystem().AddCreateEvent(foodType, node.Node.transform.position, m_Properties.DeadFoodColor, power);
 			}
 		}
 
@@ -304,6 +311,9 @@ public class slSnake : hwmActor
 
 		Destroy(m_TweakableProperties);
 		m_TweakableProperties = null;
+
+		Destroy(m_TweakableProperties);
+		m_Properties = null;
 
 		if (m_Presentation != null)
 		{
@@ -403,21 +413,10 @@ public class slSnake : hwmActor
 		}
 	}
 
-	[System.Serializable]
-	public class Properties
-	{
-		public string SnakeName;
-
-		public float HeadColliderRadius;
-		public float ClothesColliderRadius;
-		public float BodyColliderRadius;
-
-		public Color DeadFoodColor;
-	}
-
-	[System.Serializable]
+	[Serializable]
 	public class InitializeAdditionalData
 	{
+		public string SnakeName;
 		public int NodeCount;
 		public bool IsBot;
 		public Vector3 HeadPosition = Vector3.zero;
@@ -425,7 +424,7 @@ public class slSnake : hwmActor
 		public string TweakableProperties;
 	}
 
-	[System.Serializable]
+	[Serializable]
 	public class DisposeAdditionalData
 	{
 		public DeadType MyDeadType;

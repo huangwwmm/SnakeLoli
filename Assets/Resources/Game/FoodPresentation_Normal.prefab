@@ -22,7 +22,7 @@ GameObject:
   - component: {fileID: 212210694786229238}
   - component: {fileID: 114858888295027912}
   m_Layer: 0
-  m_Name: NormalFoodPresentation
+  m_Name: FoodPresentation_Normal
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
