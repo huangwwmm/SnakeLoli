@@ -100,6 +100,7 @@ public class hwmSystem : MonoBehaviour
 			m_Config.Dispose();
 			m_Config = null;
 
+			m_PerformanceStatistics.LogAndRecord();
 			m_LogRecord.Dispose();
 			m_LogRecord = null;
 

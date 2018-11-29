@@ -143,16 +143,16 @@ public class slFoodSystem
 	{
 		for (int iFood = 0; iFood < m_MaxFood; iFood++)
 		{
+			if (iFood % slConstants.FOOD_CREATECOUNT_PREFRAME_WHEN_ENDTERMAP == 0)
+			{
+				Debug.Log("foodsystem entermap created food count " + m_FoodCount);
+				yield return null;
+			}
+
 			CreateFood(slFood.FoodType.Normal
 				, hwmRandom.RandVector2(m_FoodMinPosition, m_FoodMaxPosition)
 				, hwmRandom.RandColorRGB()
 				, slConstants.NORMAL_FOOD_POWER);
-
-			if (iFood % slConstants.FOOD_CREATECOUNT_PREFRAME_WHEN_ENDTERMAP == 0)
-			{
-				Debug.Log("entermap created food count " + m_FoodCount);
-				yield return null;
-			}
 		}
 		m_Quadtree.AutoMergeAndSplitNode = false;
 	}

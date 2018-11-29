@@ -8,6 +8,7 @@ public interface hwmIPerformanceStatistics
 {
 	void Initialize();
 	void Dispose();
+	void LogAndRecord();
 	hwmPerformanceStatisticsItem LoadOrCreateItem(string itemName, bool ignoreHistoryOnLoad = false);
 	hwmPerformanceStatisticsItem Start(string itemName);
 	void Start(hwmPerformanceStatisticsItem item);
@@ -27,7 +28,7 @@ public class hwmPerformanceStatistics : hwmIPerformanceStatistics
 #if UNITY_EDITOR || UNITY_STANDALONE
 		m_RecordDirectory = Application.dataPath + "/../Temp/PerformanceStatistics/";
 #elif UNITY_ANDROID
-		m_RecordDirectory = Application.persistentDataPath + "/LogRecord/";
+		m_RecordDirectory = Application.persistentDataPath + "/PerformanceStatistics/";
 #endif
 		if (!Directory.Exists(m_RecordDirectory))
 		{
@@ -39,46 +40,8 @@ public class hwmPerformanceStatistics : hwmIPerformanceStatistics
 
 	public void Dispose()
 	{
-		List<string> historyStrs = new List<string>();
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.AppendLine("PerformanceStatistics:");
-		foreach (KeyValuePair<string, hwmPerformanceStatisticsItem> item in m_Items)
-		{
-			string itemFilePath = m_RecordDirectory + item.Value._Name + ".txt";
-			if (File.Exists(itemFilePath))
-			{
-				File.Delete(itemFilePath);
-			}
-
-			List<hwmPerformanceStatisticsItem.History> historys = item.Value._Historys;
-			long[] milliseconds = new long[historys.Count];
-			long[] ticks = new long[historys.Count];
-			historyStrs.Clear();
-			for (int iHistory = Mathf.Max(0, historys.Count - hwmPerformanceStatisticsItem.MAX_RECORD_HISTORY_COUNT); iHistory < historys.Count; iHistory++)
-			{
-				hwmPerformanceStatisticsItem.History iterHistory = historys[iHistory];
-				ticks[iHistory] = iterHistory._Ticks;
-				historyStrs.Add(hwmPerformanceStatisticsItem.SerializeHistory(iterHistory));
-			}
-			File.WriteAllLines(itemFilePath, historyStrs.ToArray());
-
-			if (historys.Count > 0)
-			{
-				ValueAnalysis tickAnalysis = new ValueAnalysis(ticks);
-				ValueAnalysis millisecondsAnalysis = new ValueAnalysis(milliseconds);
-				stringBuilder.AppendLine(string.Format("Name: {0} Coung:{1} AvgTick:{2:F2} AvgMs:{3:F2}"
-					, item.Value._Name
-					, historys.Count
-					, tickAnalysis.Avg
-					, millisecondsAnalysis.Avg));
-			}
-		}
-		historyStrs.Clear();
-		historyStrs = null;
 		m_Items.Clear();
 		m_Items = null;
-
-		UnityEngine.Debug.Log(stringBuilder.ToString());
 	}
 
 	public hwmPerformanceStatisticsItem LoadOrCreateItem(string itemName, bool ignoreHistoryOnLoad = false)
@@ -155,6 +118,45 @@ public class hwmPerformanceStatistics : hwmIPerformanceStatistics
 		item._Historys.Clear();
 	}
 
+	public void LogAndRecord()
+	{
+		List<string> historyStrs = new List<string>();
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.AppendLine("PerformanceStatistics:");
+		foreach (KeyValuePair<string, hwmPerformanceStatisticsItem> item in m_Items)
+		{
+			string itemFilePath = m_RecordDirectory + item.Value._Name + ".txt";
+			if (File.Exists(itemFilePath))
+			{
+				File.Delete(itemFilePath);
+			}
+
+			List<hwmPerformanceStatisticsItem.History> historys = item.Value._Historys;
+			long[] ticks = new long[historys.Count];
+			historyStrs.Clear();
+			for (int iHistory = Mathf.Max(0, historys.Count - hwmPerformanceStatisticsItem.MAX_RECORD_HISTORY_COUNT); iHistory < historys.Count; iHistory++)
+			{
+				hwmPerformanceStatisticsItem.History iterHistory = historys[iHistory];
+				ticks[iHistory] = iterHistory._Ticks;
+				historyStrs.Add(hwmPerformanceStatisticsItem.SerializeHistory(iterHistory));
+			}
+			File.WriteAllLines(itemFilePath, historyStrs.ToArray());
+
+			if (historys.Count > 0)
+			{
+				ValueAnalysis tickAnalysis = new ValueAnalysis(ticks);
+				stringBuilder.AppendLine(string.Format("Name: {0} Count:{1} AvgTick:{2:F2}"
+					, item.Value._Name
+					, historys.Count
+					, tickAnalysis.Avg));
+			}
+		}
+		historyStrs.Clear();
+		historyStrs = null;
+
+		UnityEngine.Debug.Log(stringBuilder.ToString());
+	}
+
 	private struct ValueAnalysis
 	{
 		public int Count;
@@ -220,6 +222,10 @@ public class hwmEmptyPerformanceStatistics : hwmIPerformanceStatistics
 	public hwmPerformanceStatisticsItem LoadOrCreateItem(string itemName, bool ignoreHistoryOnLoad = false)
 	{
 		return null;
+	}
+
+	public void LogAndRecord()
+	{
 	}
 
 	public hwmPerformanceStatisticsItem Start(string itemName)

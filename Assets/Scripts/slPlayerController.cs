@@ -40,6 +40,8 @@ public class slPlayerController : slBaseController
 		m_Camera = transform.Find("Camera").GetComponent<slCamera>();
 		m_HUD = transform.Find("HUD").GetComponent<slHUD>();
 		m_Input = hwmSystem.GetInstance().GetInput();
+
+		m_Input.GetButton(hwmConstants.ButtonIndex.Menu).SetEnable(true); // TEMP
 	}
 
 	protected override void HandleDispose()
@@ -119,6 +121,12 @@ public class slPlayerController : slBaseController
 		for (int iSkill = 0; iSkill < m_Skills.Length; iSkill++)
 		{
 			m_Skills[iSkill].DoUpdate();
+		}
+
+		// TEMP
+		if (m_Input.GetButton(hwmConstants.ButtonIndex.Menu).GetState() == hwmInput.Button.State.Up)
+		{
+			Application.Quit();
 		}
 	}
 }

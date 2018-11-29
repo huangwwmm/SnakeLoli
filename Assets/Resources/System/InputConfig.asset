@@ -33,3 +33,5 @@ MonoBehaviour:
     KeyCodes: 710000004e010000
   - Index: 5
     KeyCodes: 650000004f010000
+  - Index: 6
+    KeyCodes: 3f01000051010000

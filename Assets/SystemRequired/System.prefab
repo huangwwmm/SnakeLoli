@@ -57,3 +57,4 @@ MonoBehaviour:
     SceneFSMAssetName: SceneFSM
     LocalizationAssetName: Localization
     EnablePerformanceStatistics: 1
+    DebugViewAssetName: DebugView

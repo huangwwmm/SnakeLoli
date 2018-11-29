@@ -25,6 +25,7 @@
 		Skill4,
 		Skill5,
 		Skill6,
+		Menu,
 	}
 
 	/// <summary>
