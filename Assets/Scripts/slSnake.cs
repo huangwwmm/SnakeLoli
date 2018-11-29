@@ -63,7 +63,7 @@ public class slSnake : hwmActor
 	public void DoUpdateMovement(float deltaTime)
 	{
 		int moveNodeCount = 0;
-		switch(m_SpeedState)
+		switch (m_SpeedState)
 		{
 			case SpeedState.Normal:
 				moveNodeCount = m_TweakableProperties.NormalMoveNodeCount;
@@ -125,14 +125,16 @@ public class slSnake : hwmActor
 					newFrontNode = m_Bodys.PopBack();
 				}
 				BodyNode oldFrontNode = m_Bodys.PeekFront();
-				newFrontNode.Sprite.sortingOrder = oldFrontNode.Sprite.sortingOrder + 1;
+				m_Bodys.PushFront(newFrontNode);
 				newFrontNode.Node.transform.localPosition = lastNodePosition;
 				newFrontNode.Node.transform.localRotation = lastNodeRotation;
-				m_Bodys.PushFront(newFrontNode);
-
-				if (newFrontNode.Sprite.sortingOrder >= slConstants.SNAKE_SPRITERENDERER_MAX_ORDERINLAYER)
+				if (m_Presentation != null)
 				{
-					ResetOrderInLayer();
+					newFrontNode.Sprite.sortingOrder = oldFrontNode.Sprite.sortingOrder + 1;
+					if (newFrontNode.Sprite.sortingOrder >= slConstants.SNAKE_SPRITERENDERER_MAX_ORDERINLAYER)
+					{
+						ResetOrderInLayer();
+					}
 				}
 			}
 		}
@@ -159,7 +161,7 @@ public class slSnake : hwmActor
 			hwmQuadtree<slFood>.Node iterNode = enumerator.Current;
 			hwmBetterList<slFood> foods = iterNode.GetElements();
 			bool inCircleInside = iterNode.GetLooseBounds().InCircleInside(headPosition, radius);
-			for (int iFood = 0; iFood < foods.Count; iFood++)
+			for (int iFood = foods.Count - 1; iFood >= 0; iFood--)
 			{
 				slFood iterFood = foods[iFood];
 				if (inCircleInside
@@ -241,7 +243,10 @@ public class slSnake : hwmActor
 				, MyProperties.BodyColliderRadius
 				, m_Clothes.Node.transform.position + bodyToClothesOffset + bodyToBodyOffset * (iNode - 3)
 				, initializeData.HeadRotation);
-			node.Sprite.sortingOrder = slConstants.SNAKE_SPRITERENDERER_MIN_ORDERINLAYER + initializeData.NodeCount - iNode;
+			if (m_Presentation != null)
+			{
+				node.Sprite.sortingOrder = slConstants.SNAKE_SPRITERENDERER_MIN_ORDERINLAYER + initializeData.NodeCount - iNode;
+			}
 
 			m_Bodys.PushBack(node);
 		}
@@ -373,7 +378,7 @@ public class slSnake : hwmActor
 						? DeadType.HitWall
 						: DeadType.HitSnake;
 					hwmWorld.GetInstance().DestroyActor(this, disposeAdditionalData);
-				}			
+				}
 				break;
 			case (int)slConstants.Layer.Food:
 				slFood food = collider.gameObject.GetComponent<slFood>();
@@ -394,7 +399,7 @@ public class slSnake : hwmActor
 	private void EatFood(slFood food)
 	{
 		if (m_CanEatFood)
-		{ 
+		{
 			m_Power += food.BeEat(m_Head.Node.transform);
 		}
 	}

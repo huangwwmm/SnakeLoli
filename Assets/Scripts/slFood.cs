@@ -39,8 +39,11 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 
 	public void DeactiveFood()
 	{
-		OwnerQuadtree.RemoveElement(this);
-		OwnerQuadtree = null;
+		if (OwnerQuadtree != null)
+		{
+			OwnerQuadtree.RemoveElement(this);
+			OwnerQuadtree = null;
+		}
 
 		Collider.enabled = false;
 		gameObject.SetActive(false);
@@ -57,6 +60,8 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 		{
 			m_State = State.BeEat;
 			Collider.enabled = false;
+			OwnerQuadtree.RemoveElement(this);
+			OwnerQuadtree = null;
 			m_BeEatTransform = beEatTransform;
 			m_BeEatRemainTime = slConstants.FOOD_BEEAT_MOVE_TIME;
 			return m_Power;
