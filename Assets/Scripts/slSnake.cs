@@ -10,9 +10,9 @@ public class slSnake : hwmActor
 
 	private Vector2 m_CurrentMoveDirection;
 
-	private slSnakePresentation m_Presentation;
 	private slSnakeTweakableProperties m_TweakableProperties;
 	private slSnakeProperties m_Properties;
+	private string m_SnakeName;
 
 	private slBaseController m_Controller;
 
@@ -118,11 +118,8 @@ public class slSnake : hwmActor
 				if (bodyCountOffset > 0)
 				{
 					bodyCountOffset--;
-					newFrontNode = CreateNode<BodyNode>("Body"
-						, m_Presentation != null ? m_Presentation.MyProperties.Body : null
-						, m_Properties.BodyColliderRadius
-						, slConstants.SNAKE_BODYNODE_CREATE_POSITION
-						, Quaternion.identity);
+					newFrontNode = slWorld.GetInstance().GetSnakePool().PopBodyNode(m_SnakeName, m_GuidStr);
+					newFrontNode.Collider.radius = m_Properties.BodyColliderRadius;
 				}
 				else
 				{
@@ -132,7 +129,7 @@ public class slSnake : hwmActor
 				m_Bodys.PushFront(newFrontNode);
 				newFrontNode.Node.transform.localPosition = lastNodePosition;
 				newFrontNode.Node.transform.localRotation = lastNodeRotation;
-				if (m_Presentation != null)
+				if (newFrontNode.Sprite != null)
 				{
 					newFrontNode.Sprite.sortingOrder = oldFrontNode.Sprite.sortingOrder + 1;
 					if (newFrontNode.Sprite.sortingOrder >= slConstants.SNAKE_SPRITERENDERER_MAX_ORDERINLAYER)
@@ -146,7 +143,7 @@ public class slSnake : hwmActor
 		while (bodyCountOffset++ < 0)
 		{
 			BodyNode backNode = m_Bodys.PopBack();
-			Destroy(backNode.Node);
+			slWorld.GetInstance().GetSnakePool().PushBodyNode(m_SnakeName, backNode);
 		}
 	}
 
@@ -215,45 +212,38 @@ public class slSnake : hwmActor
 		InitializeAdditionalData initializeData = additionalData as InitializeAdditionalData;
 		hwmDebug.Assert(initializeData.NodeCount >= slConstants.SNAKE_INITIALIZEZ_NODE_MINCOUNT, "initializeData.NodeCount >= slConstants.SNAKE_INITIALIZEZ_NODE_MINCOUNT");
 
-		m_TweakableProperties = Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game
-					, slConstants.SNAKE_TWEAKABLE_PROPERTIES_PREfAB_NAME_STARTWITHS + initializeData.TweakableProperties)) as slSnakeTweakableProperties;
-
-		m_Properties = Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game
-					, slConstants.SNAKE_PROPERTIES_PREfAB_NAME_STARTWITHS + initializeData.SnakeName)) as slSnakeProperties;
-
-		if (slWorld.GetInstance().NeedPresentation())
-		{
-			m_Presentation = (Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game
-					, slConstants.SNAKE_PRESENTATION_PREfAB_NAME_STARTWITHS + initializeData.SnakeName)) as GameObject)
-				.GetComponent<slSnakePresentation>();
-			m_Presentation.gameObject.transform.SetParent(transform, false);
-		}
+		m_SnakeName = initializeData.SnakeName;
+		slWorld.GetInstance().GetSnakePool().LoadSnake(m_SnakeName);
+		m_TweakableProperties = slWorld.GetInstance().GetSnakePool().GetTweakableProperties(initializeData.TweakableProperties);
+		m_Properties = slWorld.GetInstance().GetSnakePool().GetProperties(m_SnakeName);
 
 		m_Power = initializeData.NodeCount * m_TweakableProperties.NodeToPower;
 
-		m_Head = CreateNode<HeadNode>("Head"
-			, m_Presentation != null ? m_Presentation.MyProperties.Head : null
-			, m_Properties.HeadColliderRadius
-			, initializeData.HeadPosition
-			, initializeData.HeadRotation);
+		m_Head = slWorld.GetInstance().GetSnakePool().PopHeadNode(m_SnakeName, m_GuidStr);
+		m_Head.Node.transform.localPosition = initializeData.HeadPosition;
+		m_Head.Node.transform.localRotation = initializeData.HeadRotation;
+		m_Head.Collider.radius = m_Properties.HeadColliderRadius;
+		m_Head.Trigger.OnTriggerEnter += OnTrigger;
+		m_Head.Predict.transform.localPosition = initializeData.HeadPosition;
+		m_Head.Predict.transform.localRotation = initializeData.HeadRotation;
+		m_Head.PredictCollider.size = new Vector2(m_Properties.HeadColliderRadius * slConstants.SNAKE_PREDICT_SIZE_X, slConstants.SNAKE_NODE_TO_NODE_DISTANCE * slConstants.SNAKE_PREDICT_SIZE_Y);
+		m_Head.PredictCollider.offset = new Vector2(0, m_Head.PredictCollider.size.y * 0.5f + m_Properties.HeadColliderRadius);
 
-		m_Clothes = CreateNode<ClothesNode>("Clothes"
-			, m_Presentation != null ? m_Presentation.MyProperties.Clothes : null
-			, m_Properties.ClothesColliderRadius
-			, initializeData.HeadPosition + initializeData.HeadRotation * new Vector3(0, -slConstants.SNAKE_NODE_TO_NODE_DISTANCE, 0)
-			, initializeData.HeadRotation);
+		m_Clothes = slWorld.GetInstance().GetSnakePool().PopClothesNode(m_SnakeName, m_GuidStr);
+		m_Clothes.Node.transform.localPosition = initializeData.HeadPosition + initializeData.HeadRotation * new Vector3(0, -slConstants.SNAKE_NODE_TO_NODE_DISTANCE, 0);
+		m_Clothes.Node.transform.localRotation = initializeData.HeadRotation;
+		m_Clothes.Collider.radius = m_Properties.ClothesColliderRadius;
 
 		m_Bodys = new hwmDeque<BodyNode>(16);
 		Vector3 bodyToClothesOffset = initializeData.HeadRotation * new Vector3(0, -slConstants.SNAKE_NODE_TO_NODE_DISTANCE, 0);
 		Vector3 bodyToBodyOffset = initializeData.HeadRotation * new Vector3(0, -slConstants.SNAKE_NODE_TO_NODE_DISTANCE, 0);
 		for (int iNode = 3; iNode <= initializeData.NodeCount; iNode++) // MagicNumber: 1->Head 2->Clothes 3->FirstBody
 		{
-			BodyNode node = CreateNode<BodyNode>("Body"
-				, m_Presentation != null ? m_Presentation.MyProperties.Body : null
-				, m_Properties.BodyColliderRadius
-				, m_Clothes.Node.transform.position + bodyToClothesOffset + bodyToBodyOffset * (iNode - 3)
-				, initializeData.HeadRotation);
-			if (m_Presentation != null)
+			BodyNode node = slWorld.GetInstance().GetSnakePool().PopBodyNode(m_SnakeName, m_GuidStr);
+			node.Node.transform.localPosition = m_Clothes.Node.transform.position + bodyToClothesOffset + bodyToBodyOffset * (iNode - 3);
+			node.Node.transform.localRotation = initializeData.HeadRotation;
+			node.Collider.radius = m_Properties.BodyColliderRadius;
+			if (node.Sprite != null)
 			{
 				node.Sprite.sortingOrder = slConstants.SNAKE_SPRITERENDERER_MIN_ORDERINLAYER + initializeData.NodeCount - iNode;
 			}
@@ -305,7 +295,18 @@ public class slSnake : hwmActor
 		m_Controller = null;
 
 		m_Head.Trigger.OnTriggerEnter -= OnTrigger;
+		slWorld.GetInstance().GetSnakePool().PushHeadNode(m_SnakeName, m_Head);
+		m_Head = null;
 
+		slWorld.GetInstance().GetSnakePool().PushClothesNode(m_SnakeName, m_Clothes);
+		m_Clothes = null;
+
+		int bodyCount = m_Bodys.Count;
+		for (int iBody = 0; iBody < bodyCount; iBody++)
+		{
+			BodyNode bodyNode = m_Bodys.PopBack();
+			slWorld.GetInstance().GetSnakePool().PushBodyNode(m_SnakeName, bodyNode);
+		}
 		m_Bodys.Clear();
 		m_Bodys = null;
 
@@ -314,12 +315,6 @@ public class slSnake : hwmActor
 
 		Destroy(m_TweakableProperties);
 		m_Properties = null;
-
-		if (m_Presentation != null)
-		{
-			Destroy(m_Presentation.gameObject);
-			m_Presentation = null;
-		}
 	}
 
 	protected void OnDrawGizmos()
@@ -333,45 +328,9 @@ public class slSnake : hwmActor
 		T node = new T();
 		bool isHead = node is HeadNode;
 
-		node.Node = presentation != null
-			? Instantiate(presentation) : new GameObject();
-		node.Node.name = name;
-		node.Node.transform.SetParent(transform, false);
 		node.Node.transform.localPosition = position;
 		node.Node.transform.localRotation = rotation;
 
-		node.Collider = node.Node.AddComponent<CircleCollider2D>();
-		node.Collider.radius = colliderRadius;
-		node.Collider.isTrigger = isHead;
-
-		if (isHead)
-		{
-			HeadNode headNode = node as HeadNode;
-			headNode.Trigger = headNode.Node.AddComponent<slSnakeHeadTrigger>();
-			headNode.Rigidbody = headNode.Node.AddComponent<Rigidbody2D>();
-			headNode.Rigidbody.isKinematic = true;
-			headNode.Trigger.OnTriggerEnter += OnTrigger;
-			headNode.Predict = new GameObject("Predict");
-			headNode.Predict.transform.SetParent(transform, false);
-			headNode.Predict.transform.localPosition = position;
-			headNode.Predict.transform.localRotation = rotation;
-			headNode.Predict.layer = (int)slConstants.Layer.SnakePredict;
-			headNode.PredictCollider = headNode.Predict.AddComponent<BoxCollider2D>();
-			headNode.PredictCollider.size = new Vector2(colliderRadius * slConstants.SNAKE_PREDICT_SIZE_X, slConstants.SNAKE_NODE_TO_NODE_DISTANCE * slConstants.SNAKE_PREDICT_SIZE_Y);
-			headNode.PredictCollider.offset = new Vector2(0, headNode.PredictCollider.size.y * 0.5f + colliderRadius);
-		}
-
-		if (presentation != null)
-		{
-			if (isHead)
-			{
-				(node as HeadNode).Sprite = node.Node.GetComponentsInChildren<SpriteRenderer>();
-			}
-			else
-			{
-				node.Sprite = node.Node.GetComponent<SpriteRenderer>();
-			}
-		}
 		return node;
 	}
 

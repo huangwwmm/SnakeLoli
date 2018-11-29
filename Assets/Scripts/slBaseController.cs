@@ -82,7 +82,7 @@ public class slBaseController : MonoBehaviour
 
 		for (int iHit = 0; iHit < hits.Length; iHit++)
 		{
-			if (hits[iHit].collider.transform.parent != m_Snake.transform)
+			if (hits[iHit].collider.gameObject.name != m_Snake.GetGuidStr())
 			{
 				return false;
 			}
@@ -104,7 +104,7 @@ public class slBaseController : MonoBehaviour
 
 		for (int iHit = 0; iHit < hits.Length; iHit++)
 		{
-			if (hits[iHit].collider.transform.parent != m_Snake.transform)
+			if (hits[iHit].collider.gameObject.name != m_Snake.GetGuidStr())
 			{
 				return true;
 			}

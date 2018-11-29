@@ -159,18 +159,13 @@ public class slSnakeEditorWindow : EditorWindow
 		snakeProperties.DeadFoodColor = m_SnakeEditor.DeadFoodColor;
 		AssetDatabase.CreateAsset(snakeProperties, snakePrefabPath);
 
-		string snakePresentationPrefabPath = string.Format("{0}{1}{2}.prefab", SNAKE_PREFAB_PATH, slConstants.SNAKE_PRESENTATION_PREfAB_NAME_STARTWITHS, snakeName);
-		GameObject snakePresentationGameObject = new GameObject(slConstants.SNAKE_PRESENTATION_PREfAB_NAME_STARTWITHS + snakeName);
-		slSnakePresentation snakePresentation = snakePresentationGameObject.AddComponent<slSnakePresentation>();
-		GameObject snakePresentationPropertiesGameObject = new GameObject("Properties");
-		snakePresentationPropertiesGameObject.SetActive(false);
-		snakePresentationPropertiesGameObject.transform.SetParent(snakePresentationGameObject.transform);
-		snakePresentationPropertiesGameObject.transform.position = new Vector3(10000, 10000, 0);
-		snakePresentation.MyProperties = new slSnakePresentation.Properties();
-		snakePresentation.MyProperties.Head = InstantiateFromSnakeEditorToSnakePresentation(m_SnakeEditor.Head, snakePresentationPropertiesGameObject);
-		snakePresentation.MyProperties.Clothes = InstantiateFromSnakeEditorToSnakePresentation(m_SnakeEditor.Clothes, snakePresentationPropertiesGameObject);
-		snakePresentation.MyProperties.Body = InstantiateFromSnakeEditorToSnakePresentation(m_SnakeEditor.Body1, snakePresentationPropertiesGameObject);
-		snakePresentation.MyProperties.BodySpriteMaxOrderInLayer = snakePresentation.MyProperties.Body.GetComponent<SpriteRenderer>().sortingOrder;
+		string snakePresentationPrefabPath = string.Format("{0}{1}{2}.prefab", SNAKE_PREFAB_PATH, slConstants.SNAKE_PRESENTATION_PROPERTIES_PREfAB_NAME_STARTWITHS, snakeName);
+		GameObject snakePresentationGameObject = new GameObject(slConstants.SNAKE_PRESENTATION_PROPERTIES_PREfAB_NAME_STARTWITHS + snakeName);
+		slSnakePresentationProperties snakePresentation = snakePresentationGameObject.AddComponent<slSnakePresentationProperties>();
+		snakePresentation.Head = InstantiateFromSnakeEditorToSnakePresentation(m_SnakeEditor.Head, snakePresentationGameObject);
+		snakePresentation.Clothes = InstantiateFromSnakeEditorToSnakePresentation(m_SnakeEditor.Clothes, snakePresentationGameObject);
+		snakePresentation.Body = InstantiateFromSnakeEditorToSnakePresentation(m_SnakeEditor.Body1, snakePresentationGameObject);
+		snakePresentation.BodySpriteMaxOrderInLayer = snakePresentation.Body.GetComponent<SpriteRenderer>().sortingOrder;
 		PrefabUtility.CreatePrefab(snakePresentationPrefabPath, snakePresentationGameObject);
 		DestroyImmediate(snakePresentationGameObject);
 	}

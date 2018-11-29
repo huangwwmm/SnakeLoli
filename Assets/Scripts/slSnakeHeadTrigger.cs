@@ -8,7 +8,7 @@ public class slSnakeHeadTrigger : MonoBehaviour
 	private void OnTriggerEnter2D(Collider2D collider)
 	{
 		if (OnTriggerEnter != null
-			&& transform.parent != collider.transform.parent)
+			&& gameObject.name != collider.gameObject.name)
 		{
 			OnTriggerEnter(collider);
 		}

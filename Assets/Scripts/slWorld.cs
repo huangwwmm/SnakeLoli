@@ -9,6 +9,7 @@ public class slWorld : hwmWorld
 	private slFoodSystem m_FoodSystem;
 	private slPlayerController m_PlayerController;
 	private slUpdateSchedule m_UpdateSchedule;
+	private slSnakePool m_SnakePool;
 
 	public new static slWorld GetInstance()
 	{
@@ -33,6 +34,11 @@ public class slWorld : hwmWorld
 	public slMap GetMap()
 	{
 		return m_Map;
+	}
+
+	public slSnakePool GetSnakePool()
+	{
+		return m_SnakePool;
 	}
 
 	public slFoodSystem GetFoodSystem()
@@ -68,6 +74,9 @@ public class slWorld : hwmWorld
 		m_FoodSystem = new slFoodSystem();
 		m_FoodSystem.Initialize(GetLevel());
 
+		m_SnakePool = new slSnakePool();
+		m_SnakePool.Initialize();
+
 		m_UpdateSchedule = gameObject.AddComponent<slUpdateSchedule>();
 	}
 
@@ -75,6 +84,9 @@ public class slWorld : hwmWorld
 	{
 		Destroy(m_UpdateSchedule);
 		m_UpdateSchedule = null;
+
+		m_SnakePool.Dispose();
+		m_SnakePool = null;
 
 		m_FoodSystem.Dispose();
 		m_FoodSystem = null;

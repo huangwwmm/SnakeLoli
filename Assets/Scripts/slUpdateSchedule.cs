@@ -8,8 +8,6 @@ public class slUpdateSchedule : MonoBehaviour
 	private List<slSnake> m_Snakes;
 	private float m_UpdateSnakeMovementTime = 0;
 	private int m_UpdateRespawnPlayerFrame = 0;
-	private int m_FrameCountSinceSnakeMovement = 0;
-	private float m_UpdateFoodSystemTime = 0;
 	private float m_LastUpdateFoodsTime = 0;
 
 	private hwmPerformanceStatisticsItem m_PerformanceSnakeMovementItem;
@@ -124,7 +122,7 @@ public class slUpdateSchedule : MonoBehaviour
 			// update snake ai
 			hwmSystem.GetInstance().GetPerformanceStatistics().Start(m_PerformanceSnakeAIItem);
 			for (int iSnake = 0; iSnake < m_Snakes.Count; iSnake++)
-			{ 
+			{
 				slSnake iterSnake = m_Snakes[iSnake];
 				// update ai
 				if (iterSnake.GetController() != null

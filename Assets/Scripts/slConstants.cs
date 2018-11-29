@@ -38,7 +38,7 @@ public class slConstants
 	
 	public const string SNAKE_TWEAKABLE_PROPERTIES_PREfAB_NAME_STARTWITHS = "SnakeTweakableProperties_";
 	public const string SNAKE_PROPERTIES_PREfAB_NAME_STARTWITHS = "SnakeProperties_";
-	public const string SNAKE_PRESENTATION_PREfAB_NAME_STARTWITHS = "SnakePresentation_";
+	public const string SNAKE_PRESENTATION_PROPERTIES_PREfAB_NAME_STARTWITHS = "SnakePresentationProperties_";
 
 	public const float SNAKE_SPAWN_SAFEAREA_MAP_EDGE = 10;
 	public const float SNAKE_NODE_TO_NODE_DISTANCE = 0.9f;
