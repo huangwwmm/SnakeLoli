@@ -198,8 +198,6 @@ public class slFoodSystem
 		slFoodPresentation foodPresentation = m_FoodPresentationPools != null ? m_FoodPresentationPools[(int)foodType].Pop() : null;
 		if (foodPresentation != null)
 		{
-			foodPresentation.transform.SetParent(food.transform, false);
-			foodPresentation.transform.localPosition = Vector3.zero;
 			foodPresentation.gameObject.SetActive(true);
 
 			foodPresentation.SetColor(color);
@@ -213,7 +211,6 @@ public class slFoodSystem
 		slFoodPresentation foodPresentation = food.GetPresentation();
 		if (foodPresentation != null)
 		{
-			foodPresentation.transform.SetParent(m_FoodRoot.transform, false);
 			foodPresentation.gameObject.SetActive(false);
 			m_FoodPresentationPools[(int)foodPresentation.FoodType].Push(foodPresentation);
 		}

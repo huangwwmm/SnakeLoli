@@ -24,9 +24,9 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 
 		m_Properties = foodProperties;
 		m_RemainLifeTime = hwmRandom.RandFloat(m_Properties.MinLifeTime, m_Properties.MaxLifeTime);
-		transform.localPosition = position;
 
 		m_Presentation = foodPresentation;
+		SetPosition(position);
 
 		OwnerQuadtree = slWorld.GetInstance().GetFoodSystem().GetQuadtree();
 		QuadtreeNodeBounds = new hwmBounds2D(transform.localPosition, new Vector2(m_Properties.Radius, m_Properties.Radius) * 2.0f);
@@ -44,7 +44,6 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 		}
 
 		gameObject.SetActive(false);
-		gameObject.transform.localPosition = slConstants.FOOD_DEACTIVE_POSITION;
 
 		m_Properties = null;
 
@@ -80,7 +79,7 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 			if (m_BeEatTransform != null)
 			{
 				Vector3 meToTarget = m_BeEatTransform.localPosition - transform.localPosition;
-				transform.localPosition = transform.localPosition + meToTarget * (deltaTime / m_BeEatRemainTime);
+				SetPosition(transform.localPosition + meToTarget * (deltaTime / m_BeEatRemainTime));
 
 				m_BeEatRemainTime -= deltaTime;
 				if (m_BeEatRemainTime <= 0)
@@ -107,6 +106,16 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 	{
 		return m_Index;
 	}
+
+	private void SetPosition(Vector3 position)
+	{
+		transform.localPosition = position;
+		if (m_Presentation)
+		{
+			m_Presentation.transform.localPosition = position;
+		}
+	}
+
 
 	public enum FoodType
 	{
