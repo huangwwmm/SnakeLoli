@@ -10,10 +10,11 @@ public class slUpdateSchedule : MonoBehaviour
 	private int m_UpdateRespawnPlayerFrame = 0;
 	private int m_FrameCountSinceSnakeMovement = 0;
 	private float m_UpdateFoodSystemTime = 0;
-	private float m_LastUpdateFoodSystemTime = 0;
+	private float m_LastUpdateFoodsTime = 0;
 
 	private hwmPerformanceStatisticsItem m_PerformanceSnakeMovementItem;
 	private hwmPerformanceStatisticsItem m_PerformanceFoodSystemItem;
+	private hwmPerformanceStatisticsItem m_PerformanceFoodsItem;
 	private hwmPerformanceStatisticsItem m_PerformanceSnakeAIItem;
 	private hwmPerformanceStatisticsItem m_PerformanceSnakeEatFoodItem;
 
@@ -30,6 +31,7 @@ public class slUpdateSchedule : MonoBehaviour
 
 		m_PerformanceSnakeAIItem = hwmSystem.GetInstance().GetPerformanceStatistics().LoadOrCreateItem("Update_SnakeAI", true);
 		m_PerformanceFoodSystemItem = hwmSystem.GetInstance().GetPerformanceStatistics().LoadOrCreateItem("Update_FoodSystem", true);
+		m_PerformanceFoodsItem = hwmSystem.GetInstance().GetPerformanceStatistics().LoadOrCreateItem("Update_Foods", true);
 		m_PerformanceSnakeMovementItem = hwmSystem.GetInstance().GetPerformanceStatistics().LoadOrCreateItem("Update_SnakeMovement", true);
 		m_PerformanceSnakeEatFoodItem = hwmSystem.GetInstance().GetPerformanceStatistics().LoadOrCreateItem("Update_SnakeEatFood", true);
 
@@ -44,6 +46,7 @@ public class slUpdateSchedule : MonoBehaviour
 		m_PerformanceSnakeMovementItem = null;
 		m_PerformanceSnakeAIItem = null;
 		m_PerformanceFoodSystemItem = null;
+		m_PerformanceFoodsItem = null;
 		m_PerformanceSnakeEatFoodItem = null;
 
 		hwmObserver.OnActorCreate -= OnActorCreate;
@@ -105,10 +108,16 @@ public class slUpdateSchedule : MonoBehaviour
 
 		while (true)
 		{
-			// update food system
+			// update foods
+			hwmSystem.GetInstance().GetPerformanceStatistics().Start(m_PerformanceFoodsItem);
+			slWorld.GetInstance().GetFoodSystem().DoUpdateFoods(m_Time - m_LastUpdateFoodsTime);
+			m_LastUpdateFoodsTime = m_Time;
+			hwmSystem.GetInstance().GetPerformanceStatistics().Finish(m_PerformanceFoodsItem);
+			yield return null;
+
+			// update food system			
 			hwmSystem.GetInstance().GetPerformanceStatistics().Start(m_PerformanceFoodSystemItem);
-			slWorld.GetInstance().GetFoodSystem().DoUpdate(m_Time - m_LastUpdateFoodSystemTime);
-			m_LastUpdateFoodSystemTime = m_Time;
+			slWorld.GetInstance().GetFoodSystem().DoUpdateFoodSystem();
 			hwmSystem.GetInstance().GetPerformanceStatistics().Finish(m_PerformanceFoodSystemItem);
 			yield return null;
 

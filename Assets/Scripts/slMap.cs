@@ -13,7 +13,7 @@ public class slMap : MonoBehaviour
 
 		// Wall
 		m_WallGameObject = new GameObject("Wall");
-		m_WallGameObject.transform.SetParent(transform);
+		m_WallGameObject.transform.SetParent(transform, false);
 		m_WallGameObject.layer = (int)slConstants.Layer.Wall;
 
 		BoxCollider2D up = m_WallGameObject.AddComponent<BoxCollider2D>();
@@ -40,7 +40,7 @@ public class slMap : MonoBehaviour
 		if (hwmWorld.GetInstance().NeedPresentation())
 		{
 			m_Presentation = (Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game, "MapPresentation")) as GameObject).GetComponent<slMapPresentation>();
-			m_Presentation.transform.SetParent(transform);
+			m_Presentation.transform.SetParent(transform, false);
 			m_Presentation.Initialize(this);
 		}
 	}

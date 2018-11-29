@@ -219,7 +219,7 @@ public class slSnake : hwmActor
 			m_Presentation = (Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Actor
 					, "SnakePresentation_" + MyProperties.SnakeName)) as GameObject)
 				.GetComponent<slSnakePresentation>();
-			m_Presentation.gameObject.transform.SetParent(transform);
+			m_Presentation.gameObject.transform.SetParent(transform, false);
 		}
 
 		m_Power = initializeData.NodeCount * m_TweakableProperties.NodeToPower;
@@ -326,7 +326,7 @@ public class slSnake : hwmActor
 		node.Node = presentation != null
 			? Instantiate(presentation) : new GameObject();
 		node.Node.name = name;
-		node.Node.transform.SetParent(transform);
+		node.Node.transform.SetParent(transform, false);
 		node.Node.transform.localPosition = position;
 		node.Node.transform.localRotation = rotation;
 
@@ -342,7 +342,7 @@ public class slSnake : hwmActor
 			headNode.Rigidbody.isKinematic = true;
 			headNode.Trigger.OnTriggerEnter += OnTrigger;
 			headNode.Predict = new GameObject("Predict");
-			headNode.Predict.transform.SetParent(transform);
+			headNode.Predict.transform.SetParent(transform, false);
 			headNode.Predict.transform.localPosition = position;
 			headNode.Predict.transform.localRotation = rotation;
 			headNode.Predict.layer = (int)slConstants.Layer.SnakePredict;

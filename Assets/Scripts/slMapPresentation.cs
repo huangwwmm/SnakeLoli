@@ -21,7 +21,7 @@ public class slMapPresentation : MonoBehaviour
 		Mapground.transform.localScale = new Vector3(mapSize.x, mapSize.y, 1);
 
 		m_LineRoot = new GameObject("LineRoot");
-		m_LineRoot.transform.SetParent(transform);
+		m_LineRoot.transform.SetParent(transform, false);
 		CreateLine(Vector2.zero, Vector2.up);
 		CreateLine(Vector2.zero, Vector2.down);
 		CreateLine(Vector2.zero, Vector2.left);

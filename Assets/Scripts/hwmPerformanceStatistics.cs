@@ -16,6 +16,10 @@ public interface hwmIPerformanceStatistics
 	void Finish(hwmPerformanceStatisticsItem item);
 	hwmPerformanceStatisticsItem ClearHistory(string itemName);
 	void ClearHistory(hwmPerformanceStatisticsItem item);
+	hwmPerformanceStatisticsItem Pause(string itemName);
+	void Pause(hwmPerformanceStatisticsItem item);
+	hwmPerformanceStatisticsItem Resume(string itemName);
+	void Resume(hwmPerformanceStatisticsItem item);
 }
 
 public class hwmPerformanceStatistics : hwmIPerformanceStatistics
@@ -157,6 +161,30 @@ public class hwmPerformanceStatistics : hwmIPerformanceStatistics
 		UnityEngine.Debug.Log(stringBuilder.ToString());
 	}
 
+	public hwmPerformanceStatisticsItem Pause(string itemName)
+	{
+		hwmPerformanceStatisticsItem item = LoadOrCreateItem(itemName);
+		Pause(item);
+		return item;
+	}
+
+	public void Pause(hwmPerformanceStatisticsItem item)
+	{
+		item._Stopwatch.Stop();
+	}
+
+	public hwmPerformanceStatisticsItem Resume(string itemName)
+	{
+		hwmPerformanceStatisticsItem item = LoadOrCreateItem(itemName);
+		Resume(item);
+		return item;
+	}
+
+	public void Resume(hwmPerformanceStatisticsItem item)
+	{
+		item._Stopwatch.Start();
+	}
+
 	private struct ValueAnalysis
 	{
 		public int Count;
@@ -225,6 +253,24 @@ public class hwmEmptyPerformanceStatistics : hwmIPerformanceStatistics
 	}
 
 	public void LogAndRecord()
+	{
+	}
+
+	public hwmPerformanceStatisticsItem Pause(string itemName)
+	{
+		return null;
+	}
+
+	public void Pause(hwmPerformanceStatisticsItem item)
+	{
+	}
+
+	public hwmPerformanceStatisticsItem Resume(string itemName)
+	{
+		return null;
+	}
+
+	public void Resume(hwmPerformanceStatisticsItem item)
 	{
 	}
 
