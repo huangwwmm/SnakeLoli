@@ -11,9 +11,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3d6262ff2d3ae8245b0a44996d93607a, type: 3}
   m_Name: NormalFoodProperties
   m_EditorClassIdentifier: 
-  MyType: 0
   SpriteRadius: 0.2
-  BeEatRadius: 2
-  AddPower: 1
+  Radius: 0.2
   MinLifeTime: 20
   MaxLifeTime: 40

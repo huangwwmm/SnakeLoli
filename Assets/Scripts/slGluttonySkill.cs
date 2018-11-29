@@ -28,7 +28,7 @@ public class slGluttonySkill : slSkill
 
 		if (skillInput.GetState() == hwmInput.Button.State.Up)
 		{
-			m_Snake.Gluttony(MyProperties.Radius);
+			m_Snake.EatFood(MyProperties.Radius);
 			m_CD = MyProperties.CD;
 		}
 	}

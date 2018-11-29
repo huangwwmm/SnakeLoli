@@ -50,7 +50,7 @@ public class slConstants
 
 	public const float UPDATE_SNAKE_MOVEMENT_TIEM_INTERVAL = 0.1f;
 	public const int UPDATE_RESPAWN_FRAME_INTERVAL = 3;
-	public const int UPDATE_ALL_AI_FRAME = 5;
+	public const int UPDATE_ALL_SNAKE_FRAME = 5;
 
 	public const string SKILL_PROPERTIES_PREFAB_ENDWITHS = "SkillProperties";
 
@@ -77,7 +77,6 @@ public class slConstants
 	public enum Layer
 	{
 		Wall = 8,
-		Food = 9,
 		SnakeHead = 10,
 		Snake = 11,
 		SnakePredict = 12,

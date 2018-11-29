@@ -146,12 +146,17 @@ public class slSnake : hwmActor
 		}
 	}
 
+	public void DoUpdateEatFood()
+	{
+		EatFood(m_TweakableProperties.EatFoodRadius);
+	}
+
 	public slBaseController GetController()
 	{
 		return m_Controller;
 	}
 
-	public void Gluttony(float radius)
+	public void EatFood(float radius)
 	{
 		Vector2 headPosition = m_Head.Node.transform.localPosition;
 		hwmQuadtree<slFood>.BoundsEnumerator enumerator = new hwmQuadtree<slFood>.BoundsEnumerator(slWorld.GetInstance().GetFoodSystem().GetQuadtree().GetRootNode()
@@ -171,8 +176,6 @@ public class slSnake : hwmActor
 				}
 			}
 		}
-
-		//Debug.Break();
 	}
 
 	public bool CanEatFood()
@@ -380,10 +383,6 @@ public class slSnake : hwmActor
 					hwmWorld.GetInstance().DestroyActor(this, disposeAdditionalData);
 				}
 				break;
-			case (int)slConstants.Layer.Food:
-				slFood food = collider.gameObject.GetComponent<slFood>();
-				EatFood(food);
-				break;
 		}
 	}
 
@@ -464,53 +463,4 @@ public class slSnake : hwmActor
 		Normal,
 		SpeedUp,
 	}
-
-	#region Debug&Test
-	private void QuadtreeVsPhysics2D()
-	{
-		float radius = 25.0f;
-		{
-			hwmPerformanceStatisticsItem performanceItem = hwmSystem.GetInstance().GetPerformanceStatistics().LoadOrCreateItem("Gluttony_Quadtree", true);
-			hwmSystem.GetInstance().GetPerformanceStatistics().Start(performanceItem);
-
-			int count = 0;
-
-			Vector2 headPosition = m_Head.Node.transform.localPosition;
-			hwmQuadtree<slFood>.BoundsEnumerator enumerator = new hwmQuadtree<slFood>.BoundsEnumerator(slWorld.GetInstance().GetFoodSystem().GetQuadtree().GetRootNode()
-				, new hwmBounds2D(headPosition, new Vector2(radius * 2.0f, radius * 2.0f)));
-			while (enumerator.MoveNext())
-			{
-				hwmQuadtree<slFood>.Node iterNode = enumerator.Current;
-				hwmBetterList<slFood> foods = iterNode.GetElements();
-				bool inCircleInside = iterNode.GetLooseBounds().InCircleInside(headPosition, radius);
-				for (int iFood = 0; iFood < foods.Count; iFood++)
-				{
-					slFood iterFood = foods[iFood];
-					if (inCircleInside
-						|| ((Vector2)iterFood.transform.localPosition - headPosition).sqrMagnitude <= radius * radius)
-					{
-						count++;
-					}
-				}
-			}
-
-			hwmSystem.GetInstance().GetPerformanceStatistics().Finish(performanceItem);
-		}
-
-		{
-			hwmPerformanceStatisticsItem performanceItem = hwmSystem.GetInstance().GetPerformanceStatistics().LoadOrCreateItem("Gluttony_Physics2D", true);
-			hwmSystem.GetInstance().GetPerformanceStatistics().Start(performanceItem);
-
-			int count = 0;
-			RaycastHit2D[] hits = Physics2D.CircleCastAll(m_Head.Node.transform.localPosition, radius, Vector2.zero, Mathf.Infinity, 1 << (int)slConstants.Layer.Food);
-			for (int iHit = 0; iHit < hits.Length; iHit++)
-			{
-				slFood food = hits[iHit].collider.gameObject.GetComponent<slFood>();
-				count++;
-			}
-
-			hwmSystem.GetInstance().GetPerformanceStatistics().Finish(performanceItem);
-		}
-	}
-	#endregion End Debug&Test
 }

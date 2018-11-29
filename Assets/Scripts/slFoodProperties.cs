@@ -2,8 +2,7 @@
 
 public class slFoodProperties : ScriptableObject 
 {
-	public float SpriteRadius;
-	public float BeEatRadius;
+	public float Radius;
 	public float MinLifeTime;
 	public float MaxLifeTime;
 }

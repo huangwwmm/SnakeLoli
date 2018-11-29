@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Name: ContaminationFoodProperties
   m_EditorClassIdentifier: 
   SpriteRadius: 0.3
-  BeEatRadius: 2
+  Radius: 0.3
   MinLifeTime: 40
   MaxLifeTime: 60

@@ -7,7 +7,8 @@ public class slUpdateSchedule : MonoBehaviour
 	private List<SnakeUpdteScheduleParmeter> m_Snakes;
 	private float m_UpdateSnakeMovementTime = 0;
 	private int m_UpdateRespawnPlayerFrame = 0;
-	private int m_LastUpdateAISnakeIndex = -1;
+	private int m_LastUpdateSnakeIndex = -1;
+	private int m_FrameCountSinceSnakeMovement = 0;
 
 	private hwmPerformanceStatisticsItem m_PerformanceAIItem;
 
@@ -39,47 +40,52 @@ public class slUpdateSchedule : MonoBehaviour
 			return;
 		}
 
-		bool currentUpdateSnakeMovement = false;
-
 		// update snake movement
 		m_UpdateSnakeMovementTime += Time.deltaTime;
 		if (m_UpdateSnakeMovementTime >= slConstants.UPDATE_SNAKE_MOVEMENT_TIEM_INTERVAL)
 		{
-			currentUpdateSnakeMovement = true;
 			m_UpdateSnakeMovementTime -= slConstants.UPDATE_SNAKE_MOVEMENT_TIEM_INTERVAL;
 			for (int iSnake = 0; iSnake < m_Snakes.Count; iSnake++)
 			{
 				SnakeUpdteScheduleParmeter snake = m_Snakes[iSnake];
 				snake.Owner.DoUpdateMovement(slConstants.UPDATE_SNAKE_MOVEMENT_TIEM_INTERVAL);
-				snake.NeedUpdateAI = true;
+				snake.NeedUpdate = true;
 			}
 		}
-
-		if (!currentUpdateSnakeMovement)
+		else
 		{
-			// update ai
+			// update food system
+			slWorld.GetInstance().GetFoodSystem().DoUpdate();
+
+			// update snake
 			if (m_Snakes.Count > 0)
 			{
-				int needUpdateAICount = Mathf.CeilToInt((float)m_Snakes.Count / slConstants.UPDATE_ALL_AI_FRAME);
-				int currentAIIndex = m_LastUpdateAISnakeIndex;
+				int needUpdateCount = Mathf.CeilToInt((float)m_Snakes.Count / slConstants.UPDATE_ALL_SNAKE_FRAME);
+				int currentIndex = m_LastUpdateSnakeIndex;
 				int whileTime = 0;
 				while (whileTime++ < m_Snakes.Count
-					&& needUpdateAICount > 0)
+					&& needUpdateCount > 0)
 				{
-					currentAIIndex = GetNextSnakeIndex(currentAIIndex);
+					currentIndex = GetNextSnakeIndex(currentIndex);
 
-					SnakeUpdteScheduleParmeter snake = m_Snakes[currentAIIndex];
-					if (snake.NeedUpdateAI
+					SnakeUpdteScheduleParmeter snake = m_Snakes[currentIndex];
+					snake.NeedUpdate = false;
+
+					// update eat food
+					snake.Owner.DoUpdateEatFood();
+
+					// update ai
+					if (snake.NeedUpdate
 						&& snake.Owner.GetController() != null
 						&& snake.Owner.GetController().IsAI())
 					{
-						snake.NeedUpdateAI = false;
 						hwmSystem.GetInstance().GetPerformanceStatistics().Start(m_PerformanceAIItem);
 						(snake.Owner.GetController() as slAIController).DoAIUpdate();
 						hwmSystem.GetInstance().GetPerformanceStatistics().Finish(m_PerformanceAIItem);
-						m_LastUpdateAISnakeIndex = currentAIIndex;
-						needUpdateAICount--;
 					}
+
+					m_LastUpdateSnakeIndex = currentIndex;
+					needUpdateCount--;
 				}
 			}
 
@@ -89,9 +95,6 @@ public class slUpdateSchedule : MonoBehaviour
 				m_UpdateRespawnPlayerFrame -= slConstants.UPDATE_RESPAWN_FRAME_INTERVAL;
 				slWorld.GetInstance().GetGameMode().DoUpdateRespawnPlayer();
 			}
-
-			// update food system
-			slWorld.GetInstance().GetFoodSystem().DoUpdate();
 		}
 	}
 
@@ -101,7 +104,7 @@ public class slUpdateSchedule : MonoBehaviour
 		{
 			SnakeUpdteScheduleParmeter snakeParmeter = new SnakeUpdteScheduleParmeter();
 			snakeParmeter.Owner = actor as slSnake;
-			snakeParmeter.NeedUpdateAI = true;
+			snakeParmeter.NeedUpdate = true;
 			m_Snakes.Add(snakeParmeter);
 		}
 	}
@@ -116,9 +119,9 @@ public class slUpdateSchedule : MonoBehaviour
 				if (m_Snakes[iSnake].Owner == snake)
 				{
 					m_Snakes.RemoveAt(iSnake);
-					if (m_LastUpdateAISnakeIndex == iSnake)
+					if (m_LastUpdateSnakeIndex == iSnake)
 					{
-						m_LastUpdateAISnakeIndex--;
+						m_LastUpdateSnakeIndex--;
 					}
 					break;
 				}
@@ -136,6 +139,6 @@ public class slUpdateSchedule : MonoBehaviour
 	private struct SnakeUpdteScheduleParmeter
 	{
 		public slSnake Owner;
-		public bool NeedUpdateAI;
+		public bool NeedUpdate;
 	}
 }

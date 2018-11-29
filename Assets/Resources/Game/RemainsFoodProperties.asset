@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Name: RemainsFoodProperties
   m_EditorClassIdentifier: 
   SpriteRadius: 0.3
-  BeEatRadius: 2
+  Radius: 0.3
   MinLifeTime: 8
   MaxLifeTime: 12

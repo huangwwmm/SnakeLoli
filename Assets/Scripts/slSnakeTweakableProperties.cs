@@ -7,4 +7,5 @@ public class slSnakeTweakableProperties : ScriptableObject
 	public float NodeToPower;
 	public int NormalMoveNodeCount;
 	public float RemainsFoodPower;
+	public float EatFoodRadius;
 }

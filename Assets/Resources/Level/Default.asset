@@ -13,7 +13,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   GameStateClassName: slGameState_Free
   GameModeClassName: slGameMode_Free
-  MapSize: {x: 160, y: 120}
-  BotCount: 12
-  FoodCount: 2000
+  MapSize: {x: 320, y: 240}
+  BotCount: 20
+  FoodCount: 12000
   RespawnTime: 1

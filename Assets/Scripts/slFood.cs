@@ -2,8 +2,6 @@
 
 public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 {
-	public CircleCollider2D Collider;
-
 	private slFoodPresentation m_Presentation;
 	private slFoodProperties m_Properties;
 	private State m_State;
@@ -21,17 +19,15 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 		m_State = State.Idle;
 
 		gameObject.SetActive(true);
-		Collider.enabled = true;
 
 		m_Properties = foodProperties;
-		Collider.radius = m_Properties.BeEatRadius;
 		m_RemainLifeTime = hwmRandom.RandFloat(m_Properties.MinLifeTime, m_Properties.MaxLifeTime);
 		transform.localPosition = position;
 
 		m_Presentation = foodPresentation;
 
 		OwnerQuadtree = slWorld.GetInstance().GetFoodSystem().GetQuadtree();
-		QuadtreeNodeBounds = new hwmBounds2D(transform.localPosition, new Vector2(m_Properties.SpriteRadius, m_Properties.SpriteRadius) * 2.0f);
+		QuadtreeNodeBounds = new hwmBounds2D(transform.localPosition, new Vector2(m_Properties.Radius, m_Properties.Radius) * 2.0f);
 		OwnerQuadtree.UpdateElement(this);
 
 		m_Power = power;
@@ -45,7 +41,6 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 			OwnerQuadtree = null;
 		}
 
-		Collider.enabled = false;
 		gameObject.SetActive(false);
 		gameObject.transform.localPosition = slConstants.FOOD_DEACTIVE_POSITION;
 
@@ -59,7 +54,6 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 		if (m_State == State.Idle)
 		{
 			m_State = State.BeEat;
-			Collider.enabled = false;
 			OwnerQuadtree.RemoveElement(this);
 			OwnerQuadtree = null;
 			m_BeEatTransform = beEatTransform;
