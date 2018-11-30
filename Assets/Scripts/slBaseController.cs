@@ -66,12 +66,9 @@ public class slBaseController : MonoBehaviour
 
 	protected bool IsSafe(Vector2 moveDirection, float distance, bool ignorePredict)
 	{
-		RaycastHit2D[] hits = Physics2D.BoxCastAll((Vector2)m_Snake.GetHeadPosition() + moveDirection * distance * 0.5f
-			, new Vector2(m_Snake.GetProperties().HeadColliderRadius * 1.2f, distance)
-			, -Vector2.SignedAngle(moveDirection, Vector2.up)
-			, Vector2.zero
-			, Mathf.Infinity
-			, ignorePredict 
+		RaycastHit2D[] hits = Physics2D.LinecastAll(m_Snake.GetHeadPosition()
+			, (Vector2)m_Snake.GetHeadPosition() + moveDirection * distance
+			, ignorePredict
 				? (1 << (int)slConstants.Layer.Snake)
 					| (1 << (int)slConstants.Layer.SnakeHead)
 					| (1 << (int)slConstants.Layer.SnakePredict)

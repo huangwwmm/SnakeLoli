@@ -3,7 +3,7 @@
 public class hwmDebugView : MonoBehaviour
 {
 	private const int FPS_UPDATE_INTERVALFRAME = 60;
-	private const int FPSAVG_UPDATE_SAMPLE = 10;
+	private const int FPSAVG_UPDATE_SAMPLE = 3;
 
 	public Font UIFont;
 

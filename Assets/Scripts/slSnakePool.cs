@@ -138,17 +138,18 @@ public class slSnakePool
 					.GetComponent<slSnakePresentationProperties>()
 				: null;
 			snakePresentationProperties.transform.SetParent(m_Root, false);
+			snakePresentationProperties.gameObject.SetActive(false);
 
 			NodePool<slSnake.HeadNode> headNodePool = new NodePool<slSnake.HeadNode>(snakePresentationProperties, m_Root);
-			headNodePool.Initialize(4);
+			headNodePool.Initialize(0);
 			m_HeadPools.Add(headNodePool);
 
 			NodePool<slSnake.ClothesNode> clothesNodePool = new NodePool<slSnake.ClothesNode>(snakePresentationProperties, m_Root);
-			clothesNodePool.Initialize(4);
+			clothesNodePool.Initialize(0);
 			m_ClothesNodePools.Add(clothesNodePool);
 
 			NodePool<slSnake.BodyNode> bodyNodePool = new NodePool<slSnake.BodyNode>(snakePresentationProperties, m_Root);
-			bodyNodePool.Initialize(4);
+			bodyNodePool.Initialize(0);
 			m_BodyPools.Add(bodyNodePool);
 		}
 	}

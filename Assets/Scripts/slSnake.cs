@@ -317,12 +317,6 @@ public class slSnake : hwmActor
 		m_Properties = null;
 	}
 
-	protected void OnDrawGizmos()
-	{
-		Gizmos.color = Color.black;
-		Gizmos.DrawLine(m_Head.Node.transform.localPosition, m_Head.Node.transform.localPosition + (Vector3)TargetMoveDirection * slConstants.SNAKE_DETECT_DISTANCE);
-	}
-
 	private T CreateNode<T>(string name, GameObject presentation, float colliderRadius, Vector3 position, Quaternion rotation) where T : BodyNode, new()
 	{
 		T node = new T();

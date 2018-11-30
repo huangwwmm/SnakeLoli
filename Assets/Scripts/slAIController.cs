@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class slAIController : slBaseController
 {
@@ -7,6 +8,9 @@ public class slAIController : slBaseController
 	private int m_NotChangeDirectionTimes = 0;
 	private Quaternion m_ClockwiseDetectAngle;
 	private Quaternion m_CounterclockwiseDetectAngle;
+#if UNITY_EDITOR
+	private List<AIDetectGizmos> m_AIDetectGizmos = new List<AIDetectGizmos>();
+#endif
 
 	public override bool IsAI()
 	{
@@ -21,7 +25,7 @@ public class slAIController : slBaseController
 		{
 			if (hwmRandom.RandFloat() < slConstants.SNAKE_RANDMOVEMOENT_WHENNOTCHANGED_PROBABILITY)
 			{
-				targetDirection = hwmRandom.RandVector2(-Vector2.one, Vector2.one);
+				targetDirection = new Vector2(hwmRandom.RandFloat(-1, 1), hwmRandom.RandFloat(-1, 1)).normalized;
 			}
 			m_NotChangeDirectionTimes = -1;
 		}
@@ -29,20 +33,33 @@ public class slAIController : slBaseController
 		CalculateSafeArea(ref targetDirection.x, m_Snake.GetHeadPosition().x, m_SafeAreaMinPosition.x, m_SafeAreaMaxPosition.x);
 		CalculateSafeArea(ref targetDirection.y, m_Snake.GetHeadPosition().y, m_SafeAreaMinPosition.y, m_SafeAreaMaxPosition.y);
 
+#if UNITY_EDITOR
+		m_AIDetectGizmos.Clear();
+#endif
 		bool ignorePredict = IsHitPredict();
-		if (!IsSafe(targetDirection, slConstants.SNAKE_DETECT_DISTANCE, ignorePredict)
-			|| !IsSafe(m_ClockwiseDetectAngle * targetDirection, slConstants.SNAKE_DETECT_DISTANCE, ignorePredict)
-			|| !IsSafe(m_CounterclockwiseDetectAngle * targetDirection, slConstants.SNAKE_DETECT_DISTANCE, ignorePredict))
+		int dangerDirection = 0;
+		if ((!IsSafe(m_ClockwiseDetectAngle * targetDirection, slConstants.SNAKE_DETECT_DISTANCE, ignorePredict) && dangerDirection++ > -1)
+			|| (!IsSafe(m_CounterclockwiseDetectAngle * targetDirection, slConstants.SNAKE_DETECT_DISTANCE, ignorePredict)) && dangerDirection++ > -1
+			|| !(IsSafe(targetDirection, slConstants.SNAKE_DETECT_DISTANCE, ignorePredict) && dangerDirection++ > -1))
 		{
-			Quaternion angle = hwmRandom.RandFloat() > 0.5f
+			Quaternion angle = dangerDirection == 3
 				? m_ClockwiseDetectAngle
-				: m_CounterclockwiseDetectAngle;
-			Vector2 currentCalculateDirection = Quaternion.Euler(0, 0, hwmRandom.RandFloat(-slConstants.SNAKE_BEGIN_DETECT_RAND_MAXANGLE, slConstants.SNAKE_BEGIN_DETECT_RAND_MAXANGLE))
-				* targetDirection;
+				: dangerDirection == 1
+					? m_CounterclockwiseDetectAngle
+					: m_ClockwiseDetectAngle;
+			Vector2 currentCalculateDirection = targetDirection;
 			for (int iCalculate = 0; iCalculate < slConstants.SNAKE_AI_CALCULATE_TIMES; iCalculate++)
 			{
 				currentCalculateDirection = angle * currentCalculateDirection;
-				if (IsSafe(currentCalculateDirection, slConstants.SNAKE_DETECT_DISTANCE, ignorePredict))
+				bool isSafe = IsSafe(currentCalculateDirection, slConstants.SNAKE_DETECT_DISTANCE, ignorePredict);
+#if UNITY_EDITOR
+				AIDetectGizmos aIDetectGizmos = new AIDetectGizmos();
+				aIDetectGizmos.StartPosition = m_Snake.GetHeadPosition();
+				aIDetectGizmos.EndPosition = (Vector2)m_Snake.GetHeadPosition() + currentCalculateDirection * slConstants.SNAKE_DETECT_DISTANCE;
+				aIDetectGizmos.IsSafe = isSafe;
+				m_AIDetectGizmos.Add(aIDetectGizmos);
+#endif
+				if (isSafe)
 				{
 					targetDirection = currentCalculateDirection;
 					break;
@@ -55,6 +72,18 @@ public class slAIController : slBaseController
 		m_Snake.TargetMoveDirection = targetDirection.normalized;
 	}
 
+#if UNITY_EDITOR
+	protected void OnDrawGizmos()
+	{
+		for (int iAIDetect = 0; iAIDetect < m_AIDetectGizmos.Count; iAIDetect++)
+		{
+			AIDetectGizmos iterDetect = m_AIDetectGizmos[iAIDetect];
+			Gizmos.color = iterDetect.IsSafe ? Color.green : Color.red;
+			Gizmos.DrawLine(iterDetect.StartPosition, iterDetect.EndPosition);
+		}
+	}
+#endif
+
 	protected override void HandleInitialize()
 	{
 		m_SafeAreaMinPosition = slWorld.GetInstance().GetMap().GetMapBounds().min
@@ -64,6 +93,13 @@ public class slAIController : slBaseController
 
 		m_ClockwiseDetectAngle = Quaternion.Euler(0, 0, -slConstants.SNAKE_DETECT_ANGLE);
 		m_CounterclockwiseDetectAngle = Quaternion.Euler(0, 0, slConstants.SNAKE_DETECT_ANGLE);
+	}
+
+	protected override void HandleUnController()
+	{
+#if UNITY_EDITOR
+		m_AIDetectGizmos.Clear();
+#endif
 	}
 
 	private void CalculateSafeArea(ref float moveDirection, float headPosition, float minPosition, float maxPosition)
@@ -81,4 +117,13 @@ public class slAIController : slBaseController
 				: moveDirection;
 		}
 	}
+
+#if UNITY_EDITOR
+	private struct AIDetectGizmos
+	{
+		public Vector2 StartPosition;
+		public Vector2 EndPosition;
+		public bool IsSafe;
+	}
+#endif
 }

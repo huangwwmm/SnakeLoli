@@ -4,6 +4,11 @@ public static class hwmRandom
 {
 	private static System.Random ms_Random = new System.Random();
 
+	public static int RandInt(int min ,int max)
+	{
+		return ms_Random.Next(min, max);
+	}
+
 	public static float RandFloat()
 	{
 		return (float)ms_Random.NextDouble();
