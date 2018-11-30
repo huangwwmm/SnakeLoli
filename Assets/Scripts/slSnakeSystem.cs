@@ -167,7 +167,7 @@ public class slSnakeSystem
 	{
 		private Transform m_Root;
 		private slSnakePresentationProperties m_Presentation;
-		private NodeType m_NodeType;
+		private slConstants.NodeType m_NodeType;
 		private hwmQuadtree<slSnake.QuadtreeElement> m_Quadtree;
 
 		public NodePool(slSnakePresentationProperties presentation, Transform root, hwmQuadtree<slSnake.QuadtreeElement> quadtree)
@@ -178,10 +178,10 @@ public class slSnakeSystem
 
 			Type nodeType = typeof(T);
 			m_NodeType = nodeType == typeof(slSnake.HeadNode)
-				? NodeType.Head
+				? slConstants.NodeType.Head
 				: nodeType == typeof(slSnake.ClothesNode)
-					? NodeType.Clothes
-					: NodeType.Body;
+					? slConstants.NodeType.Clothes
+					: slConstants.NodeType.Body;
 		}
 
 		protected override T HandleCreateItem()
@@ -192,15 +192,15 @@ public class slSnakeSystem
 			{
 				switch (m_NodeType)
 				{
-					case NodeType.Head:
+					case slConstants.NodeType.Head:
 						node.Node = UnityEngine.Object.Instantiate(m_Presentation.Head);
 						(node as slSnake.HeadNode).Sprite = node.Node.GetComponentsInChildren<SpriteRenderer>();
 						break;
-					case NodeType.Clothes:
+					case slConstants.NodeType.Clothes:
 						node.Node = UnityEngine.Object.Instantiate(m_Presentation.Clothes);
 						node.Sprite = node.Node.GetComponent<SpriteRenderer>();
 						break;
-					case NodeType.Body:
+					case slConstants.NodeType.Body:
 						node.Node = UnityEngine.Object.Instantiate(m_Presentation.Body);
 						node.Sprite = node.Node.GetComponent<SpriteRenderer>();
 						break;
@@ -216,11 +216,11 @@ public class slSnakeSystem
 			node.Node.transform.SetParent(m_Root, false);
 
 			node.Collider = node.Node.AddComponent<CircleCollider2D>();
-			node.Collider.isTrigger = m_NodeType == NodeType.Head;
+			node.Collider.isTrigger = m_NodeType == slConstants.NodeType.Head;
 			node.OwnerQuadtree = m_Quadtree;
 
-			node.Layer = (int)m_NodeType;
-			if (m_NodeType == NodeType.Head)
+			node.NodeType = m_NodeType;
+			if (m_NodeType == slConstants.NodeType.Head)
 			{
 				slSnake.HeadNode headNode = node as slSnake.HeadNode;
 				headNode.Trigger = headNode.Node.AddComponent<slSnakeHeadTrigger>();
@@ -235,16 +235,10 @@ public class slSnakeSystem
 
 				headNode.PredictNode = new slSnake.PredictNode();
 				headNode.PredictNode.OwnerQuadtree = m_Quadtree;
+				headNode.PredictNode.NodeType = slConstants.NodeType.Predict;
 			}
 
 			return node;
 		}
-	}
-
-	private enum NodeType
-	{
-		Head,
-		Clothes,
-		Body
 	}
 }

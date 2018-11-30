@@ -110,4 +110,12 @@ public class slConstants
 				throw new System.ArgumentOutOfRangeException();
 		}
 	}
+
+	public enum NodeType
+	{
+		Head,
+		Clothes,
+		Body,
+		Predict
+	}
 }

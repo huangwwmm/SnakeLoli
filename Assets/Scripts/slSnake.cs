@@ -31,6 +31,8 @@ public class slSnake : hwmActor
 
 	private slSnakeSystem.NodePool<BodyNode> m_BodyPool;
 
+	private AliveState m_AliveState;
+
 	public float GetPower()
 	{
 		return m_Power;
@@ -151,6 +153,35 @@ public class slSnake : hwmActor
 		EatFood(m_TweakableProperties.EatFoodRadius);
 	}
 
+	public void DoUpdateCollide()
+	{
+		hwmBox2D collideAABB = hwmBox2D.BuildAABB(m_Head.GetPosition(), new Vector2(m_Head.Radius, m_Head.Radius));
+		hwmSphere2D headSphere = new hwmSphere2D(m_Head.GetPosition(), m_Properties.HeadColliderRadius);
+		if (!slWorld.GetInstance().GetMap().GetMapBox().IsInsideOrOn(m_Head.AABB))
+		{
+			m_AliveState = AliveState.DeadHitWall;
+			return;
+		}
+		hwmQuadtree<QuadtreeElement>.AABBEnumerator enumerator = new hwmQuadtree<QuadtreeElement>.AABBEnumerator(m_Head.OwnerQuadtree.GetRootNode()
+			, collideAABB);
+		while (enumerator.MoveNext())
+		{
+			hwmQuadtree<QuadtreeElement>.Node iterNode = enumerator.Current;
+			hwmBetterList<QuadtreeElement> elements = iterNode.GetElements();
+			for (int iElement = elements.Count - 1; iElement >= 0; iElement--)
+			{
+				QuadtreeElement iterElement = elements[iElement];
+				if (iterElement.Owner != this
+					&& iterElement.NodeType != slConstants.NodeType.Predict
+					&& (iterElement.GetPosition() - m_Head.GetPosition()).sqrMagnitude
+						<= ((m_Head.Radius + iterElement.Radius) * (m_Head.Radius + iterElement.Radius)))
+				{
+					m_AliveState = AliveState.DeadHitSnake;
+				}
+			}
+		}
+	}
+
 	public slBaseController GetController()
 	{
 		return m_Controller;
@@ -207,10 +238,22 @@ public class slSnake : hwmActor
 		m_RemainsFoodContaminationPower = foodPower;
 	}
 
+	public bool IsAlive()
+	{
+		return m_AliveState == AliveState.Alive;
+	}
+
+	public void Dead()
+	{
+		hwmWorld.GetInstance().DestroyActor(this, null);
+	}
+
 	protected override void HandleInitialize(object additionalData)
 	{
 		InitializeAdditionalData initializeData = additionalData as InitializeAdditionalData;
 		hwmDebug.Assert(initializeData.NodeCount >= slConstants.SNAKE_INITIALIZEZ_NODE_MINCOUNT, "initializeData.NodeCount >= slConstants.SNAKE_INITIALIZEZ_NODE_MINCOUNT");
+
+		m_AliveState = AliveState.Alive;
 
 		m_SnakeName = initializeData.SnakeName;
 		m_TweakableProperties = slWorld.GetInstance().GetSnakeSystem().GetTweakableProperties(initializeData.TweakableProperties);
@@ -278,10 +321,9 @@ public class slSnake : hwmActor
 
 	protected override void HandleDispose(object additionalData)
 	{
-		DisposeAdditionalData disposeAdditionalData = additionalData as DisposeAdditionalData;
 		slConstants.FoodType foodType = m_IsReaminsFoodContamination ? slConstants.FoodType.Contamination : slConstants.FoodType.Remains;
 		float power = m_IsReaminsFoodContamination ? m_RemainsFoodContaminationPower : m_TweakableProperties.RemainsFoodPower;
-		if (disposeAdditionalData.MyDeadType != DeadType.FinishGame)
+		if (m_AliveState != AliveState.DeadFinishGame)
 		{
 			slWorld.GetInstance().GetFoodSystem().AddCreateEvent(foodType, m_Head.Node.transform.position, m_Properties.DeadFoodColor, power);
 			slWorld.GetInstance().GetFoodSystem().AddCreateEvent(foodType, m_Clothes.Node.transform.position, m_Properties.DeadFoodColor, power);
@@ -323,23 +365,23 @@ public class slSnake : hwmActor
 
 	private void OnTrigger(Collider2D collider)
 	{
-		switch (collider.gameObject.layer)
-		{
-			// dead
-			case (int)slConstants.Layer.Wall:
-			case (int)slConstants.Layer.Snake:
-			case (int)slConstants.Layer.SnakeHead:
-				int colliderLayer = collider.gameObject.layer;
-				if (((1 << colliderLayer) & m_EnableDamageLayers) != 0)
-				{
-					DisposeAdditionalData disposeAdditionalData = new DisposeAdditionalData();
-					disposeAdditionalData.MyDeadType = collider.gameObject.layer == (int)slConstants.Layer.Wall
-						? DeadType.HitWall
-						: DeadType.HitSnake;
-					hwmWorld.GetInstance().DestroyActor(this, disposeAdditionalData);
-				}
-				break;
-		}
+		//switch (collider.gameObject.layer)
+		//{
+		//	// dead
+		//	case (int)slConstants.Layer.Wall:
+		//	case (int)slConstants.Layer.Snake:
+		//	case (int)slConstants.Layer.SnakeHead:
+		//		//int colliderLayer = collider.gameObject.layer;
+		//		//if (((1 << colliderLayer) & m_EnableDamageLayers) != 0)
+		//		//{
+		//		//	DisposeAdditionalData disposeAdditionalData = new DisposeAdditionalData();
+		//		//	disposeAdditionalData.MyDeadType = collider.gameObject.layer == (int)slConstants.Layer.Wall
+		//		//		? DeadType.HitWall
+		//		//		: DeadType.HitSnake;
+		//	hwmWorld.GetInstance().DestroyActor(this, disposeAdditionalData);
+		//		//}
+		//		break;
+		//}
 	}
 
 	private void ResetOrderInLayer()
@@ -370,12 +412,6 @@ public class slSnake : hwmActor
 		public string TweakableProperties;
 	}
 
-	[Serializable]
-	public class DisposeAdditionalData
-	{
-		public DeadType MyDeadType;
-	}
-
 	public class HeadNode : BodyNode
 	{
 		public new SpriteRenderer[] Sprite;
@@ -396,23 +432,28 @@ public class slSnake : hwmActor
 		{
 			base.Active(owner);
 
-			Collider.radius = owner.GetProperties().HeadColliderRadius;
+			Radius = owner.GetProperties().HeadColliderRadius;
+
+			Collider.radius = Radius;
 
 			Predict.name = owner.GetGuidStr();
-			PredictCollider.size = new Vector2(owner.GetProperties().HeadColliderRadius * slConstants.SNAKE_PREDICT_SIZE_X
+			PredictCollider.size = new Vector2(Radius * slConstants.SNAKE_PREDICT_SIZE_X
 				, slConstants.SNAKE_NODE_TO_NODE_DISTANCE * slConstants.SNAKE_PREDICT_SIZE_Y);
-			PredictCollider.offset = new Vector2(0, PredictCollider.size.y * 0.5f + owner.GetProperties().HeadColliderRadius);
+			PredictCollider.offset = new Vector2(0, PredictCollider.size.y * 0.5f + Radius);
 			Predict.SetActive(true);
 
-			PredictNode.Extent = new Vector2(owner.GetProperties().HeadColliderRadius * slConstants.SNAKE_PREDICT_SIZE_X
+			PredictNode.Owner = owner;
+			PredictNode.Extent = new Vector2(Radius * slConstants.SNAKE_PREDICT_SIZE_X
 				, slConstants.SNAKE_NODE_TO_NODE_DISTANCE * slConstants.SNAKE_PREDICT_SIZE_Y) * 0.5f;
-			PredictNode.Offset = new Vector2(0, PredictNode.Extent.y + owner.GetProperties().HeadColliderRadius);
+			PredictNode.Offset = new Vector2(0, PredictNode.Extent.y + Radius);
 
 			Trigger.OnTriggerEnter += owner.OnTrigger;
 		}
 
 		public override void Deactive()
 		{
+			PredictNode.Owner = null;
+
 			Trigger.OnTriggerEnter -= Owner.OnTrigger;
 			Predict.SetActive(false);
 
@@ -436,7 +477,8 @@ public class slSnake : hwmActor
 		{
 			base.Active(owner);
 
-			Collider.radius = owner.GetProperties().ClothesColliderRadius;
+			Radius = owner.GetProperties().ClothesColliderRadius;
+			Collider.radius = Radius;
 		}
 
 		public override void Deactive()
@@ -451,9 +493,6 @@ public class slSnake : hwmActor
 		public CircleCollider2D Collider;
 		public SpriteRenderer Sprite;
 
-		protected Vector3 m_Position;
-		protected Quaternion m_Rotation;
-
 		public virtual void SetPositionAndRotation(Vector3 position, Quaternion rotation)
 		{
 			m_Position = position;
@@ -465,21 +504,14 @@ public class slSnake : hwmActor
 			UpdateQuadtree();
 		}
 
-		public Vector3 GetPosition()
-		{
-			return m_Position;
-		}
-
-		public Quaternion GetRotation()
-		{
-			return m_Rotation;
-		}
-
 		public virtual void Active(slSnake owner)
 		{
 			Owner = owner;
 			Node.name = owner.GetGuidStr();
 			Node.SetActive(true);
+
+			Radius = owner.GetProperties().BodyColliderRadius;
+			Collider.radius = Radius;
 		}
 
 		public virtual void Deactive()
@@ -491,7 +523,7 @@ public class slSnake : hwmActor
 
 		protected virtual void UpdateQuadtree()
 		{
-			AABB = hwmBox2D.BuildAABB(m_Position, new Vector2(Collider.radius, Collider.radius));
+			AABB = hwmBox2D.BuildAABB(m_Position, new Vector2(Radius, Radius));
 			OwnerQuadtree.UpdateElement(this);
 		}
 	}
@@ -509,15 +541,31 @@ public class slSnake : hwmActor
 		public hwmQuadtree<QuadtreeElement>.Node OwnerQuadtreeNode { get; set; }
 		public hwmBox2D AABB { get; set; }
 		public slSnake Owner;
-		public int Layer;
+		public slConstants.NodeType NodeType;
+
+		public float Radius;
+
+		protected Vector3 m_Position;
+		protected Quaternion m_Rotation;
+
+		public Vector3 GetPosition()
+		{
+			return m_Position;
+		}
+
+		public Quaternion GetRotation()
+		{
+			return m_Rotation;
+		}
 	}
 
 
-	public enum DeadType
+	public enum AliveState
 	{
-		HitWall,
-		HitSnake,
-		FinishGame
+		Alive,
+		DeadHitWall,
+		DeadHitSnake,
+		DeadFinishGame
 	}
 
 	public enum SpeedState

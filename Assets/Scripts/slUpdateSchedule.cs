@@ -6,6 +6,7 @@ using UnityEngine;
 public class slUpdateSchedule : MonoBehaviour
 {
 	private List<slSnake> m_Snakes;
+	private List<slSnake> m_DeadSnakes;
 	private float m_UpdateSnakeMovementTime = 0;
 	private int m_UpdateRespawnPlayerFrame = 0;
 	private float m_LastUpdateFoodsTime = 0;
@@ -21,6 +22,7 @@ public class slUpdateSchedule : MonoBehaviour
 	protected void Awake()
 	{
 		m_Snakes = new List<slSnake>();
+		m_DeadSnakes = new List<slSnake>();
 
 		hwmObserver.OnActorCreate += OnActorCreate;
 		hwmObserver.OnActorDestroy += OnActorDestroy;
@@ -34,6 +36,8 @@ public class slUpdateSchedule : MonoBehaviour
 			m_UpdateStatisticss = new UpdateStatistics[(int)UpdateType.Count];
 			m_UpdateStatisticsStopwatch = new System.Diagnostics.Stopwatch();
 		}
+
+		Time.fixedDeltaTime = slConstants.UPDATE_SNAKE_MOVEMENT_TIEM_INTERVAL / (int)UpdateType.Count;
 	}
 
 	protected void OnDestroy()
@@ -65,6 +69,8 @@ public class slUpdateSchedule : MonoBehaviour
 		hwmObserver.OnActorCreate -= OnActorCreate;
 		hwmObserver.OnActorDestroy -= OnActorDestroy;
 
+		m_DeadSnakes.Clear();
+		m_DeadSnakes = null;
 		m_Snakes.Clear();
 		m_Snakes = null;
 	}
@@ -134,6 +140,24 @@ public class slUpdateSchedule : MonoBehaviour
 				slWorld.GetInstance().GetSnakeSystem().GetQuadtree().MergeAndSplitAllNode();
 				yield return UpdateType.SnakeMovement;
 
+				// update snake collide
+				m_DeadSnakes.Clear();
+				for (int iSnake = 0; iSnake < m_Snakes.Count; iSnake++)
+				{
+					slSnake iterSnake = m_Snakes[iSnake];
+					iterSnake.DoUpdateCollide();
+					if (!iterSnake.IsAlive())
+					{
+						m_DeadSnakes.Add(iterSnake);
+					}
+				}
+				for (int iSnake = 0; iSnake < m_DeadSnakes.Count; iSnake++)
+				{
+					slSnake iterSnake = m_DeadSnakes[iSnake];
+					iterSnake.Dead();
+				}
+				yield return UpdateType.SnakeCollide;
+
 				// update snake eat food
 				for (int iSnake = 0; iSnake < m_Snakes.Count; iSnake++)
 				{
@@ -183,6 +207,7 @@ public class slUpdateSchedule : MonoBehaviour
 	{
 		Empty = 0,
 		SnakeMovement,
+		SnakeCollide,
 		SnakeEatFood,
 		Foods,
 		FoodSystem,
