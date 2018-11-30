@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class slFoodSystem
@@ -32,11 +31,11 @@ public class slFoodSystem
 
 		m_MaxFood = level.FoodCount;
 
-		m_FoodPropertiess = new slFoodProperties[(int)slFood.FoodType.Count];
+		m_FoodPropertiess = new slFoodProperties[(int)slConstants.FoodType.Count];
 		for (int iFood = 0; iFood < m_FoodPropertiess.Length; iFood++)
 		{
 			m_FoodPropertiess[iFood] = hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game
-				, slConstants.FOOD_PROPERTIES_PREFAB_STARTWITHS + ((slFood.FoodType)iFood).ToString()) as slFoodProperties;
+				, slConstants.FOOD_PROPERTIES_PREFAB_STARTWITHS + slConstants.FoodTypeToString((slConstants.FoodType)iFood)) as slFoodProperties;
 		}
 
 		m_Quadtree = new hwmQuadtree<slFood>();
@@ -53,10 +52,10 @@ public class slFoodSystem
 		m_FoodPool.Initialize(Mathf.CeilToInt(m_MaxFood * slConstants.FOOD_POOL_INITIALIZE_MULTIPLY));
 		if (slWorld.GetInstance().NeedPresentation())
 		{
-			m_FoodPresentationPools = new FoodPresentationPool[(int)slFood.FoodType.Count];
+			m_FoodPresentationPools = new FoodPresentationPool[(int)slConstants.FoodType.Count];
 			for (int iFood = 0; iFood < m_FoodPropertiess.Length; iFood++)
 			{
-				slFood.FoodType foodType = (slFood.FoodType)iFood;
+				slConstants.FoodType foodType = (slConstants.FoodType)iFood;
 				m_FoodPresentationPools[iFood] = new FoodPresentationPool(m_FoodRoot, foodType);
 				m_FoodPresentationPools[iFood].Initialize(0);
 			}
@@ -125,7 +124,7 @@ public class slFoodSystem
 		int needCreateFood = Mathf.Min(m_MaxFood - m_FoodCount, canCreateFoodCount);
 		while (needCreateFood-- > 0)
 		{
-			CreateFood(slFood.FoodType.Normal
+			CreateFood(slConstants.FoodType.Normal
 				, hwmRandom.RandVector2(m_FoodMinPosition, m_FoodMaxPosition)
 				, hwmRandom.RandColorRGB()
 				, slConstants.NORMAL_FOOD_POWER);
@@ -166,7 +165,7 @@ public class slFoodSystem
 				stopwatch.Start();
 			}
 
-			CreateFood(slFood.FoodType.Normal
+			CreateFood(slConstants.FoodType.Normal
 				, hwmRandom.RandVector2(m_FoodMinPosition, m_FoodMaxPosition)
 				, hwmRandom.RandColorRGB()
 				, slConstants.NORMAL_FOOD_POWER);
@@ -177,7 +176,7 @@ public class slFoodSystem
 		Debug.Log(string.Format("Food system enter map used {0} ms", stopwatch.ElapsedMilliseconds));
 	}
 
-	public void AddCreateEvent(slFood.FoodType foodType, Vector3 position, Color color, float power)
+	public void AddCreateEvent(slConstants.FoodType foodType, Vector3 position, Color color, float power)
 	{
 		if (CanCreateFoodAt(position))
 		{
@@ -195,7 +194,7 @@ public class slFoodSystem
 		return m_FoodCount;
 	}
 
-	private void CreateFood(slFood.FoodType foodType, Vector3 position, Color color, float power)
+	private void CreateFood(slConstants.FoodType foodType, Vector3 position, Color color, float power)
 	{
 		slFoodProperties foodProperties = m_FoodPropertiess[(int)foodType];
 		slFood food = m_FoodPool.Pop();
@@ -275,10 +274,10 @@ public class slFoodSystem
 
 	public class FoodPresentationPool : hwmPool<slFoodPresentation>
 	{
-		private slFood.FoodType m_FoodType;
+		private slConstants.FoodType m_FoodType;
 		private Transform m_Root;
 
-		public FoodPresentationPool(Transform root, slFood.FoodType foodType)
+		public FoodPresentationPool(Transform root, slConstants.FoodType foodType)
 		{
 			m_Root = root;
 			m_FoodType = foodType;
@@ -287,7 +286,7 @@ public class slFoodSystem
 		protected override slFoodPresentation HandleCreateItem()
 		{
 			slFoodPresentation food = (Object.Instantiate(hwmSystem.GetInstance().GetAssetLoader()
-					.LoadAsset(hwmAssetLoader.AssetType.Game, slConstants.FOOD_PRESENTATION_PREFAB_STARTWITHS + m_FoodType.ToString())) as GameObject)
+					.LoadAsset(hwmAssetLoader.AssetType.Game, slConstants.FOOD_PRESENTATION_PREFAB_STARTWITHS + slConstants.FoodTypeToString(m_FoodType))) as GameObject)
 				.GetComponent<slFoodPresentation>();
 			food.transform.SetParent(m_Root, false);
 			food.gameObject.SetActive(false);
@@ -299,7 +298,7 @@ public class slFoodSystem
 	{
 		public Vector3 Position;
 		public Color Color;
-		public slFood.FoodType FoodType;
+		public slConstants.FoodType FoodType;
 		public float Power;
 	}
 }

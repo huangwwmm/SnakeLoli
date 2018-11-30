@@ -84,4 +84,30 @@ public class slConstants
 		Snake = 11,
 		SnakePredict = 12,
 	}
+
+	public enum FoodType
+	{
+		Normal = 0,
+		Remains,
+		Contamination,
+		/// <summary>
+		/// must end
+		/// </summary>
+		Count,
+	}
+
+	public static string FoodTypeToString(FoodType foodType)
+	{
+		switch(foodType)
+		{
+			case FoodType.Normal:
+				return "Normal";
+			case FoodType.Remains:
+				return "Remains";
+			case FoodType.Contamination:
+				return "Contamination";
+			default:
+				throw new System.ArgumentOutOfRangeException();
+		}
+	}
 }

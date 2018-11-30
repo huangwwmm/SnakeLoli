@@ -10,6 +10,7 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 	private float m_RemainLifeTime;
 	private float m_Power = 1;
 	private int m_Index;
+	private Vector3 m_Position;
 
 	public hwmQuadtree<slFood> OwnerQuadtree { get; set; }
 	public hwmBox2D AABB { get; set; }
@@ -107,25 +108,20 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 		return m_Index;
 	}
 
+	public Vector3 GetPosition()
+	{
+		return m_Position;
+	}
+
 	private void SetPosition(Vector3 position)
 	{
+		m_Position = position;
+
 		transform.localPosition = position;
 		if (m_Presentation)
 		{
 			m_Presentation.transform.localPosition = position;
 		}
-	}
-
-
-	public enum FoodType
-	{
-		Normal = 0,
-		Remains,
-		Contamination,
-		/// <summary>
-		/// must end
-		/// </summary>
-		Count,
 	}
 
 	public enum State

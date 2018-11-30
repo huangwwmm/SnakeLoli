@@ -171,7 +171,7 @@ public class slSnake : hwmActor
 			{
 				slFood iterFood = foods[iFood];
 				if (inHeadSphere
-					|| (iterFood.transform.localPosition - m_Head.GetPosition()).sqrMagnitude <= radius * radius)
+					|| (iterFood.GetPosition() - m_Head.GetPosition()).sqrMagnitude <= radius * radius)
 				{
 					EatFood(iterFood);
 				}
@@ -279,7 +279,7 @@ public class slSnake : hwmActor
 	protected override void HandleDispose(object additionalData)
 	{
 		DisposeAdditionalData disposeAdditionalData = additionalData as DisposeAdditionalData;
-		slFood.FoodType foodType = m_IsReaminsFoodContamination ? slFood.FoodType.Contamination : slFood.FoodType.Remains;
+		slConstants.FoodType foodType = m_IsReaminsFoodContamination ? slConstants.FoodType.Contamination : slConstants.FoodType.Remains;
 		float power = m_IsReaminsFoodContamination ? m_RemainsFoodContaminationPower : m_TweakableProperties.RemainsFoodPower;
 		if (disposeAdditionalData.MyDeadType != DeadType.FinishGame)
 		{
@@ -425,7 +425,7 @@ public class slSnake : hwmActor
 
 			PredictNode.Box = hwmBox2D.BuildAABB(m_Position + m_Rotation * PredictNode.Offset, PredictNode.Extent);
 			PredictNode.AABB = m_Rotation * PredictNode.Box;
- 
+
 			PredictNode.OwnerQuadtree.UpdateElement(PredictNode);
 		}
 	}
