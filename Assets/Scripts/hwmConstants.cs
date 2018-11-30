@@ -1,5 +1,7 @@
 ﻿public class hwmConstants
 {
+	public const float KINDA_SMALL_NUMBER = 0.0001f;
+
 	/// <summary>
 	/// The order of the enum value will affect the UI display
 	/// </summary>

@@ -15,8 +15,8 @@ public class slMapPresentation : MonoBehaviour
 	{
 		m_Owner = map;
 
-		hwmBounds2D mapBounds = m_Owner.GetMapBounds();
-		Vector3 mapSize = mapBounds.size;
+		hwmBox2D mapBox = m_Owner.GetMapBox();
+		Vector3 mapSize = mapBox.GetSize();
 		Background.transform.localScale = new Vector3(mapSize.x + 1000.0f, mapSize.y + 1000.0f, 1);
 		Mapground.transform.localScale = new Vector3(mapSize.x, mapSize.y, 1);
 
@@ -36,11 +36,11 @@ public class slMapPresentation : MonoBehaviour
 
 	private void CreateLine(Vector2 startPoint, Vector2 direction)
 	{
-		hwmBounds2D mapBounds = m_Owner.GetMapBounds();
-		Vector2 mapSize = mapBounds.size;
+		hwmBox2D mapBox = m_Owner.GetMapBox();
+		Vector2 mapSize = m_Owner.GetMapBox().GetSize();
 
 		Vector2 currentPoint = startPoint;
-		while (mapBounds.Contains(currentPoint))
+		while (mapBox.IsInsideOrOn(currentPoint))
 		{
 			GameObject go = Instantiate(Line.gameObject);
 			go.transform.parent = m_LineRoot.transform;

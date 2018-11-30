@@ -93,7 +93,6 @@ public class slSnake : hwmActor
 		int bodyCountOffset = Mathf.Max(Mathf.FloorToInt(m_Power / m_TweakableProperties.NodeToPower - 2) // magic number: must have 2 node(head and chlothes)
 				- m_Bodys.Count
 			, -m_Bodys.Count);
-
 		while (moveNodeCount-- > 0)
 		{
 			m_CurrentMoveDirection = hwmUtility.CircleLerp(m_CurrentMoveDirection, TargetMoveDirection, m_TweakableProperties.MaxTurnAngularSpeed * deltaTime);
@@ -125,6 +124,7 @@ public class slSnake : hwmActor
 				{
 					newFrontNode = m_Bodys.PopBack();
 				}
+
 				BodyNode oldFrontNode = m_Bodys.PeekFront();
 				m_Bodys.PushFront(newFrontNode);
 				newFrontNode.Node.transform.localPosition = lastNodePosition;
@@ -160,17 +160,18 @@ public class slSnake : hwmActor
 	public void EatFood(float radius)
 	{
 		Vector2 headPosition = m_Head.Node.transform.localPosition;
-		hwmQuadtree<slFood>.BoundsEnumerator enumerator = new hwmQuadtree<slFood>.BoundsEnumerator(slWorld.GetInstance().GetFoodSystem().GetQuadtree().GetRootNode()
-			, new hwmBounds2D(headPosition, new Vector2(radius * 2.0f, radius * 2.0f)));
+		hwmQuadtree<slFood>.AABBEnumerator enumerator = new hwmQuadtree<slFood>.AABBEnumerator(slWorld.GetInstance().GetFoodSystem().GetQuadtree().GetRootNode()
+			, hwmBox2D.BuildAABB(headPosition, new Vector2(radius, radius)));
+		hwmSphere2D headSphere = new hwmSphere2D(headPosition, radius);
 		while (enumerator.MoveNext())
 		{
 			hwmQuadtree<slFood>.Node iterNode = enumerator.Current;
 			hwmBetterList<slFood> foods = iterNode.GetElements();
-			bool inCircleInside = iterNode.GetLooseBounds().InCircleInside(headPosition, radius);
+			bool inHeadSphere = headSphere.IsInside(iterNode.GetLooseBox());
 			for (int iFood = foods.Count - 1; iFood >= 0; iFood--)
 			{
 				slFood iterFood = foods[iFood];
-				if (inCircleInside
+				if (inHeadSphere
 					|| ((Vector2)iterFood.transform.localPosition - headPosition).sqrMagnitude <= radius * radius)
 				{
 					EatFood(iterFood);
@@ -213,7 +214,6 @@ public class slSnake : hwmActor
 		hwmDebug.Assert(initializeData.NodeCount >= slConstants.SNAKE_INITIALIZEZ_NODE_MINCOUNT, "initializeData.NodeCount >= slConstants.SNAKE_INITIALIZEZ_NODE_MINCOUNT");
 
 		m_SnakeName = initializeData.SnakeName;
-		slWorld.GetInstance().GetSnakePool().LoadSnake(m_SnakeName);
 		m_TweakableProperties = slWorld.GetInstance().GetSnakePool().GetTweakableProperties(initializeData.TweakableProperties);
 		m_Properties = slWorld.GetInstance().GetSnakePool().GetProperties(m_SnakeName);
 

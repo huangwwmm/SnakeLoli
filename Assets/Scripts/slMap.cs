@@ -5,11 +5,11 @@ public class slMap : MonoBehaviour
 	private slMapPresentation m_Presentation;
 	private GameObject m_WallGameObject;
 	private BoxCollider2D[] m_Walls;
-	private hwmBounds2D m_MapBounds;
+	private hwmBox2D m_MapBox;
 
 	public void Initialize(Vector2 mapSize)
 	{
-		m_MapBounds = new hwmBounds2D(Vector2.zero, mapSize);
+		m_MapBox = hwmBox2D.BuildAABB(Vector2.zero, mapSize * 0.5f);
 
 		// Wall
 		m_WallGameObject = new GameObject("Wall");
@@ -61,8 +61,8 @@ public class slMap : MonoBehaviour
 		m_WallGameObject = null;
 	}
 
-	public hwmBounds2D GetMapBounds()
+	public hwmBox2D GetMapBox()
 	{
-		return m_MapBounds;
+		return m_MapBox;
 	}
 }

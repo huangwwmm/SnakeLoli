@@ -85,7 +85,9 @@ public class slSnakePool
 
 	public slSnake.BodyNode PopBodyNode(string snakeName, string owner)
 	{
-		slSnake.BodyNode node = m_BodyPools[SnakeNameToIndex(snakeName)].Pop();
+		NodePool<slSnake.BodyNode> pool = m_BodyPools[SnakeNameToIndex(snakeName)];
+		slSnake.BodyNode node = pool.Pop();
+
 		node.Node.name = owner;
 		node.Node.SetActive(true);
 		return node;
@@ -131,7 +133,6 @@ public class slSnakePool
 			m_Propertiess.Add(UnityEngine.Object.Instantiate(hwmSystem.GetInstance().GetAssetLoader().LoadAsset(hwmAssetLoader.AssetType.Game
 				, slConstants.SNAKE_PROPERTIES_PREfAB_NAME_STARTWITHS + snakeName)) as slSnakeProperties);
 
-
 			slSnakePresentationProperties snakePresentationProperties = slWorld.GetInstance().NeedPresentation()
 				? UnityEngine.Object.Instantiate(hwmSystem.GetInstance().GetAssetLoader()
 						.LoadAsset(hwmAssetLoader.AssetType.Game, slConstants.SNAKE_PRESENTATION_PROPERTIES_PREfAB_NAME_STARTWITHS + snakeName) as GameObject)
@@ -141,16 +142,22 @@ public class slSnakePool
 			snakePresentationProperties.gameObject.SetActive(false);
 
 			NodePool<slSnake.HeadNode> headNodePool = new NodePool<slSnake.HeadNode>(snakePresentationProperties, m_Root);
-			headNodePool.Initialize(0);
+			headNodePool.Initialize(1);
 			m_HeadPools.Add(headNodePool);
 
 			NodePool<slSnake.ClothesNode> clothesNodePool = new NodePool<slSnake.ClothesNode>(snakePresentationProperties, m_Root);
-			clothesNodePool.Initialize(0);
+			clothesNodePool.Initialize(1);
 			m_ClothesNodePools.Add(clothesNodePool);
 
 			NodePool<slSnake.BodyNode> bodyNodePool = new NodePool<slSnake.BodyNode>(snakePresentationProperties, m_Root);
-			bodyNodePool.Initialize(0);
+			bodyNodePool.Initialize(slConstants.SNAKE_POOL_BODYNODE_CACHECOUNT_PRESNAKE);
 			m_BodyPools.Add(bodyNodePool);
+		}
+		else
+		{
+			m_HeadPools[index].Create(1);
+			m_ClothesNodePools[index].Create(1);
+			m_BodyPools[index].Create(slConstants.SNAKE_POOL_BODYNODE_CACHECOUNT_PRESNAKE);
 		}
 	}
 
@@ -200,6 +207,7 @@ public class slSnakePool
 				node.Node = new GameObject();
 			}
 
+			node.Node.SetActive(false);
 			node.Node.name = m_NodeType.ToString();
 			node.Node.transform.SetParent(m_Root, false);
 
@@ -213,6 +221,7 @@ public class slSnakePool
 				headNode.Rigidbody = headNode.Node.AddComponent<Rigidbody2D>();
 				headNode.Rigidbody.isKinematic = true;
 				headNode.Predict = new GameObject("Predict");
+				headNode.Predict.SetActive(false);
 				headNode.Predict.transform.SetParent(m_Root, false);
 				headNode.Predict.layer = (int)slConstants.Layer.SnakePredict;
 				headNode.PredictCollider = headNode.Predict.AddComponent<BoxCollider2D>();

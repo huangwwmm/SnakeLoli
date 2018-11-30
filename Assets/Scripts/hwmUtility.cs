@@ -30,20 +30,21 @@ public static class hwmUtility
 			return from;
 		}
 
-		float angleOffset = Vector2.SignedAngle(to,from);
+		float angleOffset = Vector2.SignedAngle(to, from);
 		return Quaternion.Euler(0
 				, 0
-				, angleOffset > 0 
+				, angleOffset > 0
 					? -Mathf.Min(angleOffset, angle)
 					: Mathf.Min(-angleOffset, angle)
 			) * from;
 	}
 
-	public static void GizmosDrawBounds(hwmBounds2D bounds, float z = 0)
+	public static void GizmosDrawBox(hwmBox2D box, float z = 0)
 	{
-		Vector3 leftDown = bounds.min;
+#if UNITY_EDITOR
+		Vector3 leftDown = box.Min;
 		leftDown.z = z;
-		Vector3 rightUp = bounds.max;
+		Vector3 rightUp = box.Max;
 		rightUp.z = z;
 		Vector3 leftUp = new Vector3(leftDown.x, rightUp.y, z);
 		Vector3 rightDown = new Vector3(rightUp.x, leftDown.y, z);
@@ -52,5 +53,18 @@ public static class hwmUtility
 		Gizmos.DrawLine(leftUp, rightUp);
 		Gizmos.DrawLine(rightUp, rightDown);
 		Gizmos.DrawLine(rightDown, leftDown);
+#endif
+	}
+
+	/// <summary>
+	/// Gets the reciprocal of this vector, avoiding division by zero.
+	/// Zero components are set to float.MaxValue.
+	/// </summary>
+	/// <param name="vec"></param>
+	/// <returns>Reciprocal of this vector.</returns>
+	public static Vector2 Reciprocal(Vector2 vec)
+	{
+		return new Vector2(vec.x != 0.0f ? 1.0f / vec.x : float.MaxValue
+			, vec.y != 0.0f ? 1.0f / vec.y : float.MaxValue);
 	}
 }

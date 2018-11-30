@@ -24,7 +24,7 @@ public class hwmQuadtree<T> : IEnumerable, IEnumerable<hwmQuadtree<T>.Node> wher
 		, int maxElementPerNode
 		, int minElementPreParentNode
 		, Vector2 looseSize
-		, hwmBounds2D worldBounds)
+		, hwmBox2D worldBox)
 	{
 		hwmDebug.Assert(maxDepth > 0, "maxDepth > 0");
 		hwmDebug.Assert(maxElementPerNode > 0, "maxElementPerNode > 0");
@@ -39,7 +39,7 @@ public class hwmQuadtree<T> : IEnumerable, IEnumerable<hwmQuadtree<T>.Node> wher
 		AutoMergeAndSplitNode = true;
 
 		m_Root = new Node();
-		m_Root.Initialize(this, null, worldBounds, hwmQuadtreeChilderNodeIndex.Root);
+		m_Root.Initialize(this, null, worldBox, hwmQuadtreeChilderNodeIndex.Root);
 	}
 
 	public void Dispose()
@@ -48,14 +48,14 @@ public class hwmQuadtree<T> : IEnumerable, IEnumerable<hwmQuadtree<T>.Node> wher
 		m_Root = null;
 	}
 
-	public bool TryFindContains(ref Node foundNode, hwmBounds2D bounds, Node rootNode = null)
+	public bool TryFindContains(ref Node foundNode, hwmBox2D box, Node rootNode = null)
 	{
 		if (rootNode == null)
 		{
 			rootNode = m_Root;
 		}
 
-		return rootNode.TryFindContains(ref foundNode, bounds);
+		return rootNode.TryFindContains(ref foundNode, box);
 	}
 
 	public void UpdateElement(T element)
@@ -67,12 +67,12 @@ public class hwmQuadtree<T> : IEnumerable, IEnumerable<hwmQuadtree<T>.Node> wher
 		{
 			Node elementOwner = element.OwnerQuadtreeNode;
 			elementOwner.RemoveElement(element);
-			TryFindContains(ref foundNode, element.QuadtreeNodeBounds, elementOwner);
+			TryFindContains(ref foundNode, element.AABB, elementOwner);
 		}
 
 		if (foundNode == null)
 		{
-			TryFindContains(ref foundNode, element.QuadtreeNodeBounds);
+			TryFindContains(ref foundNode, element.AABB);
 		}
 		if (foundNode == null)
 		{
@@ -120,11 +120,11 @@ public class hwmQuadtree<T> : IEnumerable, IEnumerable<hwmQuadtree<T>.Node> wher
 		private hwmQuadtreeChilderNodeIndex m_IndexInParent;
 		private Node[] m_Childers;
 
-		private hwmBounds2D m_Bounds;
+		private hwmBox2D m_Box;
 		/// <summary>
-		/// size equal <see cref="m_Bounds"/> * <see cref="m_LooseSize"/>
+		/// size equal <see cref="m_Box"/> * <see cref="m_LooseSize"/>
 		/// </summary>
-		private hwmBounds2D m_LooseBounds;
+		private hwmBox2D m_LooseBox;
 
 		/// <summary>
 		/// true if the meshes should be added directly to the node, rather than subdividing when possible.
@@ -133,7 +133,7 @@ public class hwmQuadtree<T> : IEnumerable, IEnumerable<hwmQuadtree<T>.Node> wher
 		private int m_Depth;
 		private hwmBetterList<T> m_Elements;
 
-		public void Initialize(hwmQuadtree<T> owner, Node parent, hwmBounds2D bounds, hwmQuadtreeChilderNodeIndex indexInParent)
+		public void Initialize(hwmQuadtree<T> owner, Node parent, hwmBox2D box, hwmQuadtreeChilderNodeIndex indexInParent)
 		{
 			bool isRoot = parent == null;
 
@@ -141,9 +141,8 @@ public class hwmQuadtree<T> : IEnumerable, IEnumerable<hwmQuadtree<T>.Node> wher
 			m_Parent = parent;
 			m_IndexInParent = indexInParent;
 
-			m_Bounds = bounds;
-			m_LooseBounds = bounds;
-			m_LooseBounds.size = m_LooseBounds.size + m_Owner.m_LooseSize;
+			m_Box = box;
+			m_LooseBox = new hwmBox2D(m_Box.Min - m_Owner.m_LooseSize, m_Box.Max + m_Owner.m_LooseSize);
 
 			m_IsLeaf = true;
 			m_Depth = isRoot ? 1 : parent.m_Depth + 1;
@@ -158,15 +157,15 @@ public class hwmQuadtree<T> : IEnumerable, IEnumerable<hwmQuadtree<T>.Node> wher
 			m_Parent = null;
 		}
 
-		public bool TryFindContains(ref Node foundNode, hwmBounds2D bounds)
+		public bool TryFindContains(ref Node foundNode, hwmBox2D box)
 		{
-			if (m_LooseBounds.Contains(bounds))
+			if (m_LooseBox.IsInsideOrOn(box))
 			{
 				if (!m_IsLeaf)
 				{
 					for (int iChilder = 0; iChilder < CHILDER_COUNT; iChilder++)
 					{
-						if (m_Childers[iChilder].TryFindContains(ref foundNode, bounds))
+						if (m_Childers[iChilder].TryFindContains(ref foundNode, box))
 						{
 							return true;
 						}
@@ -217,14 +216,14 @@ public class hwmQuadtree<T> : IEnumerable, IEnumerable<hwmQuadtree<T>.Node> wher
 			return m_IndexInParent;
 		}
 
-		public hwmBounds2D GetBounds()
+		public hwmBox2D GetBox()
 		{
-			return m_Bounds;
+			return m_Box;
 		}
 
-		public hwmBounds2D GetLooseBounds()
+		public hwmBox2D GetLooseBox()
 		{
-			return m_LooseBounds;
+			return m_LooseBox;
 		}
 
 		public hwmBetterList<T> GetElements()
@@ -298,7 +297,7 @@ public class hwmQuadtree<T> : IEnumerable, IEnumerable<hwmQuadtree<T>.Node> wher
 					Node iterNode = new Node();
 					m_Childers[iChild] = iterNode;
 					hwmQuadtreeChilderNodeIndex index = (hwmQuadtreeChilderNodeIndex)iChild;
-					iterNode.Initialize(m_Owner, this, CalculateChilderBounds(index), index);
+					iterNode.Initialize(m_Owner, this, CalculateChilderBox(index), index);
 				}
 
 				T[] elements = m_Elements.ToArray();
@@ -310,7 +309,7 @@ public class hwmQuadtree<T> : IEnumerable, IEnumerable<hwmQuadtree<T>.Node> wher
 					T iterElement = elements[iElement];
 					iterElement.OwnerQuadtreeNode = null;
 					Node newNode = null;
-					hwmDebug.Assert(TryFindContains(ref newNode, iterElement.QuadtreeNodeBounds), "TryFindNode(ref newNode, iterElement.QuadtreeNodeBounds)");
+					hwmDebug.Assert(TryFindContains(ref newNode, iterElement.AABB), "TryFindNode(ref newNode, iterElement.AABB)");
 					newNode.AddElement(iterElement);
 				}
 
@@ -386,31 +385,30 @@ public class hwmQuadtree<T> : IEnumerable, IEnumerable<hwmQuadtree<T>.Node> wher
 			}
 		}
 
-		private hwmBounds2D CalculateChilderBounds(hwmQuadtreeChilderNodeIndex index)
+		private hwmBox2D CalculateChilderBox(hwmQuadtreeChilderNodeIndex index)
 		{
-			Vector2 size = m_Bounds.extents;
-			Vector2 extents = size * 0.5f;
+			Vector2 extent = m_Box.GetExtent();
 			switch (index)
 			{
 				case hwmQuadtreeChilderNodeIndex.LeftUp:
-					return new hwmBounds2D(new Vector2(m_Bounds.center.x - extents.x
-							, m_Bounds.center.y + extents.y)
-						, size);
+					return new hwmBox2D(new Vector2(m_Box.Min.x
+							, m_Box.Min.y + extent.y)
+						, new Vector2(m_Box.Max.x - extent.x
+							, m_Box.Max.y));
 				case hwmQuadtreeChilderNodeIndex.RightUp:
-					return new hwmBounds2D(new Vector2(m_Bounds.center.x + extents.x
-							, m_Bounds.center.y + extents.y)
-						, size);
+					return new hwmBox2D(m_Box.Min + extent
+						, m_Box.Max);
 				case hwmQuadtreeChilderNodeIndex.LeftDown:
-					return new hwmBounds2D(new Vector2(m_Bounds.center.x - extents.x
-							, m_Bounds.center.y - extents.y)
-						, size);
+					return new hwmBox2D(m_Box.Min
+						, m_Box.Max - extent);
 				case hwmQuadtreeChilderNodeIndex.RightDown:
-					return new hwmBounds2D(new Vector2(m_Bounds.center.x + extents.x
-							, m_Bounds.center.y - extents.y)
-						, size);
+					return new hwmBox2D(new Vector2(m_Box.Min.x + extent.x
+							, m_Box.Min.y)
+						, new Vector2(m_Box.Max.x
+							, m_Box.Max.y - extent.y));
 				default:
 					hwmDebug.Assert(false, "invalid ChilderIndex: " + index);
-					return new hwmBounds2D();
+					return new hwmBox2D();
 			}
 		}
 
@@ -489,7 +487,7 @@ public class hwmQuadtree<T> : IEnumerable, IEnumerable<hwmQuadtree<T>.Node> wher
 	{
 		hwmQuadtree<T> OwnerQuadtree { get; set; }
 		Node OwnerQuadtreeNode { get; set; }
-		hwmBounds2D QuadtreeNodeBounds { get; set; }
+		hwmBox2D AABB { get; set; }
 	}
 
 	public struct Enumerator : IEnumerator<Node>, IEnumerator
@@ -560,20 +558,20 @@ public class hwmQuadtree<T> : IEnumerable, IEnumerable<hwmQuadtree<T>.Node> wher
 		}
 	}
 
-	public struct BoundsEnumerator : IEnumerator<Node>, IEnumerator
+	public struct AABBEnumerator : IEnumerator<Node>, IEnumerator
 	{
 		private Node m_RootNode;
 		private int m_ChilderIndex;
-		private hwmBounds2D m_Bounds;
+		private hwmBox2D m_AABB;
 
 		public Node Current { get; private set; }
 
 		object IEnumerator.Current { get { return Current; } }
 
-		internal BoundsEnumerator(Node rootNode, hwmBounds2D bounds)
+		internal AABBEnumerator(Node rootNode, hwmBox2D aabb)
 		{
 			m_RootNode = rootNode;
-			m_Bounds = bounds;
+			m_AABB = aabb;
 			m_ChilderIndex = 0;
 			Current = null;
 		}
@@ -582,7 +580,7 @@ public class hwmQuadtree<T> : IEnumerable, IEnumerable<hwmQuadtree<T>.Node> wher
 		{
 			if (Current == null)
 			{
-				if (m_RootNode.GetLooseBounds().Intersects(m_Bounds))
+				if (m_RootNode.GetLooseBox().Intersect(m_AABB))
 				{
 					Current = m_RootNode;
 					return true;
@@ -598,7 +596,7 @@ public class hwmQuadtree<T> : IEnumerable, IEnumerable<hwmQuadtree<T>.Node> wher
 				for (int iIndex = m_ChilderIndex; iIndex < Node.CHILDER_COUNT; iIndex++)
 				{
 					Node node = Current.GetChilder(iIndex);
-					if (node.GetLooseBounds().Intersects(m_Bounds))
+					if (node.GetLooseBox().Intersect(m_AABB))
 					{
 						Current = node;
 						m_ChilderIndex = 0;

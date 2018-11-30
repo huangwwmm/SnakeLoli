@@ -9,7 +9,7 @@ public class slConstants
 
 	public const float WALL_THICK = 10.0f;
 
-	public const int FOOD_QUADTREE_MAXDEPTH_BOUNDESIZE = 4;
+	public const int FOOD_QUADTREE_MAXDEPTH_BOXSIZE = 4;
 	public const int FOOD_QUADTREE_MAXELEMENT_PERNODE = 32;
 	public const int FOOD_QUADTREE_MINELEMENT_PREPARENTNODE = 16;
 	public const float FOOD_QUADTREE_LOOSESIZE = 1.2f;
@@ -45,6 +45,8 @@ public class slConstants
 
 	public const float SNAKE_PREDICT_SIZE_X = 2.4f;
 	public const float SNAKE_PREDICT_SIZE_Y = 6.0f;
+
+	public const int SNAKE_POOL_BODYNODE_CACHECOUNT_PRESNAKE = 256;
 
 	public const string DEFAULT_SNAKE_TWEAKABLE_PROPERTIES = "Default";
 

@@ -32,8 +32,8 @@ public class slGameMode_Free : hwmGameMode
 		hwmObserver.OnActorDestroy += HandleActorDestroy;
 		yield return StartCoroutine(slWorld.GetInstance().GetFoodSystem().EnterMap_Co());
 
-		m_SnakeSpawnMinPosition = slWorld.GetInstance().GetMap().GetMapBounds().min + new Vector2(slConstants.SNAKE_SPAWN_SAFEAREA_MAP_EDGE, slConstants.SNAKE_SPAWN_SAFEAREA_MAP_EDGE);
-		m_SnakeSpawnMaxPosition = slWorld.GetInstance().GetMap().GetMapBounds().max - new Vector2(slConstants.SNAKE_SPAWN_SAFEAREA_MAP_EDGE, slConstants.SNAKE_SPAWN_SAFEAREA_MAP_EDGE);
+		m_SnakeSpawnMinPosition = slWorld.GetInstance().GetMap().GetMapBox().Min + new Vector2(slConstants.SNAKE_SPAWN_SAFEAREA_MAP_EDGE, slConstants.SNAKE_SPAWN_SAFEAREA_MAP_EDGE);
+		m_SnakeSpawnMaxPosition = slWorld.GetInstance().GetMap().GetMapBox().Max - new Vector2(slConstants.SNAKE_SPAWN_SAFEAREA_MAP_EDGE, slConstants.SNAKE_SPAWN_SAFEAREA_MAP_EDGE);
 
 		int maxBot = slWorld.GetInstance().GetLevel().BotCount;
 		for (int iBot = 0; iBot < maxBot; iBot++)
@@ -46,6 +46,7 @@ public class slGameMode_Free : hwmGameMode
 			iterBotState.SnakeName = "10000";
 			iterBotState.CreateNodeCount = 5;
 			slWorld.GetInstance().GetGameState().AddPlayerState(iterBotState);
+			slWorld.GetInstance().GetSnakePool().LoadSnake(iterBotState.SnakeName);
 			SpawnPlayer(iterBotState);
 
 			// for aviod snakes together update move
@@ -59,6 +60,7 @@ public class slGameMode_Free : hwmGameMode
 		playerState.SnakeName = "40000";
 		playerState.CreateNodeCount = 5;
 		slWorld.GetInstance().GetGameState().AddPlayerState(playerState);
+		slWorld.GetInstance().GetSnakePool().LoadSnake(playerState.SnakeName);
 		SpawnPlayer(playerState);
 	}
 

@@ -43,7 +43,7 @@ public class slFoodSystem
 			, slConstants.FOOD_QUADTREE_MAXELEMENT_PERNODE
 			, slConstants.FOOD_QUADTREE_MINELEMENT_PREPARENTNODE
 			, new Vector2(slConstants.FOOD_QUADTREE_LOOSESIZE, slConstants.FOOD_QUADTREE_LOOSESIZE)
-			, new hwmBounds2D(Vector2.zero, level.MapSize));
+			, slWorld.GetInstance().GetMap().GetMapBox());
 #if UNITY_EDITOR
 		slQuadtreeGizmos.FoodQuadtree = m_Quadtree;
 #endif
@@ -236,8 +236,8 @@ public class slFoodSystem
 		float height = m_FoodMaxPosition.y - m_FoodMinPosition.y;
 		while (true)
 		{
-			if (width < slConstants.FOOD_QUADTREE_MAXDEPTH_BOUNDESIZE
-				|| height < slConstants.FOOD_QUADTREE_MAXDEPTH_BOUNDESIZE)
+			if (width < slConstants.FOOD_QUADTREE_MAXDEPTH_BOXSIZE
+				|| height < slConstants.FOOD_QUADTREE_MAXDEPTH_BOXSIZE)
 			{
 				break;
 			}

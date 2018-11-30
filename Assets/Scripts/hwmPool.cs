@@ -8,12 +8,17 @@ public class hwmPool<T>
 	{
 		m_Pool = new Stack<T>();
 		hwmDebug.Assert(initialSize >= 0, "initialSize >= 0");
-		while (initialSize-- > 0)
+		Create(initialSize);
+	}
+	
+	public void Create(int count)
+	{
+		while (count-- > 0)
 		{
 			Push(HandleCreateItem());
 		}
 	}
-	
+
 	public void Push(T obj)
 	{
 		HandlePushItem(ref obj);

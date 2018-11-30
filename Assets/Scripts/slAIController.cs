@@ -86,9 +86,9 @@ public class slAIController : slBaseController
 
 	protected override void HandleInitialize()
 	{
-		m_SafeAreaMinPosition = slWorld.GetInstance().GetMap().GetMapBounds().min
+		m_SafeAreaMinPosition = slWorld.GetInstance().GetMap().GetMapBox().Min
 			+ new Vector2(slConstants.SNAKE_AIMOVEMENT_SAFEAREA_MAP_EDGE, slConstants.SNAKE_AIMOVEMENT_SAFEAREA_MAP_EDGE);
-		m_SafeAreaMaxPosition = slWorld.GetInstance().GetMap().GetMapBounds().max
+		m_SafeAreaMaxPosition = slWorld.GetInstance().GetMap().GetMapBox().Max
 			- new Vector2(slConstants.SNAKE_AIMOVEMENT_SAFEAREA_MAP_EDGE, slConstants.SNAKE_AIMOVEMENT_SAFEAREA_MAP_EDGE);
 
 		m_ClockwiseDetectAngle = Quaternion.Euler(0, 0, -slConstants.SNAKE_DETECT_ANGLE);

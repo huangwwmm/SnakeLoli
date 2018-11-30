@@ -12,7 +12,7 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 	private int m_Index;
 
 	public hwmQuadtree<slFood> OwnerQuadtree { get; set; }
-	public hwmBounds2D QuadtreeNodeBounds { get; set; }
+	public hwmBox2D AABB { get; set; }
 	public hwmQuadtree<slFood>.Node OwnerQuadtreeNode { get; set; }
 
 	public void ActiveFood(int index, slFoodProperties foodProperties, slFoodPresentation foodPresentation, Vector3 position, Color color, float power)
@@ -29,7 +29,7 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 		SetPosition(position);
 
 		OwnerQuadtree = slWorld.GetInstance().GetFoodSystem().GetQuadtree();
-		QuadtreeNodeBounds = new hwmBounds2D(transform.localPosition, new Vector2(m_Properties.Radius, m_Properties.Radius) * 2.0f);
+		AABB = hwmBox2D.BuildAABB(transform.localPosition, new Vector2(m_Properties.Radius, m_Properties.Radius));
 		OwnerQuadtree.UpdateElement(this);
 
 		m_Power = power;
