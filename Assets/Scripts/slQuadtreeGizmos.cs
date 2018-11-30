@@ -5,6 +5,7 @@ using UnityEngine;
 public class slQuadtreeGizmos : MonoBehaviour
 {
 	public static hwmQuadtree<slFood> FoodQuadtree;
+	public static hwmQuadtree<slSnake.QuadtreeElement> SnakeQuadtree;
 
 	public Action OnBehaviourDrawGizmos;
 

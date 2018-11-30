@@ -1,1 +1,2 @@
 Enable_DebugView=true
+Enable_UpdateStatistics=true

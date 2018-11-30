@@ -14,6 +14,11 @@ public class slConstants
 	public const int FOOD_QUADTREE_MINELEMENT_PREPARENTNODE = 16;
 	public const float FOOD_QUADTREE_LOOSESIZE = 1.2f;
 
+	public const int SNAKE_QUADTREE_MAXDEPTH_BOXSIZE = 8;
+	public const int SNAKE_QUADTREE_MAXELEMENT_PERNODE = 32;
+	public const int SNAKE_QUADTREE_MINELEMENT_PREPARENTNODE = 16;
+	public const float SNAKE_QUADTREE_LOOSESIZE = 2.4f;
+
 	public static readonly Vector3 FOOD_DEACTIVE_POSITION = new Vector3(10000, 10000, 0);
 	public const float FOOD_MAP_EDGE = 0.5f;
 

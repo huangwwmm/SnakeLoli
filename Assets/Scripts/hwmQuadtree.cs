@@ -283,6 +283,21 @@ public class hwmQuadtree<T> : IEnumerable, IEnumerable<hwmQuadtree<T>.Node> wher
 			}
 		}
 
+		public void GetAllIntersectNode(ref List<Node> allNode, hwmBox2D aabb)
+		{
+			if (m_LooseBox.Intersect(aabb))
+			{
+				allNode.Add(this);
+				if (!m_IsLeaf)
+				{
+					m_Childers[0].GetAllIntersectNode(ref allNode, aabb);
+					m_Childers[1].GetAllIntersectNode(ref allNode, aabb);
+					m_Childers[2].GetAllIntersectNode(ref allNode, aabb);
+					m_Childers[3].GetAllIntersectNode(ref allNode, aabb);
+				}
+			}
+		}
+
 		public bool TrySplitChilders()
 		{
 			if (m_IsLeaf

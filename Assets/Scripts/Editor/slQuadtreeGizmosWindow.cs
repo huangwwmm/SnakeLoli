@@ -7,7 +7,9 @@ using UnityEngine;
 public class slQuadtreeGizmosWindow : EditorWindow
 {
 	private QuadtreeGizmosEnumerator<slFood> m_FoodEnumerator;
+	private QuadtreeGizmosEnumerator<slSnake.QuadtreeElement> m_SnakeEnumerator;
 	private slQuadtreeGizmos m_QuadtreeGizmos;
+	private QuadtreeType m_QuadtreeType;
 
 	[MenuItem("Custom/Snake Loli/Quadtree Gizmos", false, 0)]
 	public static void ShowWindow()
@@ -17,6 +19,7 @@ public class slQuadtreeGizmosWindow : EditorWindow
 
 	protected void OnEnable()
 	{
+		m_QuadtreeType = QuadtreeType.Notset;
 	}
 
 	protected void OnDisable()
@@ -27,10 +30,16 @@ public class slQuadtreeGizmosWindow : EditorWindow
 			DestroyImmediate(m_QuadtreeGizmos.gameObject);
 		}
 
-		if (m_FoodEnumerator != null)
+		switch (m_QuadtreeType)
 		{
-			m_FoodEnumerator.Dispose();
-			m_FoodEnumerator = null;
+			case QuadtreeType.Food:
+				m_FoodEnumerator.Dispose();
+				m_FoodEnumerator = null;
+				break;
+			case QuadtreeType.Snake:
+				m_SnakeEnumerator.Dispose();
+				m_SnakeEnumerator = null;
+				break;
 		}
 	}
 
@@ -42,13 +51,41 @@ public class slQuadtreeGizmosWindow : EditorWindow
 			return;
 		}
 
-		if (m_FoodEnumerator == null
-			&& slQuadtreeGizmos.FoodQuadtree != null)
+		switch (m_QuadtreeType)
 		{
-			m_FoodEnumerator = new QuadtreeGizmosEnumerator<slFood>(slQuadtreeGizmos.FoodQuadtree);
+			case QuadtreeType.Notset:
+				if (GUILayout.Button("Food"))
+				{
+					m_QuadtreeType = QuadtreeType.Food;
+					m_FoodEnumerator = new QuadtreeGizmosEnumerator<slFood>(slQuadtreeGizmos.FoodQuadtree);
+				}
+				else if (GUILayout.Button("Snake"))
+				{
+					m_QuadtreeType = QuadtreeType.Snake;
+					m_SnakeEnumerator = new QuadtreeGizmosEnumerator<slSnake.QuadtreeElement>(slQuadtreeGizmos.SnakeQuadtree);
+				}
+				break;
+			case QuadtreeType.Food:
+				OnGUIQuadtree(m_FoodEnumerator);
+				break;
+			case QuadtreeType.Snake:
+				OnGUIQuadtree(m_SnakeEnumerator);
+				break;
+		}
+	}
+
+	private void OnGUIQuadtree<T>(QuadtreeGizmosEnumerator<T> enumerator) where T : hwmQuadtree<T>.IElement
+	{
+		if (GUILayout.Button("Back"))
+		{
+			if (enumerator != null)
+			{
+				enumerator.Dispose();
+			}
+			m_QuadtreeType = QuadtreeType.Notset;
 		}
 
-		if (m_FoodEnumerator == null)
+		if (enumerator == null)
 		{
 			EditorGUILayout.HelpBox("not have quadtree", MessageType.Warning);
 			return;
@@ -61,14 +98,19 @@ public class slQuadtreeGizmosWindow : EditorWindow
 			m_QuadtreeGizmos.OnBehaviourDrawGizmos += OnDrawGizmos;
 		}
 
-		m_FoodEnumerator.OnGUI();
+		enumerator.OnGUI();
 	}
 
 	private void OnDrawGizmos()
 	{
-		if (m_FoodEnumerator != null)
+		switch (m_QuadtreeType)
 		{
-			m_FoodEnumerator.DoDrawGizmos();
+			case QuadtreeType.Food:
+				m_FoodEnumerator.DoDrawGizmos();
+				break;
+			case QuadtreeType.Snake:
+				m_SnakeEnumerator.DoDrawGizmos();
+				break;
 		}
 	}
 
@@ -203,7 +245,7 @@ public class slQuadtreeGizmosWindow : EditorWindow
 			}
 			else if (GUILayout.Button(index.ToString()))
 			{
-				
+
 				if (m_ChilderIndex == index) // double click enter childer
 				{
 					m_LastNodes.Push(m_Current);
@@ -211,7 +253,7 @@ public class slQuadtreeGizmosWindow : EditorWindow
 					m_ChilderIndex = NOTSET_CHILDER_INDEX;
 				}
 				else
-				{ 
+				{
 					m_ChilderIndex = index;
 				}
 			}
@@ -237,5 +279,12 @@ public class slQuadtreeGizmosWindow : EditorWindow
 				DoDrawGizomsElements(node.GetChilder(hwmQuadtreeChilderNodeIndex.RightDown));
 			}
 		}
+	}
+
+	private enum QuadtreeType
+	{
+		Notset,
+		Food,
+		Snake,
 	}
 }

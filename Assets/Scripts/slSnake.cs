@@ -29,6 +29,8 @@ public class slSnake : hwmActor
 	private bool m_IsReaminsFoodContamination;
 	private float m_RemainsFoodContaminationPower;
 
+	private slSnakeSystem.NodePool<BodyNode> m_BodyPool;
+
 	public float GetPower()
 	{
 		return m_Power;
@@ -51,7 +53,7 @@ public class slSnake : hwmActor
 
 	public Vector3 GetHeadPosition()
 	{
-		return m_Head.Node.transform.localPosition;
+		return m_Head.GetPosition();
 	}
 
 	public slSnakeTweakableProperties GetTweakableProperties()
@@ -96,18 +98,15 @@ public class slSnake : hwmActor
 		while (moveNodeCount-- > 0)
 		{
 			m_CurrentMoveDirection = hwmUtility.CircleLerp(m_CurrentMoveDirection, TargetMoveDirection, m_TweakableProperties.MaxTurnAngularSpeed * deltaTime);
+			Vector3 lastNodePosition = m_Head.GetPosition();
+			Quaternion lastNodeRotation = m_Head.GetRotation();
 			Quaternion headRotation = Quaternion.Euler(0, 0, -Vector2.SignedAngle(m_CurrentMoveDirection, Vector2.up));
-			Vector3 lastNodePosition = m_Head.Node.transform.localPosition;
-			Quaternion lastNodeRotation = m_Head.Node.transform.localRotation;
-			m_Head.Node.transform.localPosition = m_Head.Node.transform.localPosition + headRotation * new Vector2(0, slConstants.SNAKE_NODE_TO_NODE_DISTANCE);
-			m_Head.Node.transform.localRotation = headRotation;
-			m_Head.Predict.transform.localPosition = m_Head.Node.transform.localPosition;
-			m_Head.Predict.transform.localRotation = m_Head.Node.transform.localRotation;
+			m_Head.SetPositionAndRotation(lastNodePosition + headRotation * new Vector2(0, slConstants.SNAKE_NODE_TO_NODE_DISTANCE)
+				, headRotation);
 
-			Vector3 swapNodePosition = m_Clothes.Node.transform.localPosition;
-			Quaternion swapNodeRotation = m_Clothes.Node.transform.localRotation;
-			m_Clothes.Node.transform.localPosition = lastNodePosition;
-			m_Clothes.Node.transform.localRotation = lastNodeRotation;
+			Vector3 swapNodePosition = m_Clothes.GetPosition();
+			Quaternion swapNodeRotation = m_Clothes.GetRotation();
+			m_Clothes.SetPositionAndRotation(lastNodePosition, lastNodeRotation);
 			lastNodePosition = swapNodePosition;
 			lastNodeRotation = swapNodeRotation;
 
@@ -117,18 +116,17 @@ public class slSnake : hwmActor
 				if (bodyCountOffset > 0)
 				{
 					bodyCountOffset--;
-					newFrontNode = slWorld.GetInstance().GetSnakePool().PopBodyNode(m_SnakeName, m_GuidStr);
-					newFrontNode.Collider.radius = m_Properties.BodyColliderRadius;
+					newFrontNode = m_BodyPool.Pop();
+					newFrontNode.Active(this);
 				}
 				else
 				{
 					newFrontNode = m_Bodys.PopBack();
 				}
+				newFrontNode.SetPositionAndRotation(lastNodePosition, lastNodeRotation);
 
 				BodyNode oldFrontNode = m_Bodys.PeekFront();
 				m_Bodys.PushFront(newFrontNode);
-				newFrontNode.Node.transform.localPosition = lastNodePosition;
-				newFrontNode.Node.transform.localRotation = lastNodeRotation;
 				if (newFrontNode.Sprite != null)
 				{
 					newFrontNode.Sprite.sortingOrder = oldFrontNode.Sprite.sortingOrder + 1;
@@ -143,7 +141,8 @@ public class slSnake : hwmActor
 		while (bodyCountOffset++ < 0)
 		{
 			BodyNode backNode = m_Bodys.PopBack();
-			slWorld.GetInstance().GetSnakePool().PushBodyNode(m_SnakeName, backNode);
+			backNode.Deactive();
+			m_BodyPool.Push(backNode);
 		}
 	}
 
@@ -159,10 +158,10 @@ public class slSnake : hwmActor
 
 	public void EatFood(float radius)
 	{
-		Vector2 headPosition = m_Head.Node.transform.localPosition;
+		hwmBox2D eatAABB = hwmBox2D.BuildAABB(m_Head.GetPosition(), new Vector2(radius, radius));
 		hwmQuadtree<slFood>.AABBEnumerator enumerator = new hwmQuadtree<slFood>.AABBEnumerator(slWorld.GetInstance().GetFoodSystem().GetQuadtree().GetRootNode()
-			, hwmBox2D.BuildAABB(headPosition, new Vector2(radius, radius)));
-		hwmSphere2D headSphere = new hwmSphere2D(headPosition, radius);
+			, eatAABB);
+		hwmSphere2D headSphere = new hwmSphere2D(m_Head.GetPosition(), radius);
 		while (enumerator.MoveNext())
 		{
 			hwmQuadtree<slFood>.Node iterNode = enumerator.Current;
@@ -172,7 +171,7 @@ public class slSnake : hwmActor
 			{
 				slFood iterFood = foods[iFood];
 				if (inHeadSphere
-					|| ((Vector2)iterFood.transform.localPosition - headPosition).sqrMagnitude <= radius * radius)
+					|| (iterFood.transform.localPosition - m_Head.GetPosition()).sqrMagnitude <= radius * radius)
 				{
 					EatFood(iterFood);
 				}
@@ -214,35 +213,37 @@ public class slSnake : hwmActor
 		hwmDebug.Assert(initializeData.NodeCount >= slConstants.SNAKE_INITIALIZEZ_NODE_MINCOUNT, "initializeData.NodeCount >= slConstants.SNAKE_INITIALIZEZ_NODE_MINCOUNT");
 
 		m_SnakeName = initializeData.SnakeName;
-		m_TweakableProperties = slWorld.GetInstance().GetSnakePool().GetTweakableProperties(initializeData.TweakableProperties);
-		m_Properties = slWorld.GetInstance().GetSnakePool().GetProperties(m_SnakeName);
+		m_TweakableProperties = slWorld.GetInstance().GetSnakeSystem().GetTweakableProperties(initializeData.TweakableProperties);
+		m_Properties = slWorld.GetInstance().GetSnakeSystem().GetProperties(m_SnakeName);
 
 		m_Power = initializeData.NodeCount * m_TweakableProperties.NodeToPower;
 
-		m_Head = slWorld.GetInstance().GetSnakePool().PopHeadNode(m_SnakeName, m_GuidStr);
-		m_Head.Node.transform.localPosition = initializeData.HeadPosition;
-		m_Head.Node.transform.localRotation = initializeData.HeadRotation;
-		m_Head.Collider.radius = m_Properties.HeadColliderRadius;
-		m_Head.Trigger.OnTriggerEnter += OnTrigger;
-		m_Head.Predict.transform.localPosition = initializeData.HeadPosition;
-		m_Head.Predict.transform.localRotation = initializeData.HeadRotation;
-		m_Head.PredictCollider.size = new Vector2(m_Properties.HeadColliderRadius * slConstants.SNAKE_PREDICT_SIZE_X, slConstants.SNAKE_NODE_TO_NODE_DISTANCE * slConstants.SNAKE_PREDICT_SIZE_Y);
-		m_Head.PredictCollider.offset = new Vector2(0, m_Head.PredictCollider.size.y * 0.5f + m_Properties.HeadColliderRadius);
 
-		m_Clothes = slWorld.GetInstance().GetSnakePool().PopClothesNode(m_SnakeName, m_GuidStr);
-		m_Clothes.Node.transform.localPosition = initializeData.HeadPosition + initializeData.HeadRotation * new Vector3(0, -slConstants.SNAKE_NODE_TO_NODE_DISTANCE, 0);
-		m_Clothes.Node.transform.localRotation = initializeData.HeadRotation;
-		m_Clothes.Collider.radius = m_Properties.ClothesColliderRadius;
+		#region Head
+		m_Head = slWorld.GetInstance().GetSnakeSystem().GetHeadPool(m_SnakeName).Pop();
+		m_Head.Active(this);
+		m_Head.SetPositionAndRotation(initializeData.HeadPosition, initializeData.HeadRotation);
+		#endregion
+
+		#region Clothes
+		m_Clothes = slWorld.GetInstance().GetSnakeSystem().GetClothesPool(m_SnakeName).Pop();
+		m_Clothes.Active(this);
+		m_Clothes.SetPositionAndRotation(initializeData.HeadPosition + initializeData.HeadRotation * new Vector3(0, -slConstants.SNAKE_NODE_TO_NODE_DISTANCE, 0)
+			, initializeData.HeadRotation);
+		#endregion
+
+		#region Body
+		m_BodyPool = slWorld.GetInstance().GetSnakeSystem().GetBodyPool(m_SnakeName);
 
 		m_Bodys = new hwmDeque<BodyNode>(16);
 		Vector3 bodyToClothesOffset = initializeData.HeadRotation * new Vector3(0, -slConstants.SNAKE_NODE_TO_NODE_DISTANCE, 0);
 		Vector3 bodyToBodyOffset = initializeData.HeadRotation * new Vector3(0, -slConstants.SNAKE_NODE_TO_NODE_DISTANCE, 0);
 		for (int iNode = 3; iNode <= initializeData.NodeCount; iNode++) // MagicNumber: 1->Head 2->Clothes 3->FirstBody
 		{
-			BodyNode node = slWorld.GetInstance().GetSnakePool().PopBodyNode(m_SnakeName, m_GuidStr);
-			node.Node.transform.localPosition = m_Clothes.Node.transform.position + bodyToClothesOffset + bodyToBodyOffset * (iNode - 3);
-			node.Node.transform.localRotation = initializeData.HeadRotation;
-			node.Collider.radius = m_Properties.BodyColliderRadius;
+			BodyNode node = m_BodyPool.Pop();
+			node.Active(this);
+			m_Head.SetPositionAndRotation(m_Clothes.GetPosition() + bodyToClothesOffset + bodyToBodyOffset * (iNode - 3)
+				, initializeData.HeadRotation);
 			if (node.Sprite != null)
 			{
 				node.Sprite.sortingOrder = slConstants.SNAKE_SPRITERENDERER_MIN_ORDERINLAYER + initializeData.NodeCount - iNode;
@@ -250,6 +251,7 @@ public class slSnake : hwmActor
 
 			m_Bodys.PushBack(node);
 		}
+		#endregion
 
 		if (initializeData.IsBot)
 		{
@@ -294,18 +296,20 @@ public class slSnake : hwmActor
 		m_Controller.UnControllerSnake();
 		m_Controller = null;
 
-		m_Head.Trigger.OnTriggerEnter -= OnTrigger;
-		slWorld.GetInstance().GetSnakePool().PushHeadNode(m_SnakeName, m_Head);
+		m_Head.Deactive();
+		slWorld.GetInstance().GetSnakeSystem().GetHeadPool(m_SnakeName).Push(m_Head);
 		m_Head = null;
 
-		slWorld.GetInstance().GetSnakePool().PushClothesNode(m_SnakeName, m_Clothes);
+		m_Clothes.Deactive();
+		slWorld.GetInstance().GetSnakeSystem().GetClothesPool(m_SnakeName).Push(m_Clothes);
 		m_Clothes = null;
 
 		int bodyCount = m_Bodys.Count;
 		for (int iBody = 0; iBody < bodyCount; iBody++)
 		{
 			BodyNode bodyNode = m_Bodys.PopBack();
-			slWorld.GetInstance().GetSnakePool().PushBodyNode(m_SnakeName, bodyNode);
+			bodyNode.Deactive();
+			m_BodyPool.Push(bodyNode);
 		}
 		m_Bodys.Clear();
 		m_Bodys = null;
@@ -315,17 +319,6 @@ public class slSnake : hwmActor
 
 		Destroy(m_TweakableProperties);
 		m_Properties = null;
-	}
-
-	private T CreateNode<T>(string name, GameObject presentation, float colliderRadius, Vector3 position, Quaternion rotation) where T : BodyNode, new()
-	{
-		T node = new T();
-		bool isHead = node is HeadNode;
-
-		node.Node.transform.localPosition = position;
-		node.Node.transform.localRotation = rotation;
-
-		return node;
 	}
 
 	private void OnTrigger(Collider2D collider)
@@ -390,18 +383,135 @@ public class slSnake : hwmActor
 		public Rigidbody2D Rigidbody;
 		public GameObject Predict;
 		public BoxCollider2D PredictCollider;
+		public PredictNode PredictNode;
+
+		public override void SetPositionAndRotation(Vector3 position, Quaternion rotation)
+		{
+			base.SetPositionAndRotation(position, rotation);
+			Predict.transform.localPosition = position;
+			Predict.transform.localRotation = rotation;
+		}
+
+		public override void Active(slSnake owner)
+		{
+			base.Active(owner);
+
+			Collider.radius = owner.GetProperties().HeadColliderRadius;
+
+			Predict.name = owner.GetGuidStr();
+			PredictCollider.size = new Vector2(owner.GetProperties().HeadColliderRadius * slConstants.SNAKE_PREDICT_SIZE_X
+				, slConstants.SNAKE_NODE_TO_NODE_DISTANCE * slConstants.SNAKE_PREDICT_SIZE_Y);
+			PredictCollider.offset = new Vector2(0, PredictCollider.size.y * 0.5f + owner.GetProperties().HeadColliderRadius);
+			Predict.SetActive(true);
+
+			PredictNode.Extent = new Vector2(owner.GetProperties().HeadColliderRadius * slConstants.SNAKE_PREDICT_SIZE_X
+				, slConstants.SNAKE_NODE_TO_NODE_DISTANCE * slConstants.SNAKE_PREDICT_SIZE_Y) * 0.5f;
+			PredictNode.Offset = new Vector2(0, PredictNode.Extent.y + owner.GetProperties().HeadColliderRadius);
+
+			Trigger.OnTriggerEnter += owner.OnTrigger;
+		}
+
+		public override void Deactive()
+		{
+			Trigger.OnTriggerEnter -= Owner.OnTrigger;
+			Predict.SetActive(false);
+
+			base.Deactive();
+		}
+
+		protected override void UpdateQuadtree()
+		{
+			base.UpdateQuadtree();
+
+			PredictNode.Box = hwmBox2D.BuildAABB(m_Position + m_Rotation * PredictNode.Offset, PredictNode.Extent);
+			PredictNode.AABB = m_Rotation * PredictNode.Box;
+ 
+			PredictNode.OwnerQuadtree.UpdateElement(PredictNode);
+		}
 	}
 
 	public class ClothesNode : BodyNode
 	{
+		public override void Active(slSnake owner)
+		{
+			base.Active(owner);
+
+			Collider.radius = owner.GetProperties().ClothesColliderRadius;
+		}
+
+		public override void Deactive()
+		{
+			base.Deactive();
+		}
 	}
 
-	public class BodyNode
+	public class BodyNode : QuadtreeElement
 	{
 		public GameObject Node;
 		public CircleCollider2D Collider;
 		public SpriteRenderer Sprite;
+
+		protected Vector3 m_Position;
+		protected Quaternion m_Rotation;
+
+		public virtual void SetPositionAndRotation(Vector3 position, Quaternion rotation)
+		{
+			m_Position = position;
+			m_Rotation = rotation;
+
+			Node.transform.localPosition = position;
+			Node.transform.localRotation = rotation;
+
+			UpdateQuadtree();
+		}
+
+		public Vector3 GetPosition()
+		{
+			return m_Position;
+		}
+
+		public Quaternion GetRotation()
+		{
+			return m_Rotation;
+		}
+
+		public virtual void Active(slSnake owner)
+		{
+			Owner = owner;
+			Node.name = owner.GetGuidStr();
+			Node.SetActive(true);
+		}
+
+		public virtual void Deactive()
+		{
+			OwnerQuadtree.RemoveElement(this);
+			Node.SetActive(false);
+			Owner = null;
+		}
+
+		protected virtual void UpdateQuadtree()
+		{
+			AABB = hwmBox2D.BuildAABB(m_Position, new Vector2(Collider.radius, Collider.radius));
+			OwnerQuadtree.UpdateElement(this);
+		}
 	}
+
+	public class PredictNode : QuadtreeElement
+	{
+		public hwmBox2D Box;
+		public Vector2 Extent;
+		public Vector2 Offset;
+	}
+
+	public class QuadtreeElement : hwmQuadtree<QuadtreeElement>.IElement
+	{
+		public hwmQuadtree<QuadtreeElement> OwnerQuadtree { get; set; }
+		public hwmQuadtree<QuadtreeElement>.Node OwnerQuadtreeNode { get; set; }
+		public hwmBox2D AABB { get; set; }
+		public slSnake Owner;
+		public int Layer;
+	}
+
 
 	public enum DeadType
 	{

@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
-using UnityEngine;
-
 public class slGameState_Free : hwmGameState 
 {
+	protected override void HandleInProgress()
+	{
+		slWorld.GetInstance().GetSnakeSystem().GetQuadtree().MergeAndSplitAllNode();
+	}
 }

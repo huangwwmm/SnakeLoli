@@ -9,7 +9,7 @@ public interface hwmIPerformanceStatistics
 	void Initialize();
 	void Dispose();
 	void LogAndRecord();
-	hwmPerformanceStatisticsItem LoadOrCreateItem(string itemName, bool ignoreHistoryOnLoad = false);
+	hwmPerformanceStatisticsItem LoadOrCreateItem(string itemName, bool ignoreHistoryOnLoad = true);
 	hwmPerformanceStatisticsItem Start(string itemName);
 	void Start(hwmPerformanceStatisticsItem item);
 	hwmPerformanceStatisticsItem Finish(string itemName);
@@ -126,7 +126,7 @@ public class hwmPerformanceStatistics : hwmIPerformanceStatistics
 	{
 		List<string> historyStrs = new List<string>();
 		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.AppendLine("PerformanceStatistics:");
+		stringBuilder.AppendLine("Performance Statistics:");
 		foreach (KeyValuePair<string, hwmPerformanceStatisticsItem> item in m_Items)
 		{
 			string itemFilePath = m_RecordDirectory + item.Value._Name + ".txt";

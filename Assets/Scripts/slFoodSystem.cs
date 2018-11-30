@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class slFoodSystem
@@ -17,7 +18,7 @@ public class slFoodSystem
 
 	private Transform m_FoodRoot;
 
-	private Dictionary<int, slFood> m_Foods;
+	private hwmBetterDictionary<int, slFood> m_Foods;
 	private Queue<CreateEvent> m_CreateEvents;
 	private hwmBetterList<slFood> m_DestroyEvents;
 	private int m_LastFoodIndex = 0;
@@ -48,7 +49,7 @@ public class slFoodSystem
 		slQuadtreeGizmos.FoodQuadtree = m_Quadtree;
 #endif
 
-		m_FoodPool = new FoodPool();
+		m_FoodPool = new FoodPool(m_FoodRoot);
 		m_FoodPool.Initialize(Mathf.CeilToInt(m_MaxFood * slConstants.FOOD_POOL_INITIALIZE_MULTIPLY));
 		if (slWorld.GetInstance().NeedPresentation())
 		{
@@ -56,13 +57,13 @@ public class slFoodSystem
 			for (int iFood = 0; iFood < m_FoodPropertiess.Length; iFood++)
 			{
 				slFood.FoodType foodType = (slFood.FoodType)iFood;
-				m_FoodPresentationPools[iFood] = new FoodPresentationPool(foodType);
+				m_FoodPresentationPools[iFood] = new FoodPresentationPool(m_FoodRoot, foodType);
 				m_FoodPresentationPools[iFood].Initialize(0);
 			}
 		}
 
 		m_CreateEvents = new Queue<CreateEvent>();
-		m_Foods = new Dictionary<int, slFood>();
+		m_Foods = new hwmBetterDictionary<int, slFood>();
 		m_DestroyEvents = new hwmBetterList<slFood>();
 		m_FoodCount = 0;
 	}
@@ -96,10 +97,18 @@ public class slFoodSystem
 
 	public void DoUpdateFoods(float deltaTime)
 	{
-		foreach (slFood iterFood in m_Foods.Values)
+		hwmBetterDictionary<int, slFood>.Entry[] entries = m_Foods.GetEntries();
+		for (int iFood = 0; iFood < entries.Length; iFood++)
 		{
-			iterFood.DoUpdate(deltaTime);
+			if (entries[iFood].hashCode >= 0)
+			{
+				entries[iFood].value.DoUpdate(deltaTime);
+			}
 		}
+		//foreach (slFood iterFood in m_Foods.Values)
+		//{
+		//	iterFood.DoUpdate(deltaTime);
+		//}
 	}
 
 	public void DoUpdateFoodSystem()
@@ -145,16 +154,16 @@ public class slFoodSystem
 
 	public IEnumerator EnterMap_Co()
 	{
-		hwmPerformanceStatisticsItem performanceItem = hwmSystem.GetInstance().GetPerformanceStatistics().LoadOrCreateItem("EnterMap_FoodSystem");
-		hwmSystem.GetInstance().GetPerformanceStatistics().Start(performanceItem);
+		System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+		stopwatch.Start();
 		for (int iFood = 0; iFood < m_MaxFood; iFood++)
 		{
 			if (iFood > 0 && iFood % slConstants.FOOD_CREATECOUNT_PREFRAME_WHEN_ENDTERMAP == 0)
 			{
-				hwmSystem.GetInstance().GetPerformanceStatistics().Pause(performanceItem);
 				Debug.Log("foodsystem entermap created food count " + m_FoodCount);
+				stopwatch.Stop();
 				yield return null;
-				hwmSystem.GetInstance().GetPerformanceStatistics().Resume(performanceItem);
+				stopwatch.Start();
 			}
 
 			CreateFood(slFood.FoodType.Normal
@@ -164,12 +173,8 @@ public class slFoodSystem
 		}
 
 		m_Quadtree.AutoMergeAndSplitNode = false;
-		hwmSystem.GetInstance().GetPerformanceStatistics().Finish(performanceItem);
-	}
-
-	public Transform GetFoodRoot()
-	{
-		return m_FoodRoot;
+		stopwatch.Stop();
+		Debug.Log(string.Format("Food system enter map used {0} ms", stopwatch.ElapsedMilliseconds));
 	}
 
 	public void AddCreateEvent(slFood.FoodType foodType, Vector3 position, Color color, float power)
@@ -250,10 +255,17 @@ public class slFoodSystem
 
 	public class FoodPool : hwmPool<slFood>
 	{
+		private Transform m_Root;
+
+		public FoodPool(Transform root)
+		{
+			m_Root = root;
+		}
+
 		protected override slFood HandleCreateItem()
 		{
 			GameObject go = new GameObject("food");
-			go.transform.SetParent(slWorld.GetInstance().GetFoodSystem().GetFoodRoot(), false);
+			go.transform.SetParent(m_Root, false);
 			go.SetActive(false);
 
 			slFood food = go.AddComponent<slFood>();
@@ -264,9 +276,11 @@ public class slFoodSystem
 	public class FoodPresentationPool : hwmPool<slFoodPresentation>
 	{
 		private slFood.FoodType m_FoodType;
+		private Transform m_Root;
 
-		public FoodPresentationPool(slFood.FoodType foodType)
+		public FoodPresentationPool(Transform root, slFood.FoodType foodType)
 		{
+			m_Root = root;
 			m_FoodType = foodType;
 		}
 
@@ -275,7 +289,7 @@ public class slFoodSystem
 			slFoodPresentation food = (Object.Instantiate(hwmSystem.GetInstance().GetAssetLoader()
 					.LoadAsset(hwmAssetLoader.AssetType.Game, slConstants.FOOD_PRESENTATION_PREFAB_STARTWITHS + m_FoodType.ToString())) as GameObject)
 				.GetComponent<slFoodPresentation>();
-			food.transform.SetParent(slWorld.GetInstance().GetFoodSystem().GetFoodRoot(), false);
+			food.transform.SetParent(m_Root, false);
 			food.gameObject.SetActive(false);
 			return food;
 		}

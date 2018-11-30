@@ -28,6 +28,47 @@ public struct hwmBox2D
 		return !(lhs == rhs);
 	}
 
+	public static hwmBox2D operator *(Matrix4x4 matrix, hwmBox2D box)
+	{
+		Vector2 center = box.GetCenter();
+		Vector2 leftUp = new Vector2(box.Min.x, box.Max.y);
+		Vector2 leftDown = box.Min;
+		Vector2 rightUp = box.Max;
+		Vector2 rightDown = new Vector2(box.Max.x, box.Min.y);
+
+		Vector2 offset = center - hwmUtility.MatrixMultiplyVector(matrix, center);
+		leftUp = hwmUtility.MatrixMultiplyVector(matrix, leftUp) + offset;
+		leftDown = hwmUtility.MatrixMultiplyVector(matrix, leftDown) + offset;
+		rightUp = hwmUtility.MatrixMultiplyVector(matrix, rightUp) + offset;
+		rightDown = hwmUtility.MatrixMultiplyVector(matrix, rightDown) + offset;
+
+		return new hwmBox2D(new Vector2(Mathf.Min(leftUp.x, leftDown.x, rightUp.x, rightDown.x)
+				, Mathf.Min(leftUp.y, leftDown.y, rightUp.y, rightDown.y))
+			, new Vector2(Mathf.Max(leftUp.x, leftDown.x, rightUp.x, rightDown.x)
+				, Mathf.Max(leftUp.y, leftDown.y, rightUp.y, rightDown.y)));
+	}
+
+	public static hwmBox2D operator *(Quaternion rotation, hwmBox2D box)
+	{
+		Vector2 center = box.GetCenter();
+		Vector2 leftUp = new Vector2(box.Min.x, box.Max.y);
+		Vector2 leftDown = box.Min;
+		Vector2 rightUp = box.Max;
+		Vector2 rightDown = new Vector2(box.Max.x, box.Min.y);
+
+		Vector2 offset = center - hwmUtility.QuaternionMultiplyVector(rotation, center);
+		leftUp = hwmUtility.QuaternionMultiplyVector(rotation, leftUp) + offset;
+		leftDown = hwmUtility.QuaternionMultiplyVector(rotation, leftDown) + offset;
+		rightUp = hwmUtility.QuaternionMultiplyVector(rotation, rightUp) + offset;
+		rightDown = hwmUtility.QuaternionMultiplyVector(rotation, rightDown) + offset;
+
+		return new hwmBox2D(new Vector2(Mathf.Min(leftUp.x, leftDown.x, rightUp.x, rightDown.x)
+				, Mathf.Min(leftUp.y, leftDown.y, rightUp.y, rightDown.y))
+			, new Vector2(Mathf.Max(leftUp.x, leftDown.x, rightUp.x, rightDown.x)
+				, Mathf.Max(leftUp.y, leftDown.y, rightUp.y, rightDown.y)));
+	}
+
+
 	public static implicit operator hwmBox2D(Bounds bound)
 	{
 		return new hwmBox2D(bound.center, bound.size);

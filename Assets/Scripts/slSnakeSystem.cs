@@ -2,19 +2,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class slSnakePool
+public class slSnakeSystem
 {
-	private Transform m_Root;
+	private Transform m_PoolRoot;
 	private Dictionary<string, int> m_SnakeNameToIndex;
 	private Dictionary<string, slSnakeTweakableProperties> m_TweakablePropertiess;
 	private List<slSnakeProperties> m_Propertiess;
 	private List<NodePool<slSnake.HeadNode>> m_HeadPools;
 	private List<NodePool<slSnake.ClothesNode>> m_ClothesNodePools;
 	private List<NodePool<slSnake.BodyNode>> m_BodyPools;
+	private hwmQuadtree<slSnake.QuadtreeElement> m_Quadtree;
 
 	public void Initialize()
 	{
-		m_Root = new GameObject("Snakes").transform;
+		m_PoolRoot = new GameObject("Snakes").transform;
 		m_SnakeNameToIndex = new Dictionary<string, int>();
 		m_TweakablePropertiess = new Dictionary<string, slSnakeTweakableProperties>();
 		m_Propertiess = new List<slSnakeProperties>();
@@ -22,6 +23,17 @@ public class slSnakePool
 		m_HeadPools = new List<NodePool<slSnake.HeadNode>>();
 		m_ClothesNodePools = new List<NodePool<slSnake.ClothesNode>>();
 		m_BodyPools = new List<NodePool<slSnake.BodyNode>>();
+
+		m_Quadtree = new hwmQuadtree<slSnake.QuadtreeElement>();
+		m_Quadtree.Initialize(CalculateQuadtreeDepth()
+			, slConstants.SNAKE_QUADTREE_MAXELEMENT_PERNODE
+			, slConstants.SNAKE_QUADTREE_MINELEMENT_PREPARENTNODE
+			, new Vector2(slConstants.SNAKE_QUADTREE_LOOSESIZE, slConstants.SNAKE_QUADTREE_LOOSESIZE)
+			, slWorld.GetInstance().GetMap().GetMapBox());
+		m_Quadtree.AutoMergeAndSplitNode = false;
+#if UNITY_EDITOR
+		slQuadtreeGizmos.SnakeQuadtree = m_Quadtree;
+#endif
 	}
 
 	public void Dispose()
@@ -45,7 +57,12 @@ public class slSnakePool
 		m_TweakablePropertiess = null;
 		m_SnakeNameToIndex.Clear();
 		m_SnakeNameToIndex = null;
-		UnityEngine.Object.Destroy(m_Root.gameObject);
+		UnityEngine.Object.Destroy(m_PoolRoot.gameObject);
+	}
+
+	public hwmQuadtree<slSnake.QuadtreeElement> GetQuadtree()
+	{
+		return m_Quadtree;
 	}
 
 	public slSnakeTweakableProperties GetTweakableProperties(string propertiesName)
@@ -65,51 +82,19 @@ public class slSnakePool
 		return m_Propertiess[SnakeNameToIndex(snakeName)];
 	}
 
-	public slSnake.HeadNode PopHeadNode(string snakeName, string owner)
+	public NodePool<slSnake.HeadNode> GetHeadPool(string snakeName)
 	{
-		slSnake.HeadNode node = m_HeadPools[SnakeNameToIndex(snakeName)].Pop();
-		node.Node.name = owner;
-		node.Predict.name = owner;
-		node.Node.SetActive(true);
-		node.Predict.SetActive(true);
-		return node;
+		return m_HeadPools[SnakeNameToIndex(snakeName)];
 	}
 
-	public slSnake.ClothesNode PopClothesNode(string snakeName, string owner)
+	public NodePool<slSnake.ClothesNode> GetClothesPool(string snakeName)
 	{
-		slSnake.ClothesNode node = m_ClothesNodePools[SnakeNameToIndex(snakeName)].Pop();
-		node.Node.name = owner;
-		node.Node.SetActive(true);
-		return node;
+		return m_ClothesNodePools[SnakeNameToIndex(snakeName)];
 	}
 
-	public slSnake.BodyNode PopBodyNode(string snakeName, string owner)
+	public NodePool<slSnake.BodyNode> GetBodyPool(string snakeName)
 	{
-		NodePool<slSnake.BodyNode> pool = m_BodyPools[SnakeNameToIndex(snakeName)];
-		slSnake.BodyNode node = pool.Pop();
-
-		node.Node.name = owner;
-		node.Node.SetActive(true);
-		return node;
-	}
-
-	public void PushHeadNode(string snakeName, slSnake.HeadNode node)
-	{
-		node.Node.SetActive(false);
-		node.Predict.SetActive(false);
-		m_HeadPools[SnakeNameToIndex(snakeName)].Push(node);
-	}
-
-	public void PushClothesNode(string snakeName, slSnake.ClothesNode node)
-	{
-		node.Node.SetActive(false);
-		m_ClothesNodePools[SnakeNameToIndex(snakeName)].Push(node);
-	}
-
-	public void PushBodyNode(string snakeName, slSnake.BodyNode node)
-	{
-		node.Node.SetActive(false);
-		m_BodyPools[SnakeNameToIndex(snakeName)].Push(node);
+		return m_BodyPools[SnakeNameToIndex(snakeName)];
 	}
 
 	private int SnakeNameToIndex(string snakeName)
@@ -138,18 +123,18 @@ public class slSnakePool
 						.LoadAsset(hwmAssetLoader.AssetType.Game, slConstants.SNAKE_PRESENTATION_PROPERTIES_PREfAB_NAME_STARTWITHS + snakeName) as GameObject)
 					.GetComponent<slSnakePresentationProperties>()
 				: null;
-			snakePresentationProperties.transform.SetParent(m_Root, false);
+			snakePresentationProperties.transform.SetParent(m_PoolRoot, false);
 			snakePresentationProperties.gameObject.SetActive(false);
 
-			NodePool<slSnake.HeadNode> headNodePool = new NodePool<slSnake.HeadNode>(snakePresentationProperties, m_Root);
+			NodePool<slSnake.HeadNode> headNodePool = new NodePool<slSnake.HeadNode>(snakePresentationProperties, m_PoolRoot, m_Quadtree);
 			headNodePool.Initialize(1);
 			m_HeadPools.Add(headNodePool);
 
-			NodePool<slSnake.ClothesNode> clothesNodePool = new NodePool<slSnake.ClothesNode>(snakePresentationProperties, m_Root);
+			NodePool<slSnake.ClothesNode> clothesNodePool = new NodePool<slSnake.ClothesNode>(snakePresentationProperties, m_PoolRoot, m_Quadtree);
 			clothesNodePool.Initialize(1);
 			m_ClothesNodePools.Add(clothesNodePool);
 
-			NodePool<slSnake.BodyNode> bodyNodePool = new NodePool<slSnake.BodyNode>(snakePresentationProperties, m_Root);
+			NodePool<slSnake.BodyNode> bodyNodePool = new NodePool<slSnake.BodyNode>(snakePresentationProperties, m_PoolRoot, m_Quadtree);
 			bodyNodePool.Initialize(slConstants.SNAKE_POOL_BODYNODE_CACHECOUNT_PRESNAKE);
 			m_BodyPools.Add(bodyNodePool);
 		}
@@ -161,16 +146,35 @@ public class slSnakePool
 		}
 	}
 
-	private class NodePool<T> : hwmPool<T> where T : slSnake.BodyNode, new()
+	private int CalculateQuadtreeDepth()
+	{
+		int depth = 1;
+		Vector2 size = slWorld.GetInstance().GetMap().GetMapBox().GetSize();
+		while (true)
+		{
+			if (size.x < slConstants.SNAKE_QUADTREE_MAXDEPTH_BOXSIZE
+				|| size.y < slConstants.SNAKE_QUADTREE_MAXDEPTH_BOXSIZE)
+			{
+				break;
+			}
+			size *= 0.5f;
+			depth++;
+		}
+		return depth;
+	}
+
+	public class NodePool<T> : hwmPool<T> where T : slSnake.BodyNode, new()
 	{
 		private Transform m_Root;
 		private slSnakePresentationProperties m_Presentation;
 		private NodeType m_NodeType;
+		private hwmQuadtree<slSnake.QuadtreeElement> m_Quadtree;
 
-		public NodePool(slSnakePresentationProperties presentation, Transform root)
+		public NodePool(slSnakePresentationProperties presentation, Transform root, hwmQuadtree<slSnake.QuadtreeElement> quadtree)
 		{
 			m_Presentation = presentation;
 			m_Root = root;
+			m_Quadtree = quadtree;
 
 			Type nodeType = typeof(T);
 			m_NodeType = nodeType == typeof(slSnake.HeadNode)
@@ -213,18 +217,24 @@ public class slSnakePool
 
 			node.Collider = node.Node.AddComponent<CircleCollider2D>();
 			node.Collider.isTrigger = m_NodeType == NodeType.Head;
+			node.OwnerQuadtree = m_Quadtree;
 
+			node.Layer = (int)m_NodeType;
 			if (m_NodeType == NodeType.Head)
 			{
 				slSnake.HeadNode headNode = node as slSnake.HeadNode;
 				headNode.Trigger = headNode.Node.AddComponent<slSnakeHeadTrigger>();
 				headNode.Rigidbody = headNode.Node.AddComponent<Rigidbody2D>();
 				headNode.Rigidbody.isKinematic = true;
+
 				headNode.Predict = new GameObject("Predict");
 				headNode.Predict.SetActive(false);
 				headNode.Predict.transform.SetParent(m_Root, false);
 				headNode.Predict.layer = (int)slConstants.Layer.SnakePredict;
 				headNode.PredictCollider = headNode.Predict.AddComponent<BoxCollider2D>();
+
+				headNode.PredictNode = new slSnake.PredictNode();
+				headNode.PredictNode.OwnerQuadtree = m_Quadtree;
 			}
 
 			return node;

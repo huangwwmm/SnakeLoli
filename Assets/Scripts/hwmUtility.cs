@@ -67,4 +67,31 @@ public static class hwmUtility
 		return new Vector2(vec.x != 0.0f ? 1.0f / vec.x : float.MaxValue
 			, vec.y != 0.0f ? 1.0f / vec.y : float.MaxValue);
 	}
+
+	/// <summary>
+	/// Transforms a direction by this matrix.
+	/// </summary>
+	public static Vector2 MatrixMultiplyVector(Matrix4x4 matrix, Vector2 vector)
+	{
+		Vector2 vector2;
+		vector2.x = matrix.m00 * vector.x + matrix.m01 * vector.y;
+		vector2.y = matrix.m10 * vector.x + matrix.m11 * vector.y;
+		return vector2;
+	}
+
+	public static Vector2 QuaternionMultiplyVector(Quaternion rotation, Vector2 vector)
+	{
+		float num1 = rotation.x * 2f;
+		float num2 = rotation.y * 2f;
+		float num3 = rotation.z * 2f;
+		float num4 = rotation.x * num1;
+		float num5 = rotation.y * num2;
+		float num6 = rotation.z * num3;
+		float num7 = rotation.x * num2;
+		float num12 = rotation.w * num3;
+		Vector2 vector2;
+		vector2.x = (1.0f - (num5 + num6)) * vector.x + (num7 - num12) * vector.y;
+		vector2.y = (num7 + num12) * vector.x + (1.0f - (num4 + num6)) * vector.y;
+		return vector2;
+	}
 }

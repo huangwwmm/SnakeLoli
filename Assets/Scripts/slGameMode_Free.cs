@@ -46,7 +46,7 @@ public class slGameMode_Free : hwmGameMode
 			iterBotState.SnakeName = "10000";
 			iterBotState.CreateNodeCount = 5;
 			slWorld.GetInstance().GetGameState().AddPlayerState(iterBotState);
-			slWorld.GetInstance().GetSnakePool().LoadSnake(iterBotState.SnakeName);
+			slWorld.GetInstance().GetSnakeSystem().LoadSnake(iterBotState.SnakeName);
 			SpawnPlayer(iterBotState);
 
 			// for aviod snakes together update move
@@ -60,7 +60,7 @@ public class slGameMode_Free : hwmGameMode
 		playerState.SnakeName = "40000";
 		playerState.CreateNodeCount = 5;
 		slWorld.GetInstance().GetGameState().AddPlayerState(playerState);
-		slWorld.GetInstance().GetSnakePool().LoadSnake(playerState.SnakeName);
+		slWorld.GetInstance().GetSnakeSystem().LoadSnake(playerState.SnakeName);
 		SpawnPlayer(playerState);
 	}
 

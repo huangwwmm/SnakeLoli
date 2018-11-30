@@ -65,6 +65,11 @@ public class hwmSystem : MonoBehaviour
 	{
 		m_WaitingToPlayLevel = level;
 	}
+
+	public hwmINIParser GetConfig()
+	{
+		return m_Config;
+	}
 	#endregion // get/set function
 
 	protected void Awake()
