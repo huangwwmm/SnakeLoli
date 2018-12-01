@@ -70,13 +70,15 @@ public class slBaseController : MonoBehaviour
 
 	}
 
-	protected DangerType IsSafe(hwmQuadtree<slSnake.QuadtreeElement>.AABBEnumerator enumerator, Vector2 moveDirection, float distance, bool ignorePredict)
+	protected bool IsSafe(hwmQuadtree<slSnake.QuadtreeElement>.AABBEnumerator enumerator, Vector2 moveDirection, float distance, bool ignorePredict)
 	{
 		Vector2 start = m_Snake.GetHeadPosition();
 		Vector2 end = start + moveDirection * distance;
+		Vector2 direction = end - start;
+		Vector2 directionReciprocal = hwmUtility.Reciprocal(direction);
 		if (!slWorld.GetInstance().GetMap().GetMapBox().IsInsideOrOn(end))
 		{
-			return DangerType.Wall;
+			return false;
 		}
 
 		hwmSphere2D headSphere = new hwmSphere2D(m_Snake.GetHeadPosition(), m_Snake.GetHeadRadius());
@@ -89,14 +91,13 @@ public class slBaseController : MonoBehaviour
 			for (int iElement = elements.Count - 1; iElement >= 0; iElement--)
 			{
 				slSnake.QuadtreeElement iterElement = elements[iElement];
-				hwmDebug.Assert(iterElement.Owner != null, "VaildNode");
-				if (iterElement.Owner != m_Snake)
+				if (iterElement.Owner != m_Snake.GetGuid())
 				{
 					if (iterElement.NodeType != slConstants.NodeType.Predict)
 					{
-						if (iterElement.AABB.LineIntersection(start, end))
+						if (iterElement.AABB.LineIntersection(start, end, direction, directionReciprocal))
 						{
-							return DangerType.Snake;
+							return false;
 						}
 					}
 					else if (!ignorePredict)
@@ -107,13 +108,13 @@ public class slBaseController : MonoBehaviour
 						end = hwmUtility.QuaternionMultiplyVector(rotation, end) + offset;
 						if (((slSnake.PredictNode)iterElement).Box.LineIntersection(start, end))
 						{
-							return DangerType.Predict;
+							return false;
 						}
 					}
 				}
 			}
 		}
-		return DangerType.Safe;
+		return true;
 	}
 
 	protected bool IsHitPredict()
@@ -130,7 +131,7 @@ public class slBaseController : MonoBehaviour
 			for (int iElement = elements.Count - 1; iElement >= 0; iElement--)
 			{
 				slSnake.QuadtreeElement iterElement = elements[iElement];
-				if (iterElement.Owner != m_Snake
+				if (iterElement.Owner != m_Snake.GetGuid()
 					&& iterElement.NodeType == slConstants.NodeType.Predict)
 				{
 					Vector2 predictCenter = iterElement.GetPosition();
@@ -146,13 +147,5 @@ public class slBaseController : MonoBehaviour
 			}
 		}
 		return false;
-	}
-
-	public enum DangerType
-	{
-		Safe,
-		Wall,
-		Snake,
-		Predict,
 	}
 }

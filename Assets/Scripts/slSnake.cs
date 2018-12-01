@@ -177,7 +177,7 @@ public class slSnake : hwmActor
 			for (int iElement = elements.Count - 1; iElement >= 0; iElement--)
 			{
 				QuadtreeElement iterElement = elements[iElement];
-				if (iterElement.Owner != this
+				if (iterElement.Owner != m_Guid
 					&& iterElement.NodeType != slConstants.NodeType.Predict
 					&& (iterElement.GetPosition() - m_Head.GetPosition()).sqrMagnitude
 						<= ((m_Head.Radius + iterElement.Radius) * (m_Head.Radius + iterElement.Radius)))
@@ -256,19 +256,19 @@ public class slSnake : hwmActor
 
 	public void VaildNode()
 	{
-		hwmDebug.Assert(m_Head.Owner == this, "VaildNode");
+		hwmDebug.Assert(m_Head.Owner == m_Guid, "VaildNode");
 		hwmDebug.Assert(m_Head.NodeType == slConstants.NodeType.Head , "VaildNode");
 		hwmDebug.Assert(m_Head.OwnerQuadtreeNode != null, "VaildNode");
-		hwmDebug.Assert(m_Head.PredictNode.Owner == this, "VaildNode");
+		hwmDebug.Assert(m_Head.PredictNode.Owner == m_Guid, "VaildNode");
 		hwmDebug.Assert(m_Head.PredictNode.NodeType ==  slConstants.NodeType.Predict, "VaildNode");
 
-		hwmDebug.Assert(m_Clothes.Owner == this, "VaildNode");
+		hwmDebug.Assert(m_Clothes.Owner == m_Guid, "VaildNode");
 		hwmDebug.Assert(m_Clothes.NodeType == slConstants.NodeType.Clothes, "VaildNode");
 		hwmDebug.Assert(m_Clothes.OwnerQuadtreeNode != null, "VaildNode");
 
 		foreach (BodyNode body in m_Bodys)
 		{
-			hwmDebug.Assert(body.Owner == this, "VaildNode");
+			hwmDebug.Assert(body.Owner == m_Guid, "VaildNode");
 			hwmDebug.Assert(body.NodeType == slConstants.NodeType.Body, "VaildNode");
 			hwmDebug.Assert(body.OwnerQuadtreeNode != null, "VaildNode");
 		}
@@ -546,7 +546,7 @@ public class slSnake : hwmActor
 		public hwmQuadtree<QuadtreeElement> OwnerQuadtree { get; set; }
 		public hwmQuadtree<QuadtreeElement>.Node OwnerQuadtreeNode { get; set; }
 		public hwmBox2D AABB { get; set; }
-		public slSnake Owner;
+		public int Owner;
 		public slConstants.NodeType NodeType;
 
 		public float Radius;
@@ -572,14 +572,14 @@ public class slSnake : hwmActor
 
 		public virtual void Active(slSnake owner)
 		{
-			Owner = owner;
+			Owner = owner.GetGuid();
 			Radius = owner.GetProperties().BodyColliderRadius;
 		}
 
 		public virtual void Deactive()
 		{
 			OwnerQuadtree.RemoveElement(this);
-			Owner = null;
+			Owner = int.MinValue;
 		}
 	}
 
