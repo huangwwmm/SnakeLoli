@@ -1,8 +1,14 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class slBaseController : MonoBehaviour 
 {
 	protected slSnake m_Snake;
+
+	public slSnake GetControllerSnake()
+	{
+		return m_Snake;
+	}
 
 	public void Initialize()
 	{
@@ -64,48 +70,89 @@ public class slBaseController : MonoBehaviour
 
 	}
 
-	protected bool IsSafe(Vector2 moveDirection, float distance, bool ignorePredict)
+	protected DangerType IsSafe(hwmQuadtree<slSnake.QuadtreeElement>.AABBEnumerator enumerator, Vector2 moveDirection, float distance, bool ignorePredict)
 	{
-		RaycastHit2D[] hits = Physics2D.LinecastAll(m_Snake.GetHeadPosition()
-			, (Vector2)m_Snake.GetHeadPosition() + moveDirection * distance
-			, ignorePredict
-				? (1 << (int)slConstants.Layer.Snake)
-					| (1 << (int)slConstants.Layer.SnakeHead)
-					| (1 << (int)slConstants.Layer.SnakePredict)
-					| (1 << (int)slConstants.Layer.Wall)
-				: (1 << (int)slConstants.Layer.Snake)
-					| (1 << (int)slConstants.Layer.SnakeHead)
-					| (1 << (int)slConstants.Layer.Wall));
-
-		for (int iHit = 0; iHit < hits.Length; iHit++)
+		Vector2 start = m_Snake.GetHeadPosition();
+		Vector2 end = start + moveDirection * distance;
+		if (!slWorld.GetInstance().GetMap().GetMapBox().IsInsideOrOn(end))
 		{
-			if (hits[iHit].collider.gameObject.name != m_Snake.GetGuidStr())
+			return DangerType.Wall;
+		}
+
+		hwmSphere2D headSphere = new hwmSphere2D(m_Snake.GetHeadPosition(), m_Snake.GetHeadRadius());
+
+		enumerator.Reset();
+		while (enumerator.MoveNext())
+		{
+			hwmQuadtree<slSnake.QuadtreeElement>.Node iterNode = enumerator.Current;
+			hwmBetterList<slSnake.QuadtreeElement> elements = iterNode.GetElements();
+			for (int iElement = elements.Count - 1; iElement >= 0; iElement--)
 			{
-				return false;
-			}
-			else if (hits[iHit].collider.gameObject.layer == (int)slConstants.Layer.Wall)
-			{
-				return false;
+				slSnake.QuadtreeElement iterElement = elements[iElement];
+				hwmDebug.Assert(iterElement.Owner != null, "VaildNode");
+				if (iterElement.Owner != m_Snake)
+				{
+					if (iterElement.NodeType != slConstants.NodeType.Predict)
+					{
+						if (iterElement.AABB.LineIntersection(start, end))
+						{
+							return DangerType.Snake;
+						}
+					}
+					else if (!ignorePredict)
+					{
+						Quaternion rotation = Quaternion.Inverse(iterElement.GetRotation());
+						Vector2 offset = (Vector2)iterElement.GetPosition() - hwmUtility.QuaternionMultiplyVector(rotation, iterElement.GetPosition());
+						start = hwmUtility.QuaternionMultiplyVector(rotation, start) + offset;
+						end = hwmUtility.QuaternionMultiplyVector(rotation, end) + offset;
+						if (((slSnake.PredictNode)iterElement).Box.LineIntersection(start, end))
+						{
+							return DangerType.Predict;
+						}
+					}
+				}
 			}
 		}
-		return true;
+		return DangerType.Safe;
 	}
 
 	protected bool IsHitPredict()
 	{
-		RaycastHit2D[] hits = Physics2D.CircleCastAll(m_Snake.GetHeadPosition()
-			, m_Snake.GetProperties().HeadColliderRadius
-			, Vector2.zero
-			, Mathf.Infinity
-			, (1 << (int)slConstants.Layer.SnakePredict));
+		float radius = m_Snake.GetHeadRadius();
+		hwmBox2D collideAABB = hwmBox2D.BuildAABB(m_Snake.GetHeadPosition(), new Vector2(radius, radius));
+		hwmQuadtree<slSnake.QuadtreeElement>.AABBEnumerator enumerator = new hwmQuadtree<slSnake.QuadtreeElement>.AABBEnumerator(
+			slWorld.GetInstance().GetSnakeSystem().GetQuadtree().GetRootNode(), collideAABB);
 
-		for (int iHit = 0; iHit < hits.Length; iHit++)
+		while (enumerator.MoveNext())
 		{
-			if (hits[iHit].collider.gameObject.name != m_Snake.GetGuidStr())
+			hwmQuadtree<slSnake.QuadtreeElement>.Node iterNode = enumerator.Current;
+			hwmBetterList<slSnake.QuadtreeElement> elements = iterNode.GetElements();
+			for (int iElement = elements.Count - 1; iElement >= 0; iElement--)
 			{
-				return true;
+				slSnake.QuadtreeElement iterElement = elements[iElement];
+				if (iterElement.Owner != m_Snake
+					&& iterElement.NodeType == slConstants.NodeType.Predict)
+				{
+					Vector2 predictCenter = iterElement.GetPosition();
+					Quaternion predictRotationInverse = Quaternion.Inverse(iterElement.GetRotation());
+					Vector2 sphereCenter = hwmUtility.QuaternionMultiplyVector(predictRotationInverse, m_Snake.GetHeadPosition()) 
+						+ predictCenter
+						- hwmUtility.QuaternionMultiplyVector(predictRotationInverse, predictCenter);
+					if (((slSnake.PredictNode)iterElement).Box.IntersectSphere(sphereCenter, radius * radius))
+					{
+						return true;
+					}
+				}
 			}
 		}
 		return false;
+	}
+
+	public enum DangerType
+	{
+		Safe,
+		Wall,
+		Snake,
+		Predict,
 	}
 }

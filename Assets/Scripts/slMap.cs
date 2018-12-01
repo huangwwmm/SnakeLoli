@@ -14,7 +14,6 @@ public class slMap : MonoBehaviour
 		// Wall
 		m_WallGameObject = new GameObject("Wall");
 		m_WallGameObject.transform.SetParent(transform, false);
-		m_WallGameObject.layer = (int)slConstants.Layer.Wall;
 
 		BoxCollider2D up = m_WallGameObject.AddComponent<BoxCollider2D>();
 		BoxCollider2D down = m_WallGameObject.AddComponent<BoxCollider2D>();

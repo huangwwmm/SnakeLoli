@@ -215,23 +215,12 @@ public class slSnakeSystem
 			node.Node.name = m_NodeType.ToString();
 			node.Node.transform.SetParent(m_Root, false);
 
-			node.Collider = node.Node.AddComponent<CircleCollider2D>();
-			node.Collider.isTrigger = m_NodeType == slConstants.NodeType.Head;
 			node.OwnerQuadtree = m_Quadtree;
 
 			node.NodeType = m_NodeType;
 			if (m_NodeType == slConstants.NodeType.Head)
 			{
 				slSnake.HeadNode headNode = node as slSnake.HeadNode;
-				headNode.Trigger = headNode.Node.AddComponent<slSnakeHeadTrigger>();
-				headNode.Rigidbody = headNode.Node.AddComponent<Rigidbody2D>();
-				headNode.Rigidbody.isKinematic = true;
-
-				headNode.Predict = new GameObject("Predict");
-				headNode.Predict.SetActive(false);
-				headNode.Predict.transform.SetParent(m_Root, false);
-				headNode.Predict.layer = (int)slConstants.Layer.SnakePredict;
-				headNode.PredictCollider = headNode.Predict.AddComponent<BoxCollider2D>();
 
 				headNode.PredictNode = new slSnake.PredictNode();
 				headNode.PredictNode.OwnerQuadtree = m_Quadtree;

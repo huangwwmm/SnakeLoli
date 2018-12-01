@@ -128,5 +128,7 @@ public class slPlayerController : slBaseController
 		{
 			Application.Quit();
 		}
+
+		IsHitPredict();
 	}
 }

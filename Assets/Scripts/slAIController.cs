@@ -36,11 +36,16 @@ public class slAIController : slBaseController
 #if UNITY_EDITOR
 		m_AIDetectGizmos.Clear();
 #endif
+		hwmQuadtree<slSnake.QuadtreeElement>.AABBEnumerator enumerator = new hwmQuadtree<slSnake.QuadtreeElement>.AABBEnumerator(slWorld.GetInstance().GetSnakeSystem().GetQuadtree().GetRootNode()
+			, hwmBox2D.BuildAABB(m_Snake.GetHeadPosition(), new Vector2(slConstants.SNAKE_DETECT_DISTANCE, slConstants.SNAKE_DETECT_DISTANCE)));
 		bool ignorePredict = IsHitPredict();
 		int dangerDirection = 0;
-		if ((!IsSafe(m_ClockwiseDetectAngle * targetDirection, slConstants.SNAKE_DETECT_DISTANCE, ignorePredict) && dangerDirection++ > -1)
-			|| (!IsSafe(m_CounterclockwiseDetectAngle * targetDirection, slConstants.SNAKE_DETECT_DISTANCE, ignorePredict)) && dangerDirection++ > -1
-			|| !(IsSafe(targetDirection, slConstants.SNAKE_DETECT_DISTANCE, ignorePredict) && dangerDirection++ > -1))
+		if ((IsSafe(enumerator, m_ClockwiseDetectAngle * targetDirection, slConstants.SNAKE_DETECT_DISTANCE, ignorePredict) != DangerType.Safe
+				&& dangerDirection++ > -1)
+			|| (IsSafe(enumerator, m_CounterclockwiseDetectAngle * targetDirection, slConstants.SNAKE_DETECT_DISTANCE, ignorePredict) != DangerType.Safe
+				&& dangerDirection++ > -1)
+			|| (IsSafe(enumerator, targetDirection, slConstants.SNAKE_DETECT_DISTANCE, ignorePredict) != DangerType.Safe
+				&& dangerDirection++ > -1))
 		{
 			Quaternion angle = dangerDirection == 3
 				? m_ClockwiseDetectAngle
@@ -51,7 +56,7 @@ public class slAIController : slBaseController
 			for (int iCalculate = 0; iCalculate < slConstants.SNAKE_AI_CALCULATE_TIMES; iCalculate++)
 			{
 				currentCalculateDirection = angle * currentCalculateDirection;
-				bool isSafe = IsSafe(currentCalculateDirection, slConstants.SNAKE_DETECT_DISTANCE, ignorePredict);
+				DangerType isSafe = IsSafe(enumerator, currentCalculateDirection, slConstants.SNAKE_DETECT_DISTANCE, ignorePredict);
 #if UNITY_EDITOR
 				AIDetectGizmos aIDetectGizmos = new AIDetectGizmos();
 				aIDetectGizmos.StartPosition = m_Snake.GetHeadPosition();
@@ -59,7 +64,7 @@ public class slAIController : slBaseController
 				aIDetectGizmos.IsSafe = isSafe;
 				m_AIDetectGizmos.Add(aIDetectGizmos);
 #endif
-				if (isSafe)
+				if (isSafe == DangerType.Safe)
 				{
 					targetDirection = currentCalculateDirection;
 					break;
@@ -68,7 +73,7 @@ public class slAIController : slBaseController
 		}
 
 		m_NotChangeDirectionTimes = m_Snake.TargetMoveDirection == targetDirection.normalized
-			? m_NotChangeDirectionTimes + 1 : 0;
+				? m_NotChangeDirectionTimes + 1 : 0;
 		m_Snake.TargetMoveDirection = targetDirection.normalized;
 	}
 
@@ -78,7 +83,13 @@ public class slAIController : slBaseController
 		for (int iAIDetect = 0; iAIDetect < m_AIDetectGizmos.Count; iAIDetect++)
 		{
 			AIDetectGizmos iterDetect = m_AIDetectGizmos[iAIDetect];
-			Gizmos.color = iterDetect.IsSafe ? Color.green : Color.red;
+			Gizmos.color = iterDetect.IsSafe == DangerType.Safe
+				? Color.green
+				: iterDetect.IsSafe == DangerType.Snake
+					? Color.red
+					: iterDetect.IsSafe == DangerType.Wall
+						? Color.blue
+						: Color.gray;
 			Gizmos.DrawLine(iterDetect.StartPosition, iterDetect.EndPosition);
 		}
 	}
@@ -123,7 +134,7 @@ public class slAIController : slBaseController
 	{
 		public Vector2 StartPosition;
 		public Vector2 EndPosition;
-		public bool IsSafe;
+		public DangerType IsSafe;
 	}
 #endif
 }

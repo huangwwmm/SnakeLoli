@@ -581,6 +581,12 @@ public class hwmQuadtree<T> : IEnumerable, IEnumerable<hwmQuadtree<T>.Node> wher
 
 		public Node Current { get; private set; }
 
+		public void Reset()
+		{
+			Current = null;
+			m_ChilderIndex = 0;
+		}
+
 		object IEnumerator.Current { get { return Current; } }
 
 		internal AABBEnumerator(Node rootNode, hwmBox2D aabb)

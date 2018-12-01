@@ -271,4 +271,41 @@ public struct hwmBox2D
 			return true;
 		}
 	}
+
+	/// <summary>
+	/// Performs a sphere vs box intersection test using Arvo's algorithm:
+	/// <code>
+	///		for each i in (x, y)
+	///			if (sphereCenter(i) < BoxMin(i)) d2 += (sphereCenter(i) - BoxMin(i)) ^ 2
+	///			else if (sphereCenter(i) > BoxMax(i)) d2 += (sphereCenter(i) - BoxMax(i)) ^ 2
+	///	</code>
+	/// </summary>
+	/// <param name="sphereCenter">the center of the sphere being tested against the AABB</param>
+	/// <param name="radiusSquared">the size of the sphere being tested</param>
+	/// <returns>Whether the sphere/box intersect or not.</returns>
+	public bool IntersectSphere(Vector2 sphereCenter, float radiusSquared)
+	{
+		// Accumulates the distance as we iterate axis
+		float DistSquared = 0.0f;
+		// Check each axis for min/max and add the distance accordingly
+		// NOTE: Loop manually unrolled for > 2x speed up
+		if (sphereCenter.x < Min.x)
+		{
+			DistSquared += hwmUtility.Square(sphereCenter.x - Min.x);
+		}
+		else if (sphereCenter.x > Max.x)
+		{
+			DistSquared += hwmUtility.Square(sphereCenter.x - Max.x);
+		}
+		if (sphereCenter.y < Min.y)
+		{
+			DistSquared += hwmUtility.Square(sphereCenter.y - Min.y);
+		}
+		else if (sphereCenter.y > Max.y)
+		{
+			DistSquared += hwmUtility.Square(sphereCenter.y - Max.y);
+		}
+		// If the distance is less than or equal to the radius, they intersect
+		return DistSquared <= radiusSquared;
+	}
 }

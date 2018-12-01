@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class slSnake : hwmActor
@@ -58,6 +57,11 @@ public class slSnake : hwmActor
 		return m_Head.GetPosition();
 	}
 
+	public float GetHeadRadius()
+	{
+		return m_Head.Radius;
+	}
+
 	public slSnakeTweakableProperties GetTweakableProperties()
 	{
 		return m_TweakableProperties;
@@ -73,6 +77,8 @@ public class slSnake : hwmActor
 		int moveNodeCount = 0;
 		switch (m_SpeedState)
 		{
+			case SpeedState.Still:
+				return;
 			case SpeedState.Normal:
 				moveNodeCount = m_TweakableProperties.NormalMoveNodeCount;
 				break;
@@ -248,6 +254,26 @@ public class slSnake : hwmActor
 		hwmWorld.GetInstance().DestroyActor(this, null);
 	}
 
+	public void VaildNode()
+	{
+		hwmDebug.Assert(m_Head.Owner == this, "VaildNode");
+		hwmDebug.Assert(m_Head.NodeType == slConstants.NodeType.Head , "VaildNode");
+		hwmDebug.Assert(m_Head.OwnerQuadtreeNode != null, "VaildNode");
+		hwmDebug.Assert(m_Head.PredictNode.Owner == this, "VaildNode");
+		hwmDebug.Assert(m_Head.PredictNode.NodeType ==  slConstants.NodeType.Predict, "VaildNode");
+
+		hwmDebug.Assert(m_Clothes.Owner == this, "VaildNode");
+		hwmDebug.Assert(m_Clothes.NodeType == slConstants.NodeType.Clothes, "VaildNode");
+		hwmDebug.Assert(m_Clothes.OwnerQuadtreeNode != null, "VaildNode");
+
+		foreach (BodyNode body in m_Bodys)
+		{
+			hwmDebug.Assert(body.Owner == this, "VaildNode");
+			hwmDebug.Assert(body.NodeType == slConstants.NodeType.Body, "VaildNode");
+			hwmDebug.Assert(body.OwnerQuadtreeNode != null, "VaildNode");
+		}
+	}
+
 	protected override void HandleInitialize(object additionalData)
 	{
 		InitializeAdditionalData initializeData = additionalData as InitializeAdditionalData;
@@ -260,7 +286,6 @@ public class slSnake : hwmActor
 		m_Properties = slWorld.GetInstance().GetSnakeSystem().GetProperties(m_SnakeName);
 
 		m_Power = initializeData.NodeCount * m_TweakableProperties.NodeToPower;
-
 
 		#region Head
 		m_Head = slWorld.GetInstance().GetSnakeSystem().GetHeadPool(m_SnakeName).Pop();
@@ -285,7 +310,7 @@ public class slSnake : hwmActor
 		{
 			BodyNode node = m_BodyPool.Pop();
 			node.Active(this);
-			m_Head.SetPositionAndRotation(m_Clothes.GetPosition() + bodyToClothesOffset + bodyToBodyOffset * (iNode - 3)
+			node.SetPositionAndRotation(m_Clothes.GetPosition() + bodyToClothesOffset + bodyToBodyOffset * (iNode - 3)
 				, initializeData.HeadRotation);
 			if (node.Sprite != null)
 			{
@@ -294,6 +319,7 @@ public class slSnake : hwmActor
 
 			m_Bodys.PushBack(node);
 		}
+
 		#endregion
 
 		if (initializeData.IsBot)
@@ -325,11 +351,11 @@ public class slSnake : hwmActor
 		float power = m_IsReaminsFoodContamination ? m_RemainsFoodContaminationPower : m_TweakableProperties.RemainsFoodPower;
 		if (m_AliveState != AliveState.DeadFinishGame)
 		{
-			slWorld.GetInstance().GetFoodSystem().AddCreateEvent(foodType, m_Head.Node.transform.position, m_Properties.DeadFoodColor, power);
-			slWorld.GetInstance().GetFoodSystem().AddCreateEvent(foodType, m_Clothes.Node.transform.position, m_Properties.DeadFoodColor, power);
+			slWorld.GetInstance().GetFoodSystem().AddCreateEvent(foodType, m_Head.GetPosition(), m_Properties.DeadFoodColor, power);
+			slWorld.GetInstance().GetFoodSystem().AddCreateEvent(foodType, m_Clothes.GetPosition(), m_Properties.DeadFoodColor, power);
 			foreach (BodyNode node in m_Bodys)
 			{
-				slWorld.GetInstance().GetFoodSystem().AddCreateEvent(foodType, node.Node.transform.position, m_Properties.DeadFoodColor, power);
+				slWorld.GetInstance().GetFoodSystem().AddCreateEvent(foodType, node.GetPosition(), m_Properties.DeadFoodColor, power);
 			}
 		}
 
@@ -363,26 +389,13 @@ public class slSnake : hwmActor
 		m_Properties = null;
 	}
 
-	private void OnTrigger(Collider2D collider)
+#if UNITY_EDITOR
+	protected void OnDrawGizmos()
 	{
-		//switch (collider.gameObject.layer)
-		//{
-		//	// dead
-		//	case (int)slConstants.Layer.Wall:
-		//	case (int)slConstants.Layer.Snake:
-		//	case (int)slConstants.Layer.SnakeHead:
-		//		//int colliderLayer = collider.gameObject.layer;
-		//		//if (((1 << colliderLayer) & m_EnableDamageLayers) != 0)
-		//		//{
-		//		//	DisposeAdditionalData disposeAdditionalData = new DisposeAdditionalData();
-		//		//	disposeAdditionalData.MyDeadType = collider.gameObject.layer == (int)slConstants.Layer.Wall
-		//		//		? DeadType.HitWall
-		//		//		: DeadType.HitSnake;
-		//	hwmWorld.GetInstance().DestroyActor(this, disposeAdditionalData);
-		//		//}
-		//		break;
-		//}
+		Gizmos.color = Color.black;
+		hwmUtility.GizmosDrawRotateBox2D(m_Head.PredictNode.Box, m_Head.PredictNode.GetRotation());
 	}
+#endif
 
 	private void ResetOrderInLayer()
 	{
@@ -415,17 +428,12 @@ public class slSnake : hwmActor
 	public class HeadNode : BodyNode
 	{
 		public new SpriteRenderer[] Sprite;
-		public slSnakeHeadTrigger Trigger;
-		public Rigidbody2D Rigidbody;
-		public GameObject Predict;
-		public BoxCollider2D PredictCollider;
 		public PredictNode PredictNode;
 
 		public override void SetPositionAndRotation(Vector3 position, Quaternion rotation)
 		{
+			PredictNode.SetPositionAndRotation(position, rotation);
 			base.SetPositionAndRotation(position, rotation);
-			Predict.transform.localPosition = position;
-			Predict.transform.localRotation = rotation;
 		}
 
 		public override void Active(slSnake owner)
@@ -434,40 +442,19 @@ public class slSnake : hwmActor
 
 			Radius = owner.GetProperties().HeadColliderRadius;
 
-			Collider.radius = Radius;
-
-			Predict.name = owner.GetGuidStr();
-			PredictCollider.size = new Vector2(Radius * slConstants.SNAKE_PREDICT_SIZE_X
-				, slConstants.SNAKE_NODE_TO_NODE_DISTANCE * slConstants.SNAKE_PREDICT_SIZE_Y);
-			PredictCollider.offset = new Vector2(0, PredictCollider.size.y * 0.5f + Radius);
-			Predict.SetActive(true);
-
-			PredictNode.Owner = owner;
-			PredictNode.Extent = new Vector2(Radius * slConstants.SNAKE_PREDICT_SIZE_X
-				, slConstants.SNAKE_NODE_TO_NODE_DISTANCE * slConstants.SNAKE_PREDICT_SIZE_Y) * 0.5f;
-			PredictNode.Offset = new Vector2(0, PredictNode.Extent.y + Radius);
-
-			Trigger.OnTriggerEnter += owner.OnTrigger;
+			PredictNode.Active(owner);
 		}
 
 		public override void Deactive()
 		{
-			PredictNode.Owner = null;
-
-			Trigger.OnTriggerEnter -= Owner.OnTrigger;
-			Predict.SetActive(false);
-
+			PredictNode.Deactive();
 			base.Deactive();
 		}
 
 		protected override void UpdateQuadtree()
 		{
 			base.UpdateQuadtree();
-
-			PredictNode.Box = hwmBox2D.BuildAABB(m_Position + m_Rotation * PredictNode.Offset, PredictNode.Extent);
-			PredictNode.AABB = m_Rotation * PredictNode.Box;
-
-			PredictNode.OwnerQuadtree.UpdateElement(PredictNode);
+			PredictNode.UpdateQuadtree();
 		}
 	}
 
@@ -478,7 +465,6 @@ public class slSnake : hwmActor
 			base.Active(owner);
 
 			Radius = owner.GetProperties().ClothesColliderRadius;
-			Collider.radius = Radius;
 		}
 
 		public override void Deactive()
@@ -490,13 +476,11 @@ public class slSnake : hwmActor
 	public class BodyNode : QuadtreeElement
 	{
 		public GameObject Node;
-		public CircleCollider2D Collider;
 		public SpriteRenderer Sprite;
 
-		public virtual void SetPositionAndRotation(Vector3 position, Quaternion rotation)
+		public override void SetPositionAndRotation(Vector3 position, Quaternion rotation)
 		{
-			m_Position = position;
-			m_Rotation = rotation;
+			base.SetPositionAndRotation(position, rotation);
 
 			Node.transform.localPosition = position;
 			Node.transform.localRotation = rotation;
@@ -504,21 +488,20 @@ public class slSnake : hwmActor
 			UpdateQuadtree();
 		}
 
-		public virtual void Active(slSnake owner)
+		public override void Active(slSnake owner)
 		{
-			Owner = owner;
+			base.Active(owner);
 			Node.name = owner.GetGuidStr();
 			Node.SetActive(true);
 
 			Radius = owner.GetProperties().BodyColliderRadius;
-			Collider.radius = Radius;
 		}
 
-		public virtual void Deactive()
+		public override void Deactive()
 		{
-			OwnerQuadtree.RemoveElement(this);
 			Node.SetActive(false);
-			Owner = null;
+
+			base.Deactive();
 		}
 
 		protected virtual void UpdateQuadtree()
@@ -533,6 +516,29 @@ public class slSnake : hwmActor
 		public hwmBox2D Box;
 		public Vector2 Extent;
 		public Vector2 Offset;
+
+		public override void SetPositionAndRotation(Vector3 position, Quaternion rotation)
+		{
+			m_Position = position + rotation * Offset;
+			m_Rotation = rotation;
+		}
+
+		public void UpdateQuadtree()
+		{
+			Box = hwmBox2D.BuildAABB(m_Position, Extent);
+			AABB = m_Rotation * Box;
+
+			OwnerQuadtree.UpdateElement(this);
+		}
+
+		public override void Active(slSnake owner)
+		{
+			base.Active(owner);
+
+			Extent = new Vector2(Radius * slConstants.SNAKE_PREDICT_SIZE_X
+				, slConstants.SNAKE_NODE_TO_NODE_DISTANCE * slConstants.SNAKE_PREDICT_SIZE_Y) * 0.5f;
+			Offset = new Vector2(0, Extent.y + Radius);
+		}
 	}
 
 	public class QuadtreeElement : hwmQuadtree<QuadtreeElement>.IElement
@@ -548,6 +554,12 @@ public class slSnake : hwmActor
 		protected Vector3 m_Position;
 		protected Quaternion m_Rotation;
 
+		public virtual void SetPositionAndRotation(Vector3 position, Quaternion rotation)
+		{
+			m_Position = position;
+			m_Rotation = rotation;
+		}
+
 		public Vector3 GetPosition()
 		{
 			return m_Position;
@@ -556,6 +568,18 @@ public class slSnake : hwmActor
 		public Quaternion GetRotation()
 		{
 			return m_Rotation;
+		}
+
+		public virtual void Active(slSnake owner)
+		{
+			Owner = owner;
+			Radius = owner.GetProperties().BodyColliderRadius;
+		}
+
+		public virtual void Deactive()
+		{
+			OwnerQuadtree.RemoveElement(this);
+			Owner = null;
 		}
 	}
 
@@ -570,6 +594,7 @@ public class slSnake : hwmActor
 
 	public enum SpeedState
 	{
+		Still,
 		Normal,
 		SpeedUp,
 	}

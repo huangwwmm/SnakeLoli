@@ -149,7 +149,7 @@ public class slQuadtreeGizmosWindow : EditorWindow
 			{
 				hwmQuadtree<T>.Node gizmosNode = GetDisplayNode();
 				Gizmos.color = m_GizmosColor;
-				hwmUtility.GizmosDrawBox(gizmosNode.GetLooseBox(), m_GizmosZ);
+				hwmUtility.GizmosDrawBox2D(gizmosNode.GetLooseBox(), m_GizmosZ);
 				DoDrawGizomsElements(gizmosNode);
 			}
 		}
@@ -268,7 +268,7 @@ public class slQuadtreeGizmosWindow : EditorWindow
 			hwmBetterList<T> elements = node.GetElements();
 			for (int iElement = 0; iElement < elements.Count; iElement++)
 			{
-				hwmUtility.GizmosDrawBox(elements[iElement].AABB, m_GizmosZ);
+				hwmUtility.GizmosDrawBox2D(elements[iElement].AABB, m_GizmosZ);
 			}
 
 			if (m_GizomosDisplayChilderElement && !node.IsLeaf())
