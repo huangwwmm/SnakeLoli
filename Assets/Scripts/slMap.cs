@@ -3,37 +3,11 @@
 public class slMap : MonoBehaviour
 {
 	private slMapPresentation m_Presentation;
-	private GameObject m_WallGameObject;
-	private BoxCollider2D[] m_Walls;
 	private hwmBox2D m_MapBox;
 
 	public void Initialize(Vector2 mapSize)
 	{
 		m_MapBox = hwmBox2D.BuildAABB(Vector2.zero, mapSize * 0.5f);
-
-		// Wall
-		m_WallGameObject = new GameObject("Wall");
-		m_WallGameObject.transform.SetParent(transform, false);
-
-		BoxCollider2D up = m_WallGameObject.AddComponent<BoxCollider2D>();
-		BoxCollider2D down = m_WallGameObject.AddComponent<BoxCollider2D>();
-		BoxCollider2D left = m_WallGameObject.AddComponent<BoxCollider2D>();
-		BoxCollider2D right = m_WallGameObject.AddComponent<BoxCollider2D>();
-
-		up.size = new Vector2(mapSize.x + slConstants.WALL_THICK * 2.0f, slConstants.WALL_THICK);
-		down.size = new Vector2(mapSize.x + slConstants.WALL_THICK * 2.0f, slConstants.WALL_THICK);
-		left.size = new Vector2(slConstants.WALL_THICK, mapSize.y + slConstants.WALL_THICK * 2.0f);
-		right.size = new Vector2(slConstants.WALL_THICK, mapSize.y + slConstants.WALL_THICK * 2.0f);
-		up.offset = new Vector2(0, (mapSize.y + slConstants.WALL_THICK) * 0.5f);
-		down.offset = new Vector2(0, -(mapSize.y + slConstants.WALL_THICK) * 0.5f);
-		left.offset = new Vector2(-(mapSize.x + slConstants.WALL_THICK) * 0.5f, 0);
-		right.offset = new Vector2((mapSize.x + slConstants.WALL_THICK) * 0.5f, 0);
-
-		m_Walls = new BoxCollider2D[4];
-		m_Walls[0] = up;
-		m_Walls[1] = down;
-		m_Walls[2] = left;
-		m_Walls[3] = right;
 
 		// Presentation
 		if (hwmWorld.GetInstance().NeedPresentation())
@@ -53,11 +27,6 @@ public class slMap : MonoBehaviour
 			Destroy(m_Presentation.gameObject);
 			m_Presentation = null;
 		}
-
-		// Wall
-		Destroy(m_WallGameObject);
-		m_Walls = null;
-		m_WallGameObject = null;
 	}
 
 	public hwmBox2D GetMapBox()

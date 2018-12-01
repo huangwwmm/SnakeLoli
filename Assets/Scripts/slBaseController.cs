@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class slBaseController : MonoBehaviour 
 {
+	protected List<hwmQuadtree<slSnake.QuadtreeElement>.Node> ms_SnakeQuadtreeNodes = new List<hwmQuadtree<slSnake.QuadtreeElement>.Node>();
+
 	protected slSnake m_Snake;
 
 	public slSnake GetControllerSnake()
@@ -70,7 +72,7 @@ public class slBaseController : MonoBehaviour
 
 	}
 
-	protected bool IsSafe(hwmQuadtree<slSnake.QuadtreeElement>.AABBEnumerator enumerator, Vector2 moveDirection, float distance, bool ignorePredict)
+	protected bool IsSafe(Vector2 moveDirection, float distance, bool ignorePredict)
 	{
 		Vector2 start = m_Snake.GetHeadPosition();
 		Vector2 end = start + moveDirection * distance;
@@ -83,10 +85,9 @@ public class slBaseController : MonoBehaviour
 
 		hwmSphere2D headSphere = new hwmSphere2D(m_Snake.GetHeadPosition(), m_Snake.GetHeadRadius());
 
-		enumerator.Reset();
-		while (enumerator.MoveNext())
+		for (int iNode = 0; iNode < ms_SnakeQuadtreeNodes.Count; iNode++)
 		{
-			hwmQuadtree<slSnake.QuadtreeElement>.Node iterNode = enumerator.Current;
+			hwmQuadtree<slSnake.QuadtreeElement>.Node iterNode = ms_SnakeQuadtreeNodes[iNode];
 			hwmBetterList<slSnake.QuadtreeElement> elements = iterNode.GetElements();
 			for (int iElement = elements.Count - 1; iElement >= 0; iElement--)
 			{
@@ -119,14 +120,13 @@ public class slBaseController : MonoBehaviour
 
 	protected bool IsHitPredict()
 	{
-		float radius = m_Snake.GetHeadRadius();
-		hwmBox2D collideAABB = hwmBox2D.BuildAABB(m_Snake.GetHeadPosition(), new Vector2(radius, radius));
-		hwmQuadtree<slSnake.QuadtreeElement>.AABBEnumerator enumerator = new hwmQuadtree<slSnake.QuadtreeElement>.AABBEnumerator(
-			slWorld.GetInstance().GetSnakeSystem().GetQuadtree().GetRootNode(), collideAABB);
+		ms_SnakeQuadtreeNodes.Clear();
+		slWorld.GetInstance().GetSnakeSystem().GetQuadtree().GetRootNode()
+			.GetAllIntersectNode(ref ms_SnakeQuadtreeNodes, hwmBox2D.BuildAABB(m_Snake.GetHeadPosition(), new Vector2(m_Snake.GetHeadRadius(), m_Snake.GetHeadRadius())));
 
-		while (enumerator.MoveNext())
+		for (int iNode = 0; iNode < ms_SnakeQuadtreeNodes.Count; iNode++)
 		{
-			hwmQuadtree<slSnake.QuadtreeElement>.Node iterNode = enumerator.Current;
+			hwmQuadtree<slSnake.QuadtreeElement>.Node iterNode = ms_SnakeQuadtreeNodes[iNode];
 			hwmBetterList<slSnake.QuadtreeElement> elements = iterNode.GetElements();
 			for (int iElement = elements.Count - 1; iElement >= 0; iElement--)
 			{
@@ -139,7 +139,7 @@ public class slBaseController : MonoBehaviour
 					Vector2 sphereCenter = hwmUtility.QuaternionMultiplyVector(predictRotationInverse, m_Snake.GetHeadPosition()) 
 						+ predictCenter
 						- hwmUtility.QuaternionMultiplyVector(predictRotationInverse, predictCenter);
-					if (((slSnake.PredictNode)iterElement).Box.IntersectSphere(sphereCenter, radius * radius))
+					if (((slSnake.PredictNode)iterElement).Box.IntersectSphere(sphereCenter, m_Snake.GetHeadRadius() * m_Snake.GetHeadRadius()))
 					{
 						return true;
 					}

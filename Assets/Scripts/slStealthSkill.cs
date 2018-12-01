@@ -61,8 +61,7 @@ public class slStealthSkill : slSkill
 	{
 		m_EnableSkill = enable;
 		m_Snake.EnableEatFood(!enable);
-		m_Snake.EnableDamageLayer((int)slConstants.Layer.Snake, !enable);
-		m_Snake.EnableDamageLayer((int)slConstants.Layer.SnakeHead, !enable);
+		m_Snake.EnableDamageType(slConstants.DAMAGETYPE_SNAKE, !enable);
 	}
 
 	[System.Serializable]

@@ -15,8 +15,8 @@ public class slConstants
 	public const float FOOD_QUADTREE_LOOSESIZE = 1.2f;
 
 	public const int SNAKE_QUADTREE_MAXDEPTH_BOXSIZE = 8;
-	public const int SNAKE_QUADTREE_MAXELEMENT_PERNODE = 32;
-	public const int SNAKE_QUADTREE_MINELEMENT_PREPARENTNODE = 16;
+	public const int SNAKE_QUADTREE_MAXELEMENT_PERNODE = 12;
+	public const int SNAKE_QUADTREE_MINELEMENT_PREPARENTNODE = 4;
 	public const float SNAKE_QUADTREE_LOOSESIZE = 2.4f;
 
 	public static readonly Vector3 FOOD_DEACTIVE_POSITION = new Vector3(10000, 10000, 0);
@@ -77,14 +77,6 @@ public class slConstants
 	public const float SNAKE_RANDMOVEMOENT_WHENNOTCHANGED_PROBABILITY = 0.2f;
 	#endregion
 
-	public enum Layer
-	{
-		Wall = 8,
-		SnakeHead = 10,
-		Snake = 11,
-		SnakePredict = 12,
-	}
-
 	public enum FoodType
 	{
 		Normal = 0,
@@ -118,4 +110,7 @@ public class slConstants
 		Body,
 		Predict
 	}
+
+	public const int DAMAGETYPE_WALL = 1 << 1;
+	public const int DAMAGETYPE_SNAKE = 1 << 2;
 }

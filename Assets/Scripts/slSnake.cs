@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class slSnake : hwmActor
 {
+	protected List<hwmQuadtree<slFood>.Node> ms_FoodQuadtreeNodes = new List<hwmQuadtree<slFood>.Node>();
+
 	public Vector2 TargetMoveDirection;
 
 	public Action<slSkill.EventArgs> OnSpeedUpMovement;
@@ -20,7 +23,7 @@ public class slSnake : hwmActor
 	private hwmDeque<BodyNode> m_Bodys;
 	private SpeedState m_SpeedState;
 	private slSkill.EventArgs m_SkillEventArgs;
-	private int m_EnableDamageLayers;
+	private int m_EnableDamageType;
 	private bool m_CanEatFood;
 
 	private float m_Power;
@@ -163,7 +166,8 @@ public class slSnake : hwmActor
 	{
 		hwmBox2D collideAABB = hwmBox2D.BuildAABB(m_Head.GetPosition(), new Vector2(m_Head.Radius, m_Head.Radius));
 		hwmSphere2D headSphere = new hwmSphere2D(m_Head.GetPosition(), m_Properties.HeadColliderRadius);
-		if (!slWorld.GetInstance().GetMap().GetMapBox().IsInsideOrOn(m_Head.AABB))
+		if ((slConstants.DAMAGETYPE_WALL & m_EnableDamageType) != 0
+			&& !slWorld.GetInstance().GetMap().GetMapBox().IsInsideOrOn(m_Head.AABB))
 		{
 			m_AliveState = AliveState.DeadHitWall;
 			return;
@@ -177,7 +181,8 @@ public class slSnake : hwmActor
 			for (int iElement = elements.Count - 1; iElement >= 0; iElement--)
 			{
 				QuadtreeElement iterElement = elements[iElement];
-				if (iterElement.Owner != m_Guid
+				if ((slConstants.DAMAGETYPE_SNAKE & m_EnableDamageType) != 0
+					&& iterElement.Owner != m_Guid
 					&& iterElement.NodeType != slConstants.NodeType.Predict
 					&& (iterElement.GetPosition() - m_Head.GetPosition()).sqrMagnitude
 						<= ((m_Head.Radius + iterElement.Radius) * (m_Head.Radius + iterElement.Radius)))
@@ -195,13 +200,13 @@ public class slSnake : hwmActor
 
 	public void EatFood(float radius)
 	{
+		ms_FoodQuadtreeNodes.Clear();
 		hwmBox2D eatAABB = hwmBox2D.BuildAABB(m_Head.GetPosition(), new Vector2(radius, radius));
-		hwmQuadtree<slFood>.AABBEnumerator enumerator = new hwmQuadtree<slFood>.AABBEnumerator(slWorld.GetInstance().GetFoodSystem().GetQuadtree().GetRootNode()
-			, eatAABB);
+		slWorld.GetInstance().GetFoodSystem().GetQuadtree().GetRootNode().GetAllIntersectNode(ref ms_FoodQuadtreeNodes, eatAABB);
 		hwmSphere2D headSphere = new hwmSphere2D(m_Head.GetPosition(), radius);
-		while (enumerator.MoveNext())
+		for (int iNode = 0; iNode < ms_FoodQuadtreeNodes.Count; iNode++)
 		{
-			hwmQuadtree<slFood>.Node iterNode = enumerator.Current;
+			hwmQuadtree<slFood>.Node iterNode = ms_FoodQuadtreeNodes[iNode];
 			hwmBetterList<slFood> foods = iterNode.GetElements();
 			bool inHeadSphere = headSphere.IsInside(iterNode.GetLooseBox());
 			for (int iFood = foods.Count - 1; iFood >= 0; iFood--)
@@ -226,15 +231,15 @@ public class slSnake : hwmActor
 		m_CanEatFood = enable;
 	}
 
-	public void EnableDamageLayer(int layer, bool enable)
+	public void EnableDamageType(int damageType, bool enable)
 	{
 		if (enable)
 		{
-			m_EnableDamageLayers |= 1 << layer;
+			m_EnableDamageType |=  damageType;
 		}
 		else
 		{
-			m_EnableDamageLayers &= ~(1 << layer);
+			m_EnableDamageType &= ~damageType;
 		}
 	}
 
@@ -337,7 +342,7 @@ public class slSnake : hwmActor
 		m_CurrentMoveDirection = TargetMoveDirection;
 		m_SpeedState = SpeedState.Normal;
 
-		m_EnableDamageLayers = int.MaxValue;
+		m_EnableDamageType = int.MaxValue;
 		m_CanEatFood = true;
 
 		m_SkillEventArgs = new slSkill.EventArgs();

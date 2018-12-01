@@ -36,13 +36,16 @@ public class slAIController : slBaseController
 #if UNITY_EDITOR
 		m_AIDetectGizmos.Clear();
 #endif
-		hwmQuadtree<slSnake.QuadtreeElement>.AABBEnumerator enumerator = new hwmQuadtree<slSnake.QuadtreeElement>.AABBEnumerator(slWorld.GetInstance().GetSnakeSystem().GetQuadtree().GetRootNode()
-			, hwmBox2D.BuildAABB(m_Snake.GetHeadPosition(), new Vector2(slConstants.SNAKE_DETECT_DISTANCE, slConstants.SNAKE_DETECT_DISTANCE)));
+		ms_SnakeQuadtreeNodes.Clear();
+		slWorld.GetInstance().GetSnakeSystem().GetQuadtree().GetRootNode()
+			.GetAllIntersectNode(ref ms_SnakeQuadtreeNodes
+				, hwmBox2D.BuildAABB(m_Snake.GetHeadPosition(), new Vector2(slConstants.SNAKE_DETECT_DISTANCE, slConstants.SNAKE_DETECT_DISTANCE)));
+
 		bool ignorePredict = IsHitPredict();
 		int dangerDirection = 0;
-		if ((!IsSafe(enumerator, m_ClockwiseDetectAngle * targetDirection, slConstants.SNAKE_DETECT_DISTANCE, ignorePredict) && dangerDirection++ > -1)
-			|| (!IsSafe(enumerator, m_CounterclockwiseDetectAngle * targetDirection, slConstants.SNAKE_DETECT_DISTANCE, ignorePredict) && dangerDirection++ > -1)
-			|| (!IsSafe(enumerator, targetDirection, slConstants.SNAKE_DETECT_DISTANCE, ignorePredict) && dangerDirection++ > -1))
+		if ((!IsSafe(m_ClockwiseDetectAngle * targetDirection, slConstants.SNAKE_DETECT_DISTANCE, ignorePredict) && dangerDirection++ > -1)
+			|| (!IsSafe(m_CounterclockwiseDetectAngle * targetDirection, slConstants.SNAKE_DETECT_DISTANCE, ignorePredict) && dangerDirection++ > -1)
+			|| (!IsSafe(targetDirection, slConstants.SNAKE_DETECT_DISTANCE, ignorePredict) && dangerDirection++ > -1))
 		{
 			Quaternion angle = dangerDirection == 3
 				? m_ClockwiseDetectAngle
@@ -53,7 +56,7 @@ public class slAIController : slBaseController
 			for (int iCalculate = 0; iCalculate < slConstants.SNAKE_AI_CALCULATE_TIMES; iCalculate++)
 			{
 				currentCalculateDirection = angle * currentCalculateDirection;
-				bool isSafe = IsSafe(enumerator, currentCalculateDirection, slConstants.SNAKE_DETECT_DISTANCE, ignorePredict);
+				bool isSafe = IsSafe(currentCalculateDirection, slConstants.SNAKE_DETECT_DISTANCE, ignorePredict);
 #if UNITY_EDITOR
 				AIDetectGizmos aIDetectGizmos = new AIDetectGizmos();
 				aIDetectGizmos.StartPosition = m_Snake.GetHeadPosition();
