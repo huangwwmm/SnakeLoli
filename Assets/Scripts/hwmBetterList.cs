@@ -170,20 +170,7 @@ public sealed class hwmBetterList<T> : IEnumerable, ICollection, IList, IEnumera
 
 	public bool Contains(T item)
 	{
-		if (item == null)
-		{
-			throw new ArgumentNullException("item");
-		}
-
-		EqualityComparer<T> c = EqualityComparer<T>.Default;
-		for (int iItem = 0; iItem < Count; iItem++)
-		{
-			if (c.Equals(m_Items[iItem], item))
-			{
-				return true;
-			}
-		}
-		return false;
+		return IndexOf(item) >= 0;
 	}
 
 	public void CopyTo(T[] array, int arrayIndex)
@@ -224,7 +211,15 @@ public sealed class hwmBetterList<T> : IEnumerable, ICollection, IList, IEnumera
 			throw new ArgumentNullException("item");
 		}
 
-		return Array.IndexOf(m_Items, item, 0, Count);
+		EqualityComparer<T> c = EqualityComparer<T>.Default;
+		for (int iItem = 0; iItem < Count; iItem++)
+		{
+			if (c.Equals(m_Items[iItem], item))
+			{
+				return iItem;
+			}
+		}
+		return -1;
 	}
 
 	public void Shrink(int reserve = 0)

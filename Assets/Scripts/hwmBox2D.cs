@@ -42,32 +42,62 @@ public struct hwmBox2D
 		rightUp = hwmUtility.MatrixMultiplyVector(matrix, rightUp) + offset;
 		rightDown = hwmUtility.MatrixMultiplyVector(matrix, rightDown) + offset;
 
-		return new hwmBox2D(new Vector2(Mathf.Min(leftUp.x, leftDown.x, rightUp.x, rightDown.x)
-				, Mathf.Min(leftUp.y, leftDown.y, rightUp.y, rightDown.y))
-			, new Vector2(Mathf.Max(leftUp.x, leftDown.x, rightUp.x, rightDown.x)
-				, Mathf.Max(leftUp.y, leftDown.y, rightUp.y, rightDown.y)));
+		return new hwmBox2D(new Vector2(hwmUtility.Min(leftUp.x, leftDown.x, rightUp.x, rightDown.x)
+				, hwmUtility.Min(leftUp.y, leftDown.y, rightUp.y, rightDown.y))
+			, new Vector2(hwmUtility.Max(leftUp.x, leftDown.x, rightUp.x, rightDown.x)
+				, hwmUtility.Max(leftUp.y, leftDown.y, rightUp.y, rightDown.y)));
 	}
 
 	public static hwmBox2D operator *(Quaternion rotation, hwmBox2D box)
 	{
+		{
+			//Vector2 center = box.GetCenter();
+			//Vector2 leftUp = new Vector2(box.Min.x, box.Max.y);
+			//Vector2 leftDown = box.Min;
+			//Vector2 rightUp = box.Max;
+			//Vector2 rightDown = new Vector2(box.Max.x, box.Min.y);
+
+			//Vector2 offset = center - hwmUtility.QuaternionMultiplyVector(rotation, center);
+			//leftUp = hwmUtility.QuaternionMultiplyVector(rotation, leftUp) + offset;
+			//leftDown = hwmUtility.QuaternionMultiplyVector(rotation, leftDown) + offset;
+			//rightUp = hwmUtility.QuaternionMultiplyVector(rotation, rightUp) + offset;
+			//rightDown = hwmUtility.QuaternionMultiplyVector(rotation, rightDown) + offset;
+
+			//return new hwmBox2D(new Vector2(hwmUtility.Min(leftUp.x, leftDown.x, rightUp.x, rightDown.x)
+			//		, hwmUtility.Min(leftUp.y, leftDown.y, rightUp.y, rightDown.y))
+			//	, new Vector2(hwmUtility.Max(leftUp.x, leftDown.x, rightUp.x, rightDown.x)
+			//		, hwmUtility.Max(leftUp.y, leftDown.y, rightUp.y, rightDown.y)));
+		}
+
+		float num2 = rotation.y * 2f;
+		float num3 = rotation.z * 2f;
+		float num6 = rotation.z * num3;
+		float num7 = rotation.x * num2;
+		float num12 = rotation.w * num3;
+
+		float num21 = 1.0f - rotation.y * num2 - num6;
+		float num22 = num7 - num12;
+		float num23 = num7 + num12;
+		float num24 = 1.0f - rotation.x * rotation.x * 2f - num6;
+
 		Vector2 center = box.GetCenter();
-		Vector2 leftUp = new Vector2(box.Min.x, box.Max.y);
-		Vector2 leftDown = box.Min;
-		Vector2 rightUp = box.Max;
-		Vector2 rightDown = new Vector2(box.Max.x, box.Min.y);
+		Vector2 offset = new Vector2(center.x - num21 * center.x - num22 * center.y
+			, center.y - num23 * center.x - num24 * center.y);
 
-		Vector2 offset = center - hwmUtility.QuaternionMultiplyVector(rotation, center);
-		leftUp = hwmUtility.QuaternionMultiplyVector(rotation, leftUp) + offset;
-		leftDown = hwmUtility.QuaternionMultiplyVector(rotation, leftDown) + offset;
-		rightUp = hwmUtility.QuaternionMultiplyVector(rotation, rightUp) + offset;
-		rightDown = hwmUtility.QuaternionMultiplyVector(rotation, rightDown) + offset;
+		Vector2 leftUp = new Vector2(num21 * box.Min.x + num22 * box.Max.y + offset.x
+			, num23 * box.Min.x + num24 * box.Max.y + offset.y);
+		Vector2 leftDown = new Vector2(num21 * box.Min.x + num22 * box.Min.y + offset.x
+			, num23 * box.Min.x + num24 * box.Min.y + offset.y);
+		Vector2 rightUp = new Vector2(num21 * box.Max.x + num22 * box.Max.y + offset.x
+			, num23 * box.Max.x + num24 * box.Max.y + offset.y);
+		Vector2 rightDown = new Vector2(num21 * box.Max.x + num22 * box.Min.y + offset.x
+			, num23 * box.Max.x + num24 * box.Min.y + offset.y);
 
-		return new hwmBox2D(new Vector2(Mathf.Min(leftUp.x, leftDown.x, rightUp.x, rightDown.x)
-				, Mathf.Min(leftUp.y, leftDown.y, rightUp.y, rightDown.y))
-			, new Vector2(Mathf.Max(leftUp.x, leftDown.x, rightUp.x, rightDown.x)
-				, Mathf.Max(leftUp.y, leftDown.y, rightUp.y, rightDown.y)));
+		return new hwmBox2D(new Vector2(hwmUtility.Min(leftUp.x, leftDown.x, rightUp.x, rightDown.x)
+				, hwmUtility.Min(leftUp.y, leftDown.y, rightUp.y, rightDown.y))
+			, new Vector2(hwmUtility.Max(leftUp.x, leftDown.x, rightUp.x, rightDown.x)
+				, hwmUtility.Max(leftUp.y, leftDown.y, rightUp.y, rightDown.y)));
 	}
-
 
 	public static implicit operator hwmBox2D(Bounds bound)
 	{
@@ -103,7 +133,8 @@ public struct hwmBox2D
 	/// </summary>
 	public Vector2 GetCenter()
 	{
-		return (Min + Max) * 0.5f;
+		return new Vector2((Min.x + Max.x) * 0.5f
+			, (Min.y + Max.y) * 0.5f);
 	}
 
 	/// <summary>

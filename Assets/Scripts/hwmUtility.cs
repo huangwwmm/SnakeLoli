@@ -125,5 +125,25 @@ public static class hwmUtility
 	{
 		return value * value;
 	}
+
+	public static float Max(float a, float b, float c, float d)
+	{
+		return Max(Max(a, b), Max(c, d));
+	}
+
+	public static float Max(float a, float b)
+	{
+		return a > b ? a : b;
+	}
+
+	public static float Min(float a, float b, float c, float d)
+	{
+		return Min(Min(a, b), Min(c, d));
+	}
+
+	public static float Min(float a, float b)
+	{
+		return a < b ? a : b;
+	}
 	#endregion
 }

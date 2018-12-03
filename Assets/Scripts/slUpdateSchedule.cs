@@ -19,6 +19,24 @@ public class slUpdateSchedule : MonoBehaviour
 	private UpdateStatistics[] m_UpdateStatisticss;
 	private System.Diagnostics.Stopwatch m_UpdateStatisticsStopwatch;
 
+	public void LogStatistics()
+	{
+		if (m_EnableUpdateStatistics)
+		{
+			System.Text.StringBuilder stringBuilder = new System.Text.StringBuilder();
+			stringBuilder.AppendLine("Update Statistics:");
+			for (int iUpdate = 0; iUpdate < m_UpdateStatisticss.Length; iUpdate++)
+			{
+				UpdateStatistics iterUpdate = m_UpdateStatisticss[iUpdate];
+				stringBuilder.AppendLine(string.Format("{0}: Count:{1} AvgTicks:{2:f2}"
+					, (UpdateType)iUpdate
+					, iterUpdate.UpdateCount
+					, iterUpdate.UpdateTicks / (double)iterUpdate.UpdateCount));
+			}
+			Debug.Log(stringBuilder.ToString());
+		}
+	}
+
 	protected void Awake()
 	{
 		m_Snakes = new List<slSnake>();
@@ -44,21 +62,6 @@ public class slUpdateSchedule : MonoBehaviour
 	{
 		if (m_EnableUpdateStatistics)
 		{
-			if (m_EnableUpdateStatistics)
-			{
-				System.Text.StringBuilder stringBuilder = new System.Text.StringBuilder();
-				stringBuilder.AppendLine("Update Statistics:");
-				for (int iUpdate = 0; iUpdate < m_UpdateStatisticss.Length; iUpdate++)
-				{
-					UpdateStatistics iterUpdate = m_UpdateStatisticss[iUpdate];
-					stringBuilder.AppendLine(string.Format("{0}: Count:{1} AvgTicks:{2:f2}"
-						, (UpdateType)iUpdate
-						, iterUpdate.UpdateCount
-						, iterUpdate.UpdateTicks / (double)iterUpdate.UpdateCount));
-				}
-				Debug.Log(stringBuilder.ToString());
-			}
-
 			m_UpdateStatisticss = null;
 			m_UpdateStatisticsStopwatch.Stop();
 			m_UpdateStatisticsStopwatch = null;

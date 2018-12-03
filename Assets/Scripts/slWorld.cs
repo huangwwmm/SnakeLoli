@@ -82,6 +82,7 @@ public class slWorld : hwmWorld
 
 	protected override IEnumerator HandleBeforeEndPlay_Co()
 	{
+		m_UpdateSchedule.LogStatistics();
 		Destroy(m_UpdateSchedule);
 		m_UpdateSchedule = null;
 

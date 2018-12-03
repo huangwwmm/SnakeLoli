@@ -126,6 +126,7 @@ public class slPlayerController : slBaseController
 		// TEMP
 		if (m_Input.GetButton(hwmConstants.ButtonIndex.Menu).GetState() == hwmInput.Button.State.Up)
 		{
+			slWorld.GetInstance().GetUpdateSchedule().LogStatistics();
 			Application.Quit();
 		}
 
