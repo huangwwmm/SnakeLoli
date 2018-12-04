@@ -62,6 +62,9 @@ public class slUpdateSchedule : MonoBehaviour
 	{
 		if (m_EnableUpdateStatistics)
 		{
+#if UNITY_EDITOR
+			LogStatistics();
+#endif
 			m_UpdateStatisticss = null;
 			m_UpdateStatisticsStopwatch.Stop();
 			m_UpdateStatisticsStopwatch = null;

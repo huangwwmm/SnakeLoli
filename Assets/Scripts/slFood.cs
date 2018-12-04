@@ -9,7 +9,7 @@ public class slFood : MonoBehaviour, hwmQuadtree<slFood>.IElement
 	private float m_BeEatRemainTime;
 	private float m_RemainLifeTime;
 	private float m_Power = 1;
-	private int m_Index;
+	private int m_Index = slConstants.FOOD_NOTSET_INDEX;
 	private Vector3 m_Position;
 
 	public hwmQuadtree<slFood> OwnerQuadtree { get; set; }

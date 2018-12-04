@@ -2,6 +2,7 @@
 
 public class slConstants 
 {
+	public static readonly string[] SNAKE_NAMES = new string[] { "10000", "10100", "20000", "30000", "30001", "30100", "30101", "30200", "30201", "30202", "40000" };
 	public const string SCENE_NAME_LOBBY = "Lobby";
 	public const string SCENE_NAME_GAME = "Game";
 
@@ -13,6 +14,8 @@ public class slConstants
 	public const int FOOD_QUADTREE_MAXELEMENT_PERNODE = 32;
 	public const int FOOD_QUADTREE_MINELEMENT_PREPARENTNODE = 16;
 	public const float FOOD_QUADTREE_LOOSESIZE = 1.2f;
+
+	public const int FOOD_NOTSET_INDEX = -1;
 
 	public const int SNAKE_QUADTREE_MAXDEPTH_BOXSIZE = 8;
 	public const int SNAKE_QUADTREE_MAXELEMENT_PERNODE = 12;

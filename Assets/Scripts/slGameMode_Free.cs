@@ -21,7 +21,6 @@ public class slGameMode_Free : hwmGameMode
 					&& Time.time - iterPlayerState.LastDeadTime > slWorld.GetInstance().GetLevel().RespawnTime)
 				{
 					SpawnPlayer(iterPlayerState);
-					return;
 				}
 			}
 		}
@@ -43,7 +42,7 @@ public class slGameMode_Free : hwmGameMode
 			iterBotState.IsBot = true;
 			iterBotState.PlayerName = "Bot_" + iBot.ToString();
 			iterBotState.PlayerID = iBot;
-			iterBotState.SnakeName = "10000";
+			iterBotState.SnakeName = slConstants.SNAKE_NAMES[hwmRandom.RandInt(0, slConstants.SNAKE_NAMES.Length)];
 			iterBotState.CreateNodeCount = 5;
 			slWorld.GetInstance().GetGameState().AddPlayerState(iterBotState);
 			slWorld.GetInstance().GetSnakeSystem().LoadSnake(iterBotState.SnakeName);
@@ -57,7 +56,7 @@ public class slGameMode_Free : hwmGameMode
 		playerState.IsBot = false;
 		playerState.PlayerName = "Player";
 		playerState.PlayerID = 1000;
-		playerState.SnakeName = "40000";
+		playerState.SnakeName = slConstants.SNAKE_NAMES[hwmRandom.RandInt(0, slConstants.SNAKE_NAMES.Length)];
 		playerState.CreateNodeCount = 5;
 		slWorld.GetInstance().GetGameState().AddPlayerState(playerState);
 		slWorld.GetInstance().GetSnakeSystem().LoadSnake(playerState.SnakeName);

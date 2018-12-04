@@ -198,7 +198,12 @@ public class slFoodSystem
 	{
 		slFoodProperties foodProperties = m_FoodPropertiess[(int)foodType];
 		slFood food = m_FoodPool.Pop();
-		m_Foods.Add(++m_LastFoodIndex, food);
+		int foodIndex = food.GetIndex();
+		if (foodIndex == slConstants.FOOD_NOTSET_INDEX)
+		{
+			foodIndex = ++m_LastFoodIndex;
+		}
+		m_Foods.Add(foodIndex, food);
 		slFoodPresentation foodPresentation = m_FoodPresentationPools != null ? m_FoodPresentationPools[(int)foodType].Pop() : null;
 		if (foodPresentation != null)
 		{
@@ -206,7 +211,7 @@ public class slFoodSystem
 
 			foodPresentation.SetColor(color);
 		}
-		food.ActiveFood(m_LastFoodIndex, foodProperties, foodPresentation, position, color, power);
+		food.ActiveFood(foodIndex, foodProperties, foodPresentation, position, color, power);
 		m_FoodCount++;
 	}
 

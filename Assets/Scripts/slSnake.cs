@@ -136,16 +136,23 @@ public class slSnake : hwmActor
 				}
 				newFrontNode.SetPositionAndRotation(lastNodePosition, lastNodeRotation);
 
-				BodyNode oldFrontNode = m_Bodys.PeekFront();
-				m_Bodys.PushFront(newFrontNode);
-				if (newFrontNode.Sprite != null)
+				if (m_Bodys.Count > 0)
 				{
-					newFrontNode.Sprite.sortingOrder = oldFrontNode.Sprite.sortingOrder + 1;
-					if (newFrontNode.Sprite.sortingOrder >= slConstants.SNAKE_SPRITERENDERER_MAX_ORDERINLAYER)
+					BodyNode oldFrontNode = m_Bodys.PeekFront();
+					if (newFrontNode.Sprite != null)
 					{
-						ResetOrderInLayer();
+						newFrontNode.Sprite.sortingOrder = oldFrontNode.Sprite.sortingOrder + 1;
+						if (newFrontNode.Sprite.sortingOrder >= slConstants.SNAKE_SPRITERENDERER_MAX_ORDERINLAYER)
+						{
+							ResetOrderInLayer();
+						}
 					}
 				}
+				else
+				{
+					newFrontNode.Sprite.sortingOrder = slConstants.SNAKE_SPRITERENDERER_MIN_ORDERINLAYER;
+				}
+				m_Bodys.PushFront(newFrontNode);
 			}
 		}
 
