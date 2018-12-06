@@ -136,9 +136,8 @@ public class slBaseController : MonoBehaviour
 				{
 					Vector2 predictCenter = iterElement.GetPosition();
 					Quaternion predictRotationInverse = Quaternion.Inverse(iterElement.GetRotation());
-					Vector2 sphereCenter = hwmUtility.QuaternionMultiplyVector(predictRotationInverse, m_Snake.GetHeadPosition()) 
-						+ predictCenter
-						- hwmUtility.QuaternionMultiplyVector(predictRotationInverse, predictCenter);
+					Vector2 sphereCenter = predictCenter - hwmUtility.QuaternionMultiplyVector(predictRotationInverse, predictCenter) // position offset after center rotation around the origin
+						+ hwmUtility.QuaternionMultiplyVector(predictRotationInverse, m_Snake.GetHeadPosition());
 					if (((slSnake.PredictNode)iterElement).Box.IntersectSphere(sphereCenter, m_Snake.GetHeadRadius() * m_Snake.GetHeadRadius()))
 					{
 						return true;
