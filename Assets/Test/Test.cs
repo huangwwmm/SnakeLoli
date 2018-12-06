@@ -16,11 +16,11 @@ public class Test : MonoBehaviour
 			Performance.Initialize();
 		}
 
-		box = hwmBox2D.BuildAABB(transform.position, new Vector2(0.64f, 0.64f));
+		box = hwmBox2D.BuildAABB(transform.position, new Vector2(6400f, 5120f));
 		Quaternion rotation = transform.localRotation;
 		Vector2 center = box.GetCenter();
 		{
-			Gizmos.color = Color.grey;
+			Gizmos.color = Color.black;
 			Gizmos.DrawSphere(sphere, radius);
 
 			Vector2 leftUp = new Vector2(box.Min.x, box.Max.y);
@@ -44,8 +44,10 @@ public class Test : MonoBehaviour
 		}
 		{
 			Vector2 sp = sphere;
-			Vector2 offset = center - hwmUtility.QuaternionMultiplyVector(Quaternion.Inverse(rotation), center);
-			sp = hwmUtility.QuaternionMultiplyVector(Quaternion.Inverse(rotation), sp) + offset;
+			//Vector2 offset = center - hwmUtility.QuaternionMultiplyVector(Quaternion.Inverse(rotation), center); // 红色矩形绕原点旋转后，中心坐标的偏移
+			//sp = hwmUtility.QuaternionMultiplyVector(Quaternion.Inverse(rotation), sp) // 黑色圆绕原点旋转后的坐标
+			//	+ offset;
+			sp = center + hwmUtility.QuaternionMultiplyVector(Quaternion.Inverse(rotation),(sp - center));
 			Gizmos.color = box.IntersectSphere(sp, radius * radius) ? Color.red : Color.green;
 			Gizmos.DrawSphere(sp, radius);
 		}

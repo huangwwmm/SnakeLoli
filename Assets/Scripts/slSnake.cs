@@ -539,7 +539,6 @@ public class slSnake : hwmActor
 		{
 			Box = hwmBox2D.BuildAABB(m_Position, Extent);
 			AABB = m_Rotation * Box;
-
 			OwnerQuadtree.UpdateElement(this);
 		}
 

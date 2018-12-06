@@ -129,7 +129,5 @@ public class slPlayerController : slBaseController
 			slWorld.GetInstance().GetUpdateSchedule().LogStatistics();
 			Application.Quit();
 		}
-
-		IsHitPredict();
 	}
 }

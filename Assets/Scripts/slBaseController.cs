@@ -104,9 +104,9 @@ public class slBaseController : MonoBehaviour
 					else if (!ignorePredict)
 					{
 						Quaternion rotation = Quaternion.Inverse(iterElement.GetRotation());
-						Vector2 offset = (Vector2)iterElement.GetPosition() - hwmUtility.QuaternionMultiplyVector(rotation, iterElement.GetPosition());
-						start = hwmUtility.QuaternionMultiplyVector(rotation, start) + offset;
-						end = hwmUtility.QuaternionMultiplyVector(rotation, end) + offset;
+						Vector2 center = iterElement.GetPosition();
+						start = hwmUtility.QuaternionMultiplyVector(rotation, start - center);
+						end = hwmUtility.QuaternionMultiplyVector(rotation, end - center);
 						if (((slSnake.PredictNode)iterElement).Box.LineIntersection(start, end))
 						{
 							return false;
@@ -136,8 +136,8 @@ public class slBaseController : MonoBehaviour
 				{
 					Vector2 predictCenter = iterElement.GetPosition();
 					Quaternion predictRotationInverse = Quaternion.Inverse(iterElement.GetRotation());
-					Vector2 sphereCenter = predictCenter - hwmUtility.QuaternionMultiplyVector(predictRotationInverse, predictCenter) // position offset after center rotation around the origin
-						+ hwmUtility.QuaternionMultiplyVector(predictRotationInverse, m_Snake.GetHeadPosition());
+					Vector2 sphereCenter = predictCenter 
+						+ hwmUtility.QuaternionMultiplyVector(predictRotationInverse, (Vector2)m_Snake.GetHeadPosition() - predictCenter);
 					if (((slSnake.PredictNode)iterElement).Box.IntersectSphere(sphereCenter, m_Snake.GetHeadRadius() * m_Snake.GetHeadRadius()))
 					{
 						return true;
