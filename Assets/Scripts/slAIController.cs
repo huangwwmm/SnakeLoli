@@ -100,7 +100,7 @@ public class slAIController : slBaseController
 		m_CounterclockwiseDetectAngle = Quaternion.Euler(0, 0, slConstants.SNAKE_DETECT_ANGLE);
 	}
 
-	protected override void HandleUnController()
+	protected override void HandleUnControllerSnake()
 	{
 #if UNITY_EDITOR
 		m_AIDetectGizmos.Clear();

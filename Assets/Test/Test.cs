@@ -28,11 +28,11 @@ public class Test : MonoBehaviour
 			Vector2 rightUp = box.Max;
 			Vector2 rightDown = new Vector2(box.Max.x, box.Min.y);
 
-			Vector2 offset = center - hwmUtility.QuaternionMultiplyVector(rotation, center);
-			leftUp = hwmUtility.QuaternionMultiplyVector(rotation, leftUp) + offset;
-			leftDown = hwmUtility.QuaternionMultiplyVector(rotation, leftDown) + offset;
-			rightUp = hwmUtility.QuaternionMultiplyVector(rotation, rightUp) + offset;
-			rightDown = hwmUtility.QuaternionMultiplyVector(rotation, rightDown) + offset;
+			Vector2 offset = center - hwmMath.QuaternionMultiplyVector(rotation, center);
+			leftUp = hwmMath.QuaternionMultiplyVector(rotation, leftUp) + offset;
+			leftDown = hwmMath.QuaternionMultiplyVector(rotation, leftDown) + offset;
+			rightUp = hwmMath.QuaternionMultiplyVector(rotation, rightUp) + offset;
+			rightDown = hwmMath.QuaternionMultiplyVector(rotation, rightDown) + offset;
 
 			Gizmos.DrawLine(leftDown, leftUp);
 			Gizmos.DrawLine(leftUp, rightUp);
@@ -40,14 +40,14 @@ public class Test : MonoBehaviour
 			Gizmos.DrawLine(rightDown, leftDown);
 
 			Gizmos.color = Color.blue;
-			hwmUtility.GizmosDrawBox2D(box);
+            hwmUtility.GizmosDrawBox2D(box);
 		}
 		{
 			Vector2 sp = sphere;
-			//Vector2 offset = center - hwmUtility.QuaternionMultiplyVector(Quaternion.Inverse(rotation), center); // 红色矩形绕原点旋转后，中心坐标的偏移
-			//sp = hwmUtility.QuaternionMultiplyVector(Quaternion.Inverse(rotation), sp) // 黑色圆绕原点旋转后的坐标
+			//Vector2 offset = center - hwmMath.QuaternionMultiplyVector(Quaternion.Inverse(rotation), center); // 红色矩形绕原点旋转后，中心坐标的偏移
+			//sp = hwmMath.QuaternionMultiplyVector(Quaternion.Inverse(rotation), sp) // 黑色圆绕原点旋转后的坐标
 			//	+ offset;
-			sp = center + hwmUtility.QuaternionMultiplyVector(Quaternion.Inverse(rotation),(sp - center));
+			sp = center + hwmMath.QuaternionMultiplyVector(Quaternion.Inverse(rotation),(sp - center));
 			Gizmos.color = box.IntersectSphere(sp, radius * radius) ? Color.red : Color.green;
 			Gizmos.DrawSphere(sp, radius);
 		}

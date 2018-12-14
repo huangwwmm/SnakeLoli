@@ -23,14 +23,14 @@ public class slBaseController : MonoBehaviour
 
 		m_Snake = snake;
 
-		HandleSetController();
+		HandleSetControllerSnake();
 	}
 
 	public void UnControllerSnake()
 	{
 		hwmDebug.Assert(m_Snake != null, "m_Snake != null");
 
-		HandleUnController();
+		HandleUnControllerSnake();
 
 		m_Snake = null;
 	}
@@ -62,12 +62,12 @@ public class slBaseController : MonoBehaviour
 
 	}
 
-	protected virtual void HandleSetController()
+	protected virtual void HandleSetControllerSnake()
 	{
 
 	}
 
-	protected virtual void HandleUnController()
+	protected virtual void HandleUnControllerSnake()
 	{
 
 	}
@@ -77,13 +77,11 @@ public class slBaseController : MonoBehaviour
 		Vector2 start = m_Snake.GetHeadPosition();
 		Vector2 end = start + moveDirection * distance;
 		Vector2 direction = end - start;
-		Vector2 directionReciprocal = hwmUtility.Reciprocal(direction);
+		Vector2 directionReciprocal = hwmMath.Reciprocal(direction);
 		if (!slWorld.GetInstance().GetMap().GetMapBox().IsInsideOrOn(end))
 		{
 			return false;
 		}
-
-		hwmSphere2D headSphere = new hwmSphere2D(m_Snake.GetHeadPosition(), m_Snake.GetHeadRadius());
 
 		for (int iNode = 0; iNode < ms_SnakeQuadtreeNodes.Count; iNode++)
 		{
@@ -105,8 +103,8 @@ public class slBaseController : MonoBehaviour
 					{
 						Quaternion rotation = Quaternion.Inverse(iterElement.GetRotation());
 						Vector2 center = iterElement.GetPosition();
-						start = hwmUtility.QuaternionMultiplyVector(rotation, start - center);
-						end = hwmUtility.QuaternionMultiplyVector(rotation, end - center);
+						start = hwmMath.QuaternionMultiplyVector(rotation, start - center);
+						end = hwmMath.QuaternionMultiplyVector(rotation, end - center);
 						if (((slSnake.PredictNode)iterElement).Box.LineIntersection(start, end))
 						{
 							return false;
@@ -137,7 +135,7 @@ public class slBaseController : MonoBehaviour
 					Vector2 predictCenter = iterElement.GetPosition();
 					Quaternion predictRotationInverse = Quaternion.Inverse(iterElement.GetRotation());
 					Vector2 sphereCenter = predictCenter 
-						+ hwmUtility.QuaternionMultiplyVector(predictRotationInverse, (Vector2)m_Snake.GetHeadPosition() - predictCenter);
+						+ hwmMath.QuaternionMultiplyVector(predictRotationInverse, (Vector2)m_Snake.GetHeadPosition() - predictCenter);
 					if (((slSnake.PredictNode)iterElement).Box.IntersectSphere(sphereCenter, m_Snake.GetHeadRadius() * m_Snake.GetHeadRadius()))
 					{
 						return true;

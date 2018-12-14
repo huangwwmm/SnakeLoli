@@ -51,7 +51,7 @@ public class slPlayerController : slBaseController
 		m_Camera = null;
 	}
 
-	protected override void HandleSetController()
+	protected override void HandleSetControllerSnake()
 	{
 		Vector3 cameraPosition = m_Camera.transform.localPosition;
 		Vector3 snakeHaedPosition = m_Snake.GetHeadPosition();
@@ -77,7 +77,7 @@ public class slPlayerController : slBaseController
 		}
 	}
 
-	protected override void HandleUnController()
+	protected override void HandleUnControllerSnake()
 	{
 		for (int iSkill = 0; iSkill < m_Skills.Length; iSkill++)
 		{

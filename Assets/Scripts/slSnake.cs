@@ -108,7 +108,7 @@ public class slSnake : hwmActor
 			, -m_Bodys.Count);
 		while (moveNodeCount-- > 0)
 		{
-			m_CurrentMoveDirection = hwmUtility.CircleLerp(m_CurrentMoveDirection, TargetMoveDirection, m_TweakableProperties.MaxTurnAngularSpeed * deltaTime);
+			m_CurrentMoveDirection = hwmMath.CircleLerp(m_CurrentMoveDirection, TargetMoveDirection, m_TweakableProperties.MaxTurnAngularSpeed * deltaTime);
 			Vector3 lastNodePosition = m_Head.GetPosition();
 			Quaternion lastNodeRotation = m_Head.GetRotation();
 			Quaternion headRotation = Quaternion.Euler(0, 0, -Vector2.SignedAngle(m_CurrentMoveDirection, Vector2.up));
@@ -405,7 +405,7 @@ public class slSnake : hwmActor
 	protected void OnDrawGizmos()
 	{
 		Gizmos.color = Color.black;
-		hwmUtility.GizmosDrawRotateBox2D(m_Head.PredictNode.Box, m_Head.PredictNode.GetRotation());
+        hwmUtility.GizmosDrawRotateBox2D(m_Head.PredictNode.Box, m_Head.PredictNode.GetRotation());
 	}
 #endif
 
